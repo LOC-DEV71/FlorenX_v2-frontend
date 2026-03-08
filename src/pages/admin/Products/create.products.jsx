@@ -4,9 +4,11 @@ import "./create.products.scss";
 import { Switch } from "antd";
 import { createProduct } from "../../../services/admin/product.admin.service";
 import SEO from "../../../utils/SEO";
+import { error, success } from "../../../utils/notift";
+import { useNavigate } from "react-router-dom";
 
 function CreateProduct() {
-
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -16,7 +18,7 @@ function CreateProduct() {
     status: "active",
     position: "",
     brand: "",
-    featured: false
+    featured: "no"
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -95,18 +97,33 @@ function CreateProduct() {
 
       const res = await createProduct(formData);
 
-      console.log(res.data);
-
+      if (res.data.code) {
+        success(res.data.message)
+        const newSlug = res.data.slug;
+        setForm({
+          title: "",
+          description: "",
+          price: "",
+          discountPercentage: "",
+          stock: "",
+          status: "active",
+          position: "",
+          brand: "",
+          featured: "no"
+        })
+        navigate(`/admin/products/${newSlug}`)
+      } else {
+        error(res.data.message)
+      }
     } catch (error) {
       console.log(error.response?.data.message);
     }
   };
 
-  console.log(form)
 
   return (
     <div className="create-product">
-      <SEO title="Tạo sản phẩm mới"/>
+      <SEO title="Tạo sản phẩm mới" />
       <div className="page-header">
         <h2>Tạo sản phẩm mới</h2>
         <p>Thêm một sản phẩm vào hệ thống.</p>
@@ -174,7 +191,9 @@ function CreateProduct() {
                   value={form.position}
                   onChange={(e) =>
                     setForm({ ...form, position: e.target.value })
+
                   }
+                  placeholder="Có thể không nhập tự động + 1"
                 />
               </div>
 
@@ -257,6 +276,37 @@ function CreateProduct() {
               </button>
 
             </div>
+
+            <div className="card visibility">
+
+              <h3>Sản phẩm nổi bậc</h3>
+
+              <div className="toggle">
+
+                <Switch
+                  // defaultChecked
+                  onChange={(checked) =>
+                    setForm({
+                      ...form,
+                      featured: checked ? "yes" : "no"
+                    })
+                  }
+                />
+
+                <span
+                  className={
+                    form.featured === "no"
+                      ? "no"
+                      : "yes"
+                  }
+                >
+                  {form.featured === "yes" ? "Nổi bậc" : "Không nổi bậc"}
+                </span>
+
+              </div>
+
+            </div>
+
 
           </div>
 

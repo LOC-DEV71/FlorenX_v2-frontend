@@ -2,48 +2,131 @@ import "./Products.scss";
 import { BsCalendarCheck, BsCheck2Circle } from "react-icons/bs";
 import { CiWarning } from "react-icons/ci";
 import { RiErrorWarningLine } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CgMathPlus } from "react-icons/cg";
 import { Statistic } from "antd";
 import CountUp from "react-countup";
-import {SearchOutlined} from "@ant-design/icons"
+import { SearchOutlined } from "@ant-design/icons"
 import SEO from "../../../utils/SEO";
-
+import { useState } from "react";
+import { getProducts, changeMulti } from "../../../services/admin/product.admin.service";
+import { useEffect } from "react";
+import { MdDeleteOutline } from "react-icons/md";
+import { renderpagination } from "../../../utils/pagination";
+import { Skeleton } from "antd";
+import { error, success, confirm  } from "../../../utils/notift";
 const formatter = (value) => (
     <CountUp end={value} duration={2} separator="," />
 );
 
-const product = [
-    {
-        id: 1,
-        name: "Premium Quartz Watch",
-        sku: "WATCH-772",
-        category: "Electronics",
-        price: 199,
-        stock: 124,
-        status: "active",
-        created: "Oct 12, 2023",
-        images: ["/products/watch.jpg"]
-    },
-    {
-        id: 2,
-        name: "Wireless Headphones",
-        sku: "AUD-042",
-        category: "Electronics",
-        price: 249,
-        stock: 12,
-        status: "low",
-        created: "Nov 04, 2023",
-        images: ["/products/headphone1.jpg", "/products/headphone2.jpg"]
-    }
-];
-
 function Products() {
+    const [data, setData] = useState([]);
+    const [pagination, setPagination] = useState([])
+    const [typeChange, setTypeChange] = useState("");
+    const [changePosition, setChangePosition] = useState({});
+    const [selectId, setSelectId] = useState([])
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [reload, setReload] = useState(false)
+    const navigate = useNavigate();
+    const [totalProduct, setTotalProduct] = useState("")
+    const [productsActive, setProductsActive] = useState("")
+    const [countOutStock, setCountOutStock] = useState("")
+    const [countLowStock, setCountLowStock] = useState("")
+
+    const [loading, setLoading] = useState(false);
+
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 5;
+    const sort = searchParams.get("sort") || "";
+    useEffect(() => {
+        const fetchApi = async () => {
+            try {
+                setLoading(true);
+
+                const res = await getProducts({ page, limit, sort });
+                setData(res.data.products);
+                setPagination(res.data.pagination);
+                setTotalProduct(res.data.totalProduct)
+                setProductsActive(res.data.productsActive)
+                setCountOutStock(res.data.countOutStock)
+                setCountLowStock(res.data.countLowStock)
+
+            } catch (error) {
+                console.log(error.response?.data.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchApi();
+    }, [page, limit, sort, reload]);
+
+    const handleChangeMulti = async () => {
+        try {
+
+            if (typeChange === "delete") {
+                const ok = await confirm(
+                    "Xoá sản phẩm?",
+                    "Sản phẩm bị xóa sẽ chuyển vào thùng rác"
+                );
+
+                if (!ok) return;
+                const res = await changeMulti({selectId, typeChange})
+                if(res.data.code){
+                    success(res.data.message)
+                }
+            }
+
+            if (typeChange === "position") {
+
+                const positions = Object.keys(changePosition).map(id => ({
+                    id,
+                    position: changePosition[id]
+                }));
+
+                const res = await changeMulti({
+                    typeChange,
+                    positions
+                });
+
+                if (res.data.code) {
+                    success(res.data.message);
+                } else {
+                    error(res.data.message);
+                }
+
+            } else {
+
+                const res = await changeMulti({
+                    selectId,
+                    typeChange
+                });
+
+                if (res.data.code) {
+                    success(res.data.message);
+                } else {
+                    error(res.data.message);
+                }
+
+            }
+
+            setChangePosition({});
+            setSelectId([]);
+            setTypeChange("");
+            setReload(prev => !prev);
+
+        } catch (error) {
+            console.log(error.response?.data.message);
+        }
+    };
+
+    console.log(changePosition)
+
     return (
-        
+
         <div className="product-page">
             <SEO
-                title="Quản lý sản phẩm" 
+                title="Quản lý sản phẩm"
             />
             <h2 className="product-page__title">Quản Lý Sản Phẩm</h2>
 
@@ -52,22 +135,22 @@ function Products() {
 
                 <div className="stat-card stat-total">
                     <p><BsCalendarCheck /> Total Products</p>
-                    <Statistic value={1128} formatter={formatter} />
+                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={totalProduct} formatter={formatter} />}
                 </div>
 
                 <div className="stat-card stat-active">
                     <p><BsCheck2Circle /> Active Products</p>
-                    <Statistic value={1050} formatter={formatter} />
+                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={productsActive} formatter={formatter} />}
                 </div>
 
                 <div className="stat-card stat-out">
                     <p><RiErrorWarningLine /> Out of Stock</p>
-                    <Statistic value={42} formatter={formatter} />
+                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={countOutStock} formatter={formatter} />}
                 </div>
 
                 <div className="stat-card stat-low">
                     <p><CiWarning /> Low Stock</p>
-                    <Statistic value={18} formatter={formatter} />
+                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={countLowStock} formatter={formatter} />}
                 </div>
 
             </div>
@@ -75,22 +158,54 @@ function Products() {
             {/* Filters */}
             <div className="product-filters">
                 <div className="search">
-                    <SearchOutlined/>
-                    <input placeholder="Search product name, SKU..." />
+                    <SearchOutlined />
+                    <input placeholder="Tìm tên sản phẩm hoặc slug..." />
                 </div>
 
                 <select>
-                    <option>Category: All</option>
+                    <option>Danh mục: Tất cả</option>
                 </select>
 
-                <select>
-                    <option>Status: All</option>
+                <select
+                    value={sort}
+                    onChange={e =>
+                        setSearchParams({
+                            page: 1,
+                            limit,
+                            sort: e.target.value
+                        })
+                    }
+                >
+                    <option value={""}>-- Sắp xếp theo --</option>
+                    <option value={"position-asc"}>Sắp xếp theo vị trí thấp đến cao</option>
+                    <option value={"position-desc"}>Sắp xếp theo vị trí cao đến thấp</option>
+                    <option value={"price-asc"}>Sắp xếp theo giá thấp đến cao</option>
+                    <option value={"price-desc"}>Sắp xếp theo giá cao đến thấp</option>
+                    <option value={"title-asc"}>Sắp xếp theo tên A-Z</option>
+                    <option value={"title-desc"}>Sắp xếp theo tên Z-A</option>
+                    <option value={"featured-yes"}>Sản phẩm nổi bậc</option>
+                    <option value={"featured-no"}>Sản phẩm không nổi bậc</option>
                 </select>
 
-                <input placeholder="Min Price" />
-                <input placeholder="Max Price" />
+                <button className="reset"
+                    onClick={() =>
+                        navigate("/admin/products")
+                    }
+                ><MdDeleteOutline /> Xóa lọc</button>
 
-                <button>Reset</button>
+
+                <select
+                    onChange={e => setTypeChange(e.target.value)}
+                    value={typeChange}
+                >
+                    <option value="">-- Chọn hành động --</option>
+                    <option value="active">Chuyển thành hoạt động</option>
+                    <option value="inactive">Chuyển thành không hoạt động</option>
+                    <option value="position">Thay đổi vị trí sản phẩm</option>
+                    <option value="delete">Xóa nhiều sản phẩm</option>
+                </select>
+
+                <button className="activity" onClick={handleChangeMulti}>Áp dụng</button>
 
                 <Link className="create" to={"/admin/products/create"}>
                     <CgMathPlus /> Tạo mới
@@ -103,60 +218,123 @@ function Products() {
                 <div className="product-table">
 
                     <div className="table-header">
-                        <div><input type="checkbox" /></div>
-                        <div className="col-product">Product</div>
-                        <div>SKU</div>
-                        <div>Category</div>
-                        <div>Price</div>
-                        <div>Stock</div>
-                        <div>Status</div>
-                        <div>Created</div>
-                        <div>Action</div>
+                        <div>
+                            <input
+                                type="checkbox"
+                                checked={data.length && data.length === selectId.length}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectId(data.map(i => i._id))
+                                    } else {
+                                        setSelectId([])
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="col-product">Sản phẩm</div>
+                        <div>Vị trí</div>
+                        <div>Danh mục</div>
+                        <div>Giá</div>
+                        <div>Số lượng</div>
+                        <div>Trạng thái</div>
+                        <div>Giảm giá</div>
+                        <div>Hành động</div>
                     </div>
 
-                    {product.map((p) => (
-                        <div className="table-row" key={p.id}>
+                    {loading
+                        ? Array(limit).fill(0).map((_, i) => (
+                            <div className="table-row" key={i}>
+                                <div><Skeleton.Avatar active shape style={{ width: 15, height: 15 }} /></div>
 
-                            <div className="product-info col-product">
-
-                                <div className="product-checkbox">
-                                    <input type="checkbox" />
+                                <div className="product-info col-product">
+                                    <Skeleton.Image active style={{ width: 50, height: 50 }} />
+                                    <div>
+                                        <Skeleton.Input active style={{ width: 200, height: 60, marginBottom: 20 }} />
+                                        <Skeleton.Input active style={{ width: 30, height: 20 }} />
+                                    </div>
                                 </div>
 
-                                <div className="product-images">
-                                    {p.images.map((img, i) => (
-                                        <img key={i} src={img} alt="" />
-                                    ))}
+                                <Skeleton.Input active size="small" />
+                                <Skeleton.Input active size="small" />
+                                <Skeleton.Input active size="small" />
+                                <Skeleton.Input active size="small" />
+                                <Skeleton.Input active size="small" />
+                                <Skeleton.Input active size="small" />
+                            </div>
+                        ))
+                        : data.map((item) => (
+                            <div className="table-row" key={item._id}>
+                                <span className={item.featured === "yes" ? "yes featured" : "no featured"}>{item.featured === "yes" ? "Nổi bật" : ""}</span>
+                                <div className="product-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectId.includes(item._id)}
+                                        onChange={e => {
+                                            if (e.target.checked) {
+                                                setSelectId(prev => [...prev, item._id])
+                                            } else {
+                                                setSelectId(prev =>
+                                                    prev.filter(id => id != item._id)
+                                                )
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                <div className="product-info col-product">
+
+
+
+                                    <div className="product-images">
+                                        <img src={item.thumbnail} alt={item.title} />
+                                    </div>
+
+                                    <div>
+                                        <p className="product-name">{item.title}</p>
+                                        <span className="product-sub">Sample product</span>
+                                    </div>
+
                                 </div>
 
                                 <div>
-                                    <p className="product-name">{p.name}</p>
-                                    <span className="product-sub">Sample product</span>
+                                    <input
+                                        type="number"
+                                        defaultValue={item.position}
+                                        style={{ width: 60, textAlign: "center" }}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+
+                                            setChangePosition(prev => ({
+                                                ...prev,
+                                                [item._id]: value
+                                            }))
+                                        }}
+                                    />
+                                </div>
+
+                                <div>category</div>
+                                <div>{item.price.toLocaleString("VN-vi")}đ</div>
+                                <div>{item.stock}</div>
+
+                                <div>
+                                    <span className={`status ${item.status}`}>
+                                        {item.status === "active" && "active"}
+                                        {item.status === "inactive" && "inactive"}
+                                    </span>
+                                </div>
+
+                                <div>{item.discountPercentage ? `${item.discountPercentage} %` : "Không có"}</div>
+
+                                <div className="actions">
+                                    <button>Edit</button>
+                                    <button>Delete</button>
                                 </div>
 
                             </div>
+                        ))
+                    }
 
-                            <div>{p.sku}</div>
-                            <div>{p.category}</div>
-                            <div>${p.price}</div>
-                            <div>{p.stock}</div>
 
-                            <div>
-                                <span className={`status ${p.status}`}>
-                                    {p.status === "active" && "ACTIVE"}
-                                    {p.status === "low" && "LOW STOCK"}
-                                </span>
-                            </div>
-
-                            <div>{p.created}</div>
-
-                            <div className="actions">
-                                <button>Edit</button>
-                                <button>Delete</button>
-                            </div>
-
-                        </div>
-                    ))}
+                    {renderpagination(pagination, setSearchParams, limit, sort)}
 
                 </div>
 
