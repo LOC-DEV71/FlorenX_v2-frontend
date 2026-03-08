@@ -7,6 +7,7 @@ import { CgMathPlus } from "react-icons/cg";
 import { Statistic } from "antd";
 import CountUp from "react-countup";
 import {SearchOutlined} from "@ant-design/icons"
+import SEO from "../../../utils/SEO";
 
 const formatter = (value) => (
     <CountUp end={value} duration={2} separator="," />
@@ -39,8 +40,11 @@ const product = [
 
 function Products() {
     return (
+        
         <div className="product-page">
-
+            <SEO
+                title="Quản lý sản phẩm" 
+            />
             <h2 className="product-page__title">Quản Lý Sản Phẩm</h2>
 
             {/* Stats */}

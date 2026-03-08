@@ -28,11 +28,6 @@
     border-radius: 10px;
     padding: 20px;
     border: 1px solid #E5E7EB;
-
-    h3 {
-      margin-bottom: 20px;
-      font-size: 18px;
-    }
   }
 
   .form-group {
@@ -41,17 +36,15 @@
     margin-bottom: 15px;
 
     label {
+      margin-bottom: 5px;
       font-size: 14px;
-      margin-bottom: 6px;
     }
 
     input,
-    select,
-    textarea {
+    select {
       padding: 10px;
       border-radius: 6px;
       border: 1px solid #E2E8F0;
-      font-size: 14px;
 
       &:focus {
         border-color: #2563EB;
@@ -62,92 +55,90 @@
 
   .row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3,1fr);
     gap: 15px;
   }
 
   .upload-box {
+
     border: 2px dashed #CBD5E1;
-    padding: 30px;
+    padding: 20px;
     text-align: center;
     border-radius: 8px;
-    color: #64748B;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+
+    label {
+      cursor: pointer;
+      background: #F1F5F9;
+      padding: 8px 15px;
+      border-radius: 6px;
+    }
+
+    input {
+      display: none;
+    }
+
   }
 
   .preview-grid {
+
     display: grid;
     grid-template-columns: repeat(2,1fr);
-    gap: 15px;
+    gap: 10px;
 
     .image {
+
       position: relative;
       border-radius: 8px;
       overflow: hidden;
       background: #F1F5F9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
 
       img {
         width: 100%;
-        height: 100%;
+        height: 120px;
         object-fit: cover;
       }
 
       &.main span {
         position: absolute;
-        top: 8px;
-        left: 8px;
+        top: 6px;
+        left: 6px;
         background: #2563EB;
         color: white;
-        font-size: 12px;
         padding: 2px 6px;
+        font-size: 12px;
         border-radius: 4px;
       }
 
-      &.add {
-        font-size: 28px;
-        color: #94A3B8;
+      .remove {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: red;
+        color: white;
+        border: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
         cursor: pointer;
       }
-    }
-  }
 
-  .actions {
-
-    .create-btn {
-      width: 100%;
-      padding: 12px;
-      background: #2563EB;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: 500;
-      margin-bottom: 10px;
-      cursor: pointer;
     }
 
-    .cancel-btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: #E2E8F0;
-      cursor: pointer;
-    }
   }
 
 }
 
 .specifications {
+
   display: flex;
   flex-direction: column;
   gap: 10px;
 
   .spec-row {
+
     display: grid;
-    grid-template-columns: 1fr 1fr 60px;
+    grid-template-columns: 1fr 1fr 50px;
     gap: 10px;
 
     input {
@@ -163,6 +154,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
   }
 
   > button {
@@ -174,23 +166,50 @@
     border-radius: 6px;
     cursor: pointer;
   }
+
 }
 
-.toggle{
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.toggle {
 
-    .active{
-        background: rgb(189, 255, 207);
-        padding: 2px;
-        border-radius: 5px;
-        color: green;
-    }
-    .inactive{
-        background: rgb(255, 164, 164);
-        padding: 2px;
-        border-radius: 5px;
-        color: red;
-    }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .active {
+    background: #dcfce7;
+    color: green;
+    padding: 3px 6px;
+    border-radius: 4px;
+  }
+
+  .inactive {
+    background: #fee2e2;
+    color: red;
+    padding: 3px 6px;
+    border-radius: 4px;
+  }
+
+}
+
+.actions {
+
+  .create-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  .cancel-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #E2E8F0;
+  }
+
 }
