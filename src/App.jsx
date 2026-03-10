@@ -6,10 +6,13 @@ function App() {
 
   return (
     <>
-      <AppRoutes/>
+      <AppRoutes />
       <Toaster
         position="bottom-right"
         reverseOrder={false}
+        toastOptions={{
+          duration: 5000
+        }}
       />
     </>
   )

@@ -325,8 +325,8 @@ function Products() {
                                 <div>{item.discountPercentage ? `${item.discountPercentage} %` : "Không có"}</div>
 
                                 <div className="actions">
-                                    <button>Edit</button>
-                                    <button>Delete</button>
+                                    <Link className="edit" to={`/admin/products/update/${item.slug}`}>Edit</Link>
+                                    <button className="delete">Delete</button>
                                 </div>
 
                             </div>

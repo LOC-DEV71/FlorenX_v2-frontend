@@ -1,6 +1,6 @@
 import { useState } from "react";
 import TinyEditor from "../../../utils/tinyEditor";
-import "./create.products.scss";
+import "./create.update.products.scss";
 import { Switch } from "antd";
 import { createProduct } from "../../../services/admin/product.admin.service";
 import SEO from "../../../utils/SEO";

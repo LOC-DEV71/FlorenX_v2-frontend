@@ -15,3 +15,13 @@ export const getProducts = (data) => {
 export const changeMulti = (data) => {
   return axiosAdmin.post(`/products/change-multi`, data);
 }
+
+
+export const getProductBySlug = (slug) => {
+  return axiosAdmin.get(`/products/${slug}`);
+}
+
+
+export const updateProduct = (slug, data) => {
+  return axiosAdmin.post(`/products/update/${slug}`, data);
+}

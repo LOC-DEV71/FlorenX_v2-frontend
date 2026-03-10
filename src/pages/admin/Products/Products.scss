@@ -285,16 +285,30 @@
     display: flex;
     gap: 6px;
 
-    button {
+    .edit {
         border: none;
-        background: #f3f4f6;
+        background: #3273ff;
         padding: 6px 10px;
         border-radius: 6px;
         cursor: pointer;
+        color: white;
+        font-weight: 600;
     }
+    .delete {
+        border: none;
+        background: #ff5441;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: white;
+        font-weight: 600;
 
-    button:hover {
-        background: #e5e7eb;
+        &:hover {
+            background: #d05a5a;
+        }
+        &:active{
+            background: rgb(143, 1, 1);
+        }
     }
 }
 
