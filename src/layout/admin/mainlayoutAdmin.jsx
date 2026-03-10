@@ -34,7 +34,7 @@ const menuItems = [
   {
     key: "3",
     icon: <MdCategory />,
-    label: <Link to="/admin">Danh mục</Link>,
+    label: <Link to="/admin/categories">Danh mục</Link>,
   },
   {
     key: "4",

@@ -1,0 +1,87 @@
+.auth_admin{
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    &-top{
+        width: 250px;
+        margin: 0 auto 30px;
+        text-align: center;
+
+        img{
+            width: 150px;
+        }
+
+        p{
+            margin: 0;
+            font-weight: 600;
+        }
+    }
+
+    &-main{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+
+        &-left{
+            img{
+                width: 100%;
+            }
+        }
+
+        &-right{
+            padding: 40px;
+
+            h2{
+                margin-bottom: 25px;
+            }
+        }
+    }
+}
+
+.form-data{
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px;
+    margin-bottom: 15px;
+    gap: 10px;
+
+    input{
+        border: none;
+        outline: none;
+        flex: 1;
+    }
+
+    svg{
+        font-size: 18px;
+        color: #777;
+    }
+
+    .eye{
+        cursor: pointer;
+    }
+}
+
+.btn-login{
+    width: 100%;
+    padding: 10px;
+    background: #6a5cff;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+
+
+    &:active{
+        background: #342a9b;
+    }
+}
