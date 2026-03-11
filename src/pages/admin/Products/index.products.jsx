@@ -120,8 +120,6 @@ function Products() {
         }
     };
 
-    console.log(changePosition)
-
     return (
 
         <div className="product-page">

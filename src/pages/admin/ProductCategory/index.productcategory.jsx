@@ -1,55 +1,178 @@
 import "./Categories.scss";
+import { useEffect, useMemo, useState } from "react";
 import { BsCalendarCheck, BsCheck2Circle } from "react-icons/bs";
-import { CiWarning } from "react-icons/ci";
-import { RiErrorWarningLine } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CgMathPlus } from "react-icons/cg";
-import { Statistic } from "antd";
+import { Statistic, Skeleton } from "antd";
 import CountUp from "react-countup";
 import { SearchOutlined } from "@ant-design/icons";
 import { MdDeleteOutline } from "react-icons/md";
 import SEO from "../../../utils/SEO";
+import { getTreeCategory } from "../../../services/admin/product.category.admin";
+import { flattenTree } from "../../../utils/buildTree";
+import { RiParentFill } from "react-icons/ri";
+import { FaChildren } from "react-icons/fa6";
+import { changeMulti } from "../../../services/admin/product.category.admin";
+import { confirm, error, success } from "../../../utils/notift";
 
 const formatter = (value) => (
   <CountUp end={value} duration={2} separator="," />
 );
 
 function Categories() {
-  const categoryList = [
-    {
-      id: 1,
-      title: "Điện thoại",
-      slug: "dien-thoai",
-      thumbnail: "https://via.placeholder.com/40",
-      position: 1,
-      parent: "Không có",
-      totalProduct: 24,
-      status: "active",
-      featured: "yes"
-    },
-    {
-      id: 2,
-      title: "Laptop",
-      slug: "laptop",
-      thumbnail: "https://via.placeholder.com/40",
-      position: 2,
-      parent: "Không có",
-      totalProduct: 18,
-      status: "active",
-      featured: "no"
-    },
-    {
-      id: 3,
-      title: "Phụ kiện",
-      slug: "phu-kien",
-      thumbnail: "https://via.placeholder.com/40",
-      position: 3,
-      parent: "Điện tử",
-      totalProduct: 40,
-      status: "inactive",
-      featured: "no"
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [activeCategories, setActiveCategories] = useState(null);
+  const [totalCategories, setTotalCategories] = useState(null);
+  const [parentCategories, setParentCategories] = useState(null);
+  const [childCategories, setChildCategories] = useState(null);
+  const [selectId, setSelectId] = useState([]);
+  const [typeChange, setTypeChange] = useState("");
+  const [changePosition, setChangePosition] = useState({});
+  const [reload, setReload] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const sort = searchParams.get("sort");
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      try {
+        setLoading(true);
+        const res = await getTreeCategory({sort});
+
+        if (res?.data?.code) {
+          setCategories(res.data.categories || []);
+          setActiveCategories(res.data.activeCategories);
+          setTotalCategories(res.data.totalCategories);
+          setParentCategories(res.data.parentCategories);
+          setChildCategories(res.data.childCategories);
+        }
+      } catch (err) {
+        console.error(err?.response?.data?.message || err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApi();
+  }, [reload,sort]);
+
+  const categoryDisplayList = useMemo(() => {
+    return flattenTree(categories);
+  }, [categories]);
+
+  const flatCategoryIds = useMemo(() => {
+    return categoryDisplayList.map((item) => item._id);
+  }, [categoryDisplayList]);
+
+  const findCategoryById = (tree, id) => {
+    for (const node of tree) {
+      if (node._id === id) return node;
+
+      if (node.children && node.children.length > 0) {
+        const found = findCategoryById(node.children, id);
+        if (found) return found;
+      }
     }
-  ];
+
+    return null;
+  };
+
+  const getAllChildrenIds = (node) => {
+    let ids = [node._id];
+
+    if (node.children && node.children.length > 0) {
+      for (const child of node.children) {
+        ids = [...ids, ...getAllChildrenIds(child)];
+      }
+    }
+
+    return ids;
+  };
+
+  const handleCheckCategory = (categoryId, checked) => {
+    const currentNode = findCategoryById(categories, categoryId);
+    if (!currentNode) return;
+
+    const idsOfNodeAndChildren = getAllChildrenIds(currentNode);
+
+    if (checked) {
+      setSelectId((prev) => [...new Set([...prev, ...idsOfNodeAndChildren])]);
+    } else {
+      setSelectId((prev) =>
+        prev.filter((id) => !idsOfNodeAndChildren.includes(id))
+      );
+    }
+  };
+
+  const handleCheckAll = (checked) => {
+    if (checked) {
+      setSelectId(flatCategoryIds);
+    } else {
+      setSelectId([]);
+    }
+  };
+
+  const handleChangeMulti = async () => {
+    try {
+
+      if (typeChange === "delete") {
+        const ok = await confirm(
+          "Xoá anh mục?",
+          "Danh mục bị xóa sẽ chuyển vào thùng rác"
+        );
+
+        if (!ok) return;
+        const res = await changeMulti({ selectId, typeChange })
+        if (res.data.code) {
+          success(res.data.message)
+        }
+      }
+
+      if (typeChange === "position") {
+
+        const positions = Object.keys(changePosition).map(id => ({
+          id,
+          position: changePosition[id]
+        }));
+
+        const res = await changeMulti({
+          typeChange,
+          positions
+        });
+
+        if (res.data.code) {
+          success(res.data.message);
+        } else {
+          error(res.data.message);
+        }
+
+      } else {
+
+        const res = await changeMulti({
+          selectId,
+          typeChange
+        });
+
+        if (res.data.code) {
+          success(res.data.message);
+        } else {
+          error(res.data.message);
+        }
+
+      }
+
+      setChangePosition({});
+      setSelectId([]);
+      setTypeChange("");
+      setReload(prev => !prev);
+
+    } catch (error) {
+      console.log(error.response?.data.message);
+    }
+  };
+
 
   return (
     <div className="category-page">
@@ -59,23 +182,47 @@ function Categories() {
 
       <div className="category-stats">
         <div className="stat-card stat-total">
-          <p><BsCalendarCheck /> Total Categories</p>
-          <Statistic value={128} formatter={formatter} />
+          <p>
+            <BsCalendarCheck /> Total Categories
+          </p>
+          {loading ? (
+            <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+          ) : (
+            <Statistic value={totalCategories} formatter={formatter} />
+          )}
         </div>
 
         <div className="stat-card stat-active">
-          <p><BsCheck2Circle /> Active Categories</p>
-          <Statistic value={96} formatter={formatter} />
+          <p>
+            <BsCheck2Circle /> Active Categories
+          </p>
+          {loading ? (
+            <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+          ) : (
+            <Statistic value={activeCategories} formatter={formatter} />
+          )}
         </div>
 
         <div className="stat-card stat-out">
-          <p><RiErrorWarningLine /> Parent Categories</p>
-          <Statistic value={18} formatter={formatter} />
+          <p>
+            <RiParentFill /> Parent Categories
+          </p>
+          {loading ? (
+            <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+          ) : (
+            <Statistic value={parentCategories} formatter={formatter} />
+          )}
         </div>
 
         <div className="stat-card stat-low">
-          <p><CiWarning /> Child Categories</p>
-          <Statistic value={110} formatter={formatter} />
+          <p>
+            <FaChildren /> Child Categories
+          </p>
+          {loading ? (
+            <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+          ) : (
+            <Statistic value={childCategories} formatter={formatter} />
+          )}
         </div>
       </div>
 
@@ -85,33 +232,46 @@ function Categories() {
           <input placeholder="Tìm tên danh mục hoặc slug..." />
         </div>
 
-        <select>
-          <option>Trạng thái: Tất cả</option>
-          <option>Hoạt động</option>
-          <option>Không hoạt động</option>
+        <select
+          value={sort}
+          onChange={e => setSearchParams({
+            sort: e.target.value
+          })}
+        >
+          <option value="">Trạng thái: Tất cả</option>
+          <option value="status-active">Hoạt động</option>
+          <option value="status-inactive">Không hoạt động</option>
         </select>
 
-        <select>
-          <option>-- Sắp xếp theo --</option>
-          <option>Tên A-Z</option>
-          <option>Tên Z-A</option>
-          <option>Vị trí thấp đến cao</option>
-          <option>Vị trí cao đến thấp</option>
+        <select
+          value={sort}
+          onChange={e => setSearchParams({
+            sort: e.target.value
+          })}
+        >
+          <option value="">-- Sắp xếp theo --</option>
+          <option value="title-asc">Tên A-Z</option>
+          <option value="title-desc">Tên Z-A</option>
+          <option value="position-asc">Vị trí thấp đến cao</option>
+          <option value="position-desc">Vị trí cao đến thấp</option>
         </select>
 
         <button className="reset">
-          <MdDeleteOutline /> Xóa lọc
+          <MdDeleteOutline onClick={() => navigate("/admin/categories")}/> Xóa lọc
         </button>
 
-        <select>
-          <option>-- Chọn hành động --</option>
-          <option>Chuyển thành hoạt động</option>
-          <option>Chuyển thành không hoạt động</option>
-          <option>Thay đổi vị trí danh mục</option>
-          <option>Xóa nhiều danh mục</option>
+        <select
+          onChange={(e) => setTypeChange(e.target.value)}
+          value={typeChange}
+        >
+          <option value="">-- Chọn hành động --</option>
+          <option value="active">Chuyển thành hoạt động</option>
+          <option value="inactive">Chuyển thành không hoạt động</option>
+          <option value="position">Thay đổi vị trí sản phẩm</option>
+          <option value="delete">Xóa nhiều sản phẩm</option>
         </select>
 
-        <button className="activity">Áp dụng</button>
+        <button className="activity" onClick={handleChangeMulti}>Áp dụng</button>
 
         <Link className="create" to="/admin/categories/create">
           <CgMathPlus /> Tạo mới
@@ -122,8 +282,16 @@ function Categories() {
         <div className="category-table">
           <div className="table-header">
             <div>
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={
+                  flatCategoryIds.length > 0 &&
+                  flatCategoryIds.every((id) => selectId.includes(id))
+                }
+                onChange={(e) => handleCheckAll(e.target.checked)}
+              />
             </div>
+
             <div className="col-category">Danh mục</div>
             <div>Vị trí</div>
             <div>Danh mục cha</div>
@@ -133,55 +301,120 @@ function Categories() {
             <div>Hành động</div>
           </div>
 
-          {categoryList.map((item) => (
-            <div className="table-row" key={item.id}>
-              <span className={item.featured === "yes" ? "yes featured" : "no featured"}>
-                {item.featured === "yes" ? "Nổi bật" : ""}
-              </span>
+          {loading &&
+            Array(5)
+              .fill()
+              .map((_, i) => (
+                <div className="table-row" key={i}>
+                  <div>
+                    <Skeleton.Avatar
+                      active
+                      shape
+                      style={{ width: 15, height: 15 }}
+                    />
+                  </div>
 
-              <div className="category-checkbox">
-                <input type="checkbox" />
-              </div>
+                  <div className="product-info col-product">
+                    <div>
+                      <Skeleton.Input
+                        active
+                        style={{ width: 200, height: 60, marginBottom: 20 }}
+                      />
+                      <Skeleton.Input
+                        active
+                        style={{ width: 30, height: 20 }}
+                      />
+                    </div>
+                  </div>
 
-              <div className="category-info col-category">
-                <div className="category-images">
-                  <img src={item.thumbnail} alt={item.title} />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                </div>
+              ))}
+
+          {!loading && categoryDisplayList.length === 0 && (
+            <div className="table-row">
+              <div style={{ padding: "16px" }}>Không có danh mục nào</div>
+            </div>
+          )}
+
+          {!loading &&
+            categoryDisplayList.map((item) => (
+              <div className="table-row" key={item._id || item.id}>
+                <span
+                  className={
+                    item.featured === "yes" ? "yes featured" : "no featured"
+                  }
+                >
+                  {item.featured === "yes" ? "Nổi bật" : ""}
+                </span>
+
+                <div className="category-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectId.includes(item._id)}
+                    onChange={(e) =>
+                      handleCheckCategory(item._id, e.target.checked)
+                    }
+                  />
+                </div>
+
+                <div
+                  className="category-info col-category"
+                  style={{ paddingLeft: `${item.level * 24}px` }}
+                >
+                  <div>
+                    <p className="category-name">
+                      {item.level > 0 && "— ".repeat(item.level)}
+                      {item.title}
+                    </p>
+                    <span className="category-sub">{item.slug}</span>
+                  </div>
                 </div>
 
                 <div>
-                  <p className="category-name">{item.title}</p>
-                  <span className="category-sub">{item.slug}</span>
+                  <input
+                    type="number"
+                    defaultValue={item.position}
+                    style={{ width: 60, textAlign: "center" }}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+
+                      setChangePosition(prev => ({
+                        ...prev,
+                        [item._id]: value
+                      }))
+                    }}
+                  />
+                </div>
+
+                <div>{item.parentTitle}</div>
+                <div>{item.totalProduct || 0}</div>
+
+                <div>
+                  <span className={`status ${item.status}`}>
+                    {item.status === "active" && "Hoạt động"}
+                    {item.status === "inactive" && "Không hoạt động"}
+                  </span>
+                </div>
+
+                <div>{item.featured === "yes" ? "Có" : "Không"}</div>
+
+                <div className="actions">
+                  <Link
+                    className="edit"
+                    to={`/admin/categories/update/${item.slug}`}
+                  >
+                    Edit
+                  </Link>
+                  <button className="delete">Delete</button>
                 </div>
               </div>
-
-              <div>
-                <input
-                  type="number"
-                  defaultValue={item.position}
-                  style={{ width: 60, textAlign: "center" }}
-                />
-              </div>
-
-              <div>{item.parent}</div>
-              <div>{item.totalProduct}</div>
-
-              <div>
-                <span className={`status ${item.status}`}>
-                  {item.status === "active" && "Hoạt động"}
-                  {item.status === "inactive" && "Không hoạt động"}
-                </span>
-              </div>
-
-              <div>{item.featured === "yes" ? "Có" : "Không"}</div>
-
-              <div className="actions">
-                <Link className="edit" to={`/admin/categories/update/${item.slug}`}>
-                  Edit
-                </Link>
-                <button className="delete">Delete</button>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>

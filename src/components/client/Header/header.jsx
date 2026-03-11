@@ -3,7 +3,7 @@ import logo from "../../../assets/logo/logo_main.png";
 import {HashLink} from "react-router-hash-link";
 import "./header.scss";
 import {MenuOutlined, UserOutlined, ShoppingCartOutlined, HeartOutlined, SearchOutlined} from "@ant-design/icons"
-function Header(){
+function Header({setOpenMenu}){
     return(
         <header>
             <div className="header_layout_client" id="home">
@@ -19,7 +19,7 @@ function Header(){
                     <SearchOutlined /><input type="text" placeholder="Search tech..."/>
                 </div>
                 <div className="header_layout_client-card">
-                    <MenuOutlined />
+                    <MenuOutlined onClick={() => setOpenMenu(prev => !prev)}/>
                     <div className="search">
                         <SearchOutlined/>
                     </div>

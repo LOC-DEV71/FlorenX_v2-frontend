@@ -1,0 +1,25 @@
+.category-overlay {
+  position: fixed;
+  top: 77px;
+  left: 0;
+  width: 260px;
+  height: calc(100vh - 77px);
+  background: #fff;
+  z-index: 999;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+
+  .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-bottom: 12px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+  }
+}

@@ -6,6 +6,8 @@ import { updateProduct, getProductBySlug } from "../../../services/admin/product
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
 import { useNavigate, useParams } from "react-router-dom";
+import { getTreeCategory } from "../../../services/admin/product.category.admin";
+import { renderCategoryOptions } from "../../../utils/buildTree";
 
 function UpdateProduct() {
 
@@ -21,7 +23,8 @@ function UpdateProduct() {
         status: "active",
         position: "",
         brand: "",
-        featured: "no"
+        featured: "no",
+        product_category_id: ""
     });
 
     const [thumbnail, setThumbnail] = useState(null);
@@ -29,6 +32,21 @@ function UpdateProduct() {
 
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        try {
+            const fetchApi = async () => {
+                const res = await getTreeCategory();
+                if (res.data.code) {
+                    setCategories(res.data.categories)
+                }
+            }
+            fetchApi();
+        } catch (err) {
+            console.error(err.response?.data.message)
+        }
+    }, [])
 
     const [specs, setSpecs] = useState([
         { key: "", value: "" }
@@ -55,7 +73,8 @@ function UpdateProduct() {
                         status: product.status || "active",
                         position: product.position || "",
                         brand: product.brand || "",
-                        featured: product.featured || "no"
+                        featured: product.featured || "no",
+                        product_category_id: product.product_category_id || ""
                     });
 
                     setThumbnailPreview(product.thumbnail);
@@ -214,8 +233,12 @@ function UpdateProduct() {
                         <div className="row">
                             <div className="form-group">
                                 <label>Danh mục</label>
-                                <select>
-                                    <option>Chọn danh mục</option>
+                                <select
+                                    value={form.product_category_id}
+                                    onChange={e => setForm({ ...form, product_category_id: e.target.value })}
+                                >
+                                    <option value="">-- Chọn danh mục cha --</option>
+                                    {renderCategoryOptions(categories)}
                                 </select>
                             </div>
 

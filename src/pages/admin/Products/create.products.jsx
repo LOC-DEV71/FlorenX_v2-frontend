@@ -6,6 +6,9 @@ import { createProduct } from "../../../services/admin/product.admin.service";
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
 import { useNavigate } from "react-router-dom";
+import { getTreeCategory } from "../../../services/admin/product.category.admin";
+import { useEffect } from "react";
+import { renderCategoryOptions } from "../../../utils/buildTree";
 
 function CreateProduct() {
   const navigate = useNavigate();
@@ -18,7 +21,8 @@ function CreateProduct() {
     status: "active",
     position: "",
     brand: "",
-    featured: "no"
+    featured: "no",
+    product_category_id: ""
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -26,6 +30,21 @@ function CreateProduct() {
 
   const [images, setImages] = useState([]);
   const [imagesPreview, setImagesPreview] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    try {
+      const fetchApi = async () => {
+        const res = await getTreeCategory();
+        if (res.data.code) {
+          setCategories(res.data.categories)
+        }
+      }
+      fetchApi();
+    } catch (err) {
+      console.error(err.response?.data.message)
+    }
+  }, [])
 
   // SPEC STATE RIÊNG
   const [specs, setSpecs] = useState([
@@ -109,7 +128,8 @@ function CreateProduct() {
           status: "active",
           position: "",
           brand: "",
-          featured: "no"
+          featured: "no",
+          product_category_id: ""
         })
         navigate(`/admin/products/${newSlug}`)
       } else {
@@ -153,8 +173,12 @@ function CreateProduct() {
 
               <div className="form-group">
                 <label>Danh mục</label>
-                <select>
-                  <option>Chọn danh mục</option>
+                <select
+                  value={form.product_category_id}
+                  onChange={e => setForm({ ...form, product_category_id: e.target.value })}
+                >
+                  <option value="">-- Chọn danh mục cha --</option>
+                  {renderCategoryOptions(categories)}
                 </select>
               </div>
 
