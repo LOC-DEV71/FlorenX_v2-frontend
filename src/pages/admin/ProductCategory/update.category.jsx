@@ -1,17 +1,18 @@
 import "./create.category.scss";
 import SEO from "../../../utils/SEO";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import { FiUploadCloud } from "react-icons/fi";
 import { CgMathPlus } from "react-icons/cg";
 import { useEffect, useRef, useState } from "react";
 import TinyEditor from "../../../utils/tinyEditor";
-import { createProductCategory, getListCategory } from "../../../services/admin/product.category.admin";
+import { getCategoryBySlug, getListCategory, UpdateProductCategory } from "../../../services/admin/product.category.admin";
 import { success, error } from "../../../utils/notift";
 import { renderCategoryOptions } from "../../../utils/buildTree";
 
-function CreateCategory() {
+function UpdateCategory() {
     const [form, setForm] = useState({
+        id: "",
         title: "",
         description: "",
         slug: "",
@@ -20,10 +21,11 @@ function CreateCategory() {
         status: "active",
     });
     const [categories, setCategories] = useState([]);
-    const navigate = useNavigate();
     const [thumbnail, setThumbnail] = useState(null);
     const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const fileInputRef = useRef(null);
+    const { slug } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         try {
@@ -38,39 +40,64 @@ function CreateCategory() {
             console.error(err.response?.data.message)
         }
     }, [])
+    useEffect(() => {
+        try {
+            const fetchApi = async () => {
+                const res = await getCategoryBySlug(slug);
+                const data = res.data.category;
+                if (res.data.code) {
+                    setForm({
+                        _id: data._id,
+                        title: data.title,
+                        description: data.description,
+                        slug: data.slug,
+                        position: data.position,
+                        parent_id: data.parent_id,
+                        status: data.status,
+                        thumbnail: data.thumbnail
+                    })
+                    setThumbnailPreview(data.thumbnail)
+                }
+            }
+            fetchApi();
+        } catch (err) {
+            console.error(err.response?.data.message)
+        }
+    }, [])
 
-    const handleCreateCategory = async () => {
+    const handleUpdateCategory = async () => {
         try {
             const formData = new FormData();
-
-            Object.keys(form).forEach((key) => {
+            Object.keys(form).forEach(key => 
+            {
                 if (key === "parent_id" && !form[key]) return;
                 if (key === "position" && !form[key]) return;
-                formData.append(key, form[key]);
-            });
-
-            if (thumbnail) {
-                formData.append("thumbnail", thumbnail);
+                formData.append(key, form[key])
+            }
+            )
+            if(thumbnail){
+                formData.append("thumbnail", thumbnail)
             }
 
-            const res = await createProductCategory(formData);
-            if (res.data.code) {
+            const res = await UpdateProductCategory({formData, slug});
+            if(res.data.code){
                 success(res.data.message);
-                navigate("/admin/categories");
+                navigate("/admin/categories")
             }
         } catch (err) {
-            error(err.response?.data.message);
+            error(err.response?.data.message)
         }
-    };
+    }
+
     return (
         <div className="create-category-page">
-            <SEO title="Tạo danh mục" />
+            <SEO title="Cập nhật danh mục" />
 
             <div className="create-category-page__header">
                 <div>
-                    <h2 className="create-category-page__title">Tạo Danh Mục</h2>
+                    <h2 className="create-category-page__title">Cập nhật Danh Mục</h2>
                     <p className="create-category-page__desc">
-                        Thêm danh mục mới cho hệ thống quản trị
+                        Cập nhật danh
                     </p>
                 </div>
 
@@ -91,22 +118,22 @@ function CreateCategory() {
                         <div className="form-grid">
                             <div className="form-group full">
                                 <label>Tên danh mục</label>
-                                <input type="text" placeholder="Nhập tên danh mục..." onChange={e => setForm({ ...form, title: e.target.value })} />
+                                <input type="text" value={form.title} placeholder="Nhập tên danh mục..." onChange={e => setForm({ ...form, title: e.target.value })} />
                             </div>
 
                             <div className="form-group">
                                 <label>Slug</label>
-                                <input type="text" placeholder="vi-du-danh-muc" onChange={e => setForm({ ...form, slug: e.target.value })} />
+                                <input type="text" value={form.slug} placeholder="vi-du-danh-muc" onChange={e => setForm({ ...form, slug: e.target.value })} />
                             </div>
 
                             <div className="form-group">
                                 <label>Vị trí</label>
-                                <input type="number" placeholder="Có thể không nhập tự động + 1" onChange={e => setForm({ ...form, position: e.target.value })} />
+                                <input type="number" value={form.position} placeholder="Có thể không nhập tự động + 1" onChange={e => setForm({ ...form, position: e.target.value })} />
                             </div>
 
                             <div className="form-group">
                                 <label>Danh mục cha</label>
-                               <select
+                                <select
                                     value={form.parent_id}
                                     onChange={e => setForm({ ...form, parent_id: e.target.value })}
                                 >
@@ -128,7 +155,7 @@ function CreateCategory() {
 
                             <div className="form-group full">
                                 <label>Mô tả ngắn</label>
-                                <TinyEditor onChange={(content) => setForm({ ...form, description: content })} />
+                                <TinyEditor value={form.description} onChange={(content) => setForm({ ...form, description: content })} />
                             </div>
                         </div>
                     </div>
@@ -231,14 +258,6 @@ function CreateCategory() {
                                 </div>
                                 <input type="checkbox" />
                             </label>
-
-                            <label className="toggle-item">
-                                <div>
-                                    <span>Tự động sinh slug</span>
-                                    <small>Tự động tạo slug từ tên danh mục</small>
-                                </div>
-                                <input type="checkbox" />
-                            </label>
                         </div>
                     </div>
 
@@ -249,9 +268,9 @@ function CreateCategory() {
                         </div>
 
                         <div className="action-buttons">
-                            <button className="btn btn-primary" onClick={handleCreateCategory}>
+                            <button className="btn btn-primary" onClick={handleUpdateCategory}>
                                 <CgMathPlus />
-                                Tạo danh mục
+                                Cập nhật danh mục
                             </button>
 
                             <button className="btn btn-outline">Lưu bản nháp</button>
@@ -267,4 +286,4 @@ function CreateCategory() {
     );
 }
 
-export default CreateCategory;
+export default UpdateCategory;

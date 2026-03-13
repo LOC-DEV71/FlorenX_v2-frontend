@@ -256,8 +256,8 @@ function Categories() {
           <option value="position-desc">Vị trí cao đến thấp</option>
         </select>
 
-        <button className="reset">
-          <MdDeleteOutline onClick={() => navigate("/admin/categories")}/> Xóa lọc
+        <button className="reset" onClick={() => navigate("/admin/categories")}>
+          <MdDeleteOutline/> Xóa lọc
         </button>
 
         <select

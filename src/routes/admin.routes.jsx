@@ -7,6 +7,8 @@ import UpdateProduct from "../pages/admin/Products/update.products"
 import PrivateRoute from "../PrivateRoute/Admin/PrivateRoute.admin"
 import Categories from "../pages/admin/ProductCategory/index.productcategory"
 import CreateCategory from "../pages/admin/ProductCategory/create.category"
+import UpdateCategory from "../pages/admin/ProductCategory/update.category"
+import AccountAdmin from "../pages/admin/Accounts/index.account"
 
 function AdminRoutes() {
   return (
@@ -27,7 +29,12 @@ function AdminRoutes() {
 
         {/* Categories*/}
         <Route path="categories" element={<Categories/>}/>
+        <Route path="categories/update/:slug" element={<UpdateCategory/>}/>
         <Route path="categories/create" element={<CreateCategory/>}/>
+
+
+        {/* accounts */}
+        <Route path="accounts" element={<AccountAdmin/>}/>
       </Route>
     </Routes>
   );

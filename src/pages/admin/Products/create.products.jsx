@@ -6,7 +6,7 @@ import { createProduct } from "../../../services/admin/product.admin.service";
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
 import { useNavigate } from "react-router-dom";
-import { getTreeCategory } from "../../../services/admin/product.category.admin";
+import { getListCategory } from "../../../services/admin/product.category.admin";
 import { useEffect } from "react";
 import { renderCategoryOptions } from "../../../utils/buildTree";
 
@@ -35,7 +35,7 @@ function CreateProduct() {
   useEffect(() => {
     try {
       const fetchApi = async () => {
-        const res = await getTreeCategory();
+        const res = await getListCategory();
         if (res.data.code) {
           setCategories(res.data.categories)
         }
@@ -139,6 +139,8 @@ function CreateProduct() {
       console.log(error.response?.data.message);
     }
   };
+
+  console.log(categories)
 
 
   return (

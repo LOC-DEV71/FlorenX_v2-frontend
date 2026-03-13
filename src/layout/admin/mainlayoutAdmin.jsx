@@ -44,7 +44,7 @@ const menuItems = [
   {
     key: "5",
     icon: <MdOutlineManageAccounts />,
-    label: <Link to="/admin">TK Quản trị</Link>,
+    label: <Link to="/admin/accounts">TK Quản trị</Link>,
   },
   {
     key: "6",

@@ -6,7 +6,7 @@ import { updateProduct, getProductBySlug } from "../../../services/admin/product
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
 import { useNavigate, useParams } from "react-router-dom";
-import { getTreeCategory } from "../../../services/admin/product.category.admin";
+import { getListCategory } from "../../../services/admin/product.category.admin";
 import { renderCategoryOptions } from "../../../utils/buildTree";
 
 function UpdateProduct() {
@@ -37,7 +37,7 @@ function UpdateProduct() {
     useEffect(() => {
         try {
             const fetchApi = async () => {
-                const res = await getTreeCategory();
+                const res = await getListCategory();
                 if (res.data.code) {
                     setCategories(res.data.categories)
                 }
