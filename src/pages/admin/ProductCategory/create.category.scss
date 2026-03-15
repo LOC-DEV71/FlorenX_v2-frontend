@@ -7,6 +7,15 @@
     margin-bottom: 24px;
   }
 
+  .eyebrow {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2563eb;
+  }
+
   &__title {
     font-size: 24px;
     font-weight: 700;
@@ -185,14 +194,15 @@
   }
 }
 
-.input{
-    display: none;
+.input {
+  display: none;
 }
 
-.thumbnailPriview{
+.thumbnailPriview {
   width: 200px;
   position: relative;
-  .clear{
+
+  .clear {
     position: absolute;
     display: block;
     top: 0;
@@ -205,14 +215,16 @@
     width: 35px;
     height: 25px;
 
-    &:active{
+    &:active {
       background: rgb(188, 0, 0);
     }
   }
-  .clear-none{
+
+  .clear-none {
     display: none;
   }
-  img{
+
+  img {
     width: 100%;
   }
 }

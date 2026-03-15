@@ -9,6 +9,7 @@ export const getProducts = (data) => {
   if(data.page) params.append("page", data.page)
   if(data.limit) params.append("limit", data.limit)
   if(data.sort) params.append("sort", data.sort)
+  if(data.sortByCategory) params.append("sortByCategory", data.sortByCategory)
   return axiosAdmin.get(`/products?${params.toString()}`);
 };
 

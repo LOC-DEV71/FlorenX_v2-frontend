@@ -55,7 +55,7 @@
 
   .row {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
   }
 
@@ -83,7 +83,7 @@
   .preview-grid {
 
     display: grid;
-    grid-template-columns: repeat(2,1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
 
     .image {
@@ -157,7 +157,7 @@
 
   }
 
-  > button {
+  >button {
     width: 120px;
     padding: 8px;
     background: #1677ff;
@@ -212,4 +212,14 @@
     background: #E2E8F0;
   }
 
+}
+
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2563eb;
 }

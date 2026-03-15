@@ -49,7 +49,7 @@ const menuItems = [
   {
     key: "6",
     icon: <TfiControlEject />,
-    label: <Link to="/admin">Nhóm quyền</Link>,
+    label: <Link to="/admin/roles">Nhóm quyền</Link>,
   },
   {
     key: "7",

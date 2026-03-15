@@ -9,6 +9,11 @@ import Categories from "../pages/admin/ProductCategory/index.productcategory"
 import CreateCategory from "../pages/admin/ProductCategory/create.category"
 import UpdateCategory from "../pages/admin/ProductCategory/update.category"
 import AccountAdmin from "../pages/admin/Accounts/index.account"
+import CreateAccounts from "../pages/admin/Accounts/create.account"
+import CreateRole from "../pages/admin/Role/create.role"
+import Roles from "../pages/admin/Role/index.role"
+import UpdateRole from "../pages/admin/Role/update.role"
+import UpdateAccount from "../pages/admin/Accounts/update.account"
 
 function AdminRoutes() {
   return (
@@ -35,6 +40,14 @@ function AdminRoutes() {
 
         {/* accounts */}
         <Route path="accounts" element={<AccountAdmin/>}/>
+        <Route path="accounts/create" element={<CreateAccounts/>}/>
+        <Route path="accounts/update/:id" element={<UpdateAccount/>}/>
+
+
+        {/* roles */}
+        <Route path="roles" element={<Roles/>}/>
+        <Route path="roles/create" element={<CreateRole/>}/>
+        <Route path="roles/update/:slug" element={<UpdateRole/>}/>
       </Route>
     </Routes>
   );

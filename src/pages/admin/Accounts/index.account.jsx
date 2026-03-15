@@ -1,5 +1,5 @@
 import "./AccountAdmin.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Statistic } from "antd";
 import CountUp from "react-countup";
 import { SearchOutlined } from "@ant-design/icons";
@@ -8,44 +8,74 @@ import { MdDeleteOutline } from "react-icons/md";
 import { BsCalendarCheck, BsCheck2Circle } from "react-icons/bs";
 import { FaUserShield, FaUserSlash } from "react-icons/fa6";
 import SEO from "../../../utils/SEO";
+import { useState } from "react";
+import { useEffect } from "react";
+import { confirm, error, success } from "../../../utils/notift";
+import { getListAccount, changeMulti } from "../../../services/admin/account.admin.service";
+import Avatar from "../../../assets/banner/avatar-none.jpg";
 
 const formatter = (value) => (
   <CountUp end={value} duration={2} separator="," />
 );
 
 function AccountAdmin() {
-  const accounts = [
-    {
-      id: 1,
-      fullName: "Lộc Lâm",
-      email: "1945musictrending@gmail.com",
-      phone: "0987654321",
-      role: "admin",
-      status: "active",
-      createdAt: "13/03/2026",
-      avatar: "https://i.pravatar.cc/100?img=1",
-    },
-    {
-      id: 2,
-      fullName: "Nguyễn Văn A",
-      email: "nguyenvana@gmail.com",
-      phone: "0912345678",
-      role: "staff",
-      status: "inactive",
-      createdAt: "10/03/2026",
-      avatar: "https://i.pravatar.cc/100?img=2",
-    },
-    {
-      id: 3,
-      fullName: "Trần Thị B",
-      email: "tranthib@gmail.com",
-      phone: "0909009009",
-      role: "admin",
-      status: "active",
-      createdAt: "08/03/2026",
-      avatar: "https://i.pravatar.cc/100?img=3",
-    },
-  ];
+  const [accounts, setAccounts] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [typeChange, setTypeChange] = useState("");
+  const [selectId, setSelectId] = useState([])
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 5;
+  const sort = searchParams.get("sort") || "";
+  const [reload, setReload] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const fetchApi = async () => {
+
+        const res = await getListAccount({page, limit, sort});
+        if (res.data.code) {
+          setAccounts(res.data.accounts)
+        }
+      }
+      fetchApi()
+    } catch (err) {
+      error(error.response?.data.message)
+    }
+  }, [reload, page, limit, sort]);
+
+  const handleChangeMulti = async () => {
+    try {
+
+      if (typeChange === "delete") {
+        const ok = await confirm(
+          "Xoá sản phẩm?",
+          "Sản phẩm bị xóa sẽ chuyển vào thùng rác"
+        );
+
+        if (!ok) return;
+        const res = await changeMulti({ selectId, typeChange })
+        if (res.data.code) {
+          success(res.data.message)
+        }
+      }
+        const res = await changeMulti({
+          selectId,
+          typeChange
+        });
+
+        if (res.data.code) {
+          success(res.data.message);
+        } else {
+          error(res.data.message);
+        }
+        setSelectId([]);
+        setTypeChange("");
+        setReload(prev => !prev);
+
+    } catch (error) {
+      console.log(error.response?.data.message);
+    }
+  };
 
   return (
     <div className="account-admin-page">
@@ -89,32 +119,54 @@ function AccountAdmin() {
           <input placeholder="Tìm tên tài khoản hoặc email..." />
         </div>
 
-        <select defaultValue="">
+        <select 
+          value={sort}
+          onChange={e =>
+            setSearchParams({
+              page: 1,
+              limit,
+              sort: e.target.value
+            })
+          }
+        >
           <option value="">Trạng thái: Tất cả</option>
-          <option value="active">Hoạt động</option>
-          <option value="inactive">Không hoạt động</option>
+          <option value="status-active">Hoạt động</option>
+          <option value="status-inactive">Không hoạt động</option>
         </select>
 
-        <select defaultValue="">
+        <select
+          value={sort}
+          onChange={e =>
+            setSearchParams({
+              page: 1,
+              limit,
+              sort: e.target.value
+            })
+          }
+        >
           <option value="">-- Sắp xếp theo --</option>
-          <option value="name-asc">Tên A-Z</option>
-          <option value="name-desc">Tên Z-A</option>
-          <option value="newest">Mới nhất</option>
-          <option value="oldest">Cũ nhất</option>
+          <option value="fullname-asc">Tên A-Z</option>
+          <option value="fullname-desc">Tên Z-A</option>
         </select>
 
-        <button className="reset">
+        <button className="reset" 
+          onClick={() =>
+            navigate("/admin/accounts")
+          }>
           <MdDeleteOutline /> Xoá lọc
         </button>
 
-        <select defaultValue="">
+        <select
+          value={typeChange}
+          onChange={e => setTypeChange(e.target.value)}
+        >
           <option value="">-- Chọn hành động --</option>
           <option value="active">Chuyển thành hoạt động</option>
           <option value="inactive">Chuyển thành không hoạt động</option>
           <option value="delete">Xoá nhiều tài khoản</option>
         </select>
 
-        <button className="activity">Áp dụng</button>
+        <button className="activity" onClick={handleChangeMulti}>Áp dụng</button>
 
         <Link className="create" to="/admin/accounts/create">
           <CgMathPlus /> Tạo mới
@@ -125,7 +177,17 @@ function AccountAdmin() {
         <div className="account-table">
           <div className="table-header">
             <div>
-              <input type="checkbox" />
+              <input 
+                type="checkbox" 
+                checked={accounts.length > 0 && selectId.length === accounts.length}
+                onChange={e => {
+                  if(e.target.checked){
+                    setSelectId(accounts.map(item => item._id))
+                  } else {
+                    setSelectId([])
+                  }
+                }}
+              />
             </div>
             <div className="col-account">Tài khoản</div>
             <div>Số điện thoại</div>
@@ -136,15 +198,25 @@ function AccountAdmin() {
           </div>
 
           {accounts.map((item) => (
-            <div className="table-row" key={item.id}>
+            <div className="table-row" key={item._id}>
               <div className="account-checkbox">
-                <input type="checkbox" />
+                <input 
+                  type="checkbox" 
+                  checked={selectId.includes(item._id)}
+                  onChange={e => {
+                    if(e.target.checked){
+                      setSelectId(prev => [...prev, item._id])
+                    } else {
+                      setSelectId(prev => prev.filter(id => id != item._id))
+                    }
+                  }}
+                />
               </div>
 
               <div className="account-info col-account">
-                <img src={item.avatar} alt={item.fullName} />
+                <img src={item.avatar ? item.avatar : Avatar} alt={item.fullname} />
                 <div>
-                  <p className="account-name">{item.fullName}</p>
+                  <p className="account-name">{item.fullname}</p>
                   <span className="account-sub">{item.email}</span>
                 </div>
               </div>
@@ -152,8 +224,8 @@ function AccountAdmin() {
               <div>{item.phone}</div>
 
               <div>
-                <span className={`role ${item.role}`}>
-                  {item.role === "admin" ? "Admin" : "Staff"}
+                <span className={`role ${item.role_slug}`}>
+                  {item.role_slug}
                 </span>
               </div>
 
@@ -166,7 +238,7 @@ function AccountAdmin() {
               </div>
 
               <div className="actions">
-                <Link className="edit" to={`/admin/accounts/edit/${item.id}`}>
+                <Link className="edit" to={`/admin/accounts/update/${item._id}`}>
                   Edit
                 </Link>
                 <button className="delete">Delete</button>

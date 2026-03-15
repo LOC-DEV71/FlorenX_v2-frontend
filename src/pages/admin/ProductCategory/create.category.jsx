@@ -68,6 +68,7 @@ function CreateCategory() {
 
             <div className="create-category-page__header">
                 <div>
+                    <p class="eyebrow">Veltrix Gear</p>
                     <h2 className="create-category-page__title">Tạo Danh Mục</h2>
                     <p className="create-category-page__desc">
                         Thêm danh mục mới cho hệ thống quản trị
@@ -253,8 +254,6 @@ function CreateCategory() {
                                 <CgMathPlus />
                                 Tạo danh mục
                             </button>
-
-                            <button className="btn btn-outline">Lưu bản nháp</button>
 
                             <Link to="/admin/categories" className="btn btn-danger">
                                 Hủy bỏ

@@ -132,21 +132,17 @@ function CreateProduct() {
           product_category_id: ""
         })
         navigate(`/admin/products/${newSlug}`)
-      } else {
-        error(res.data.message)
-      }
-    } catch (error) {
-      console.log(error.response?.data.message);
+      } 
+    } catch (err) {
+      error(err.response?.data.message);
     }
   };
-
-  console.log(categories)
-
 
   return (
     <div className="create-product">
       <SEO title="Tạo sản phẩm mới" />
       <div className="page-header">
+        <p class="eyebrow">Veltrix Gear</p>
         <h2>Tạo sản phẩm mới</h2>
         <p>Thêm một sản phẩm vào hệ thống.</p>
       </div>

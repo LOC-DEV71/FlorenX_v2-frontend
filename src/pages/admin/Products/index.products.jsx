@@ -15,6 +15,8 @@ import { MdDeleteOutline } from "react-icons/md";
 import { renderpagination } from "../../../utils/pagination";
 import { Skeleton } from "antd";
 import { error, success, confirm  } from "../../../utils/notift";
+import { getListCategory } from "../../../services/admin/product.category.admin";
+import { renderCategoryOptions } from "../../../utils/buildTree";
 const formatter = (value) => (
     <CountUp end={value} duration={2} separator="," />
 );
@@ -32,18 +34,20 @@ function Products() {
     const [productsActive, setProductsActive] = useState("")
     const [countOutStock, setCountOutStock] = useState("")
     const [countLowStock, setCountLowStock] = useState("")
+    const [category, setCategory] = useState([])
 
     const [loading, setLoading] = useState(false);
 
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 5;
     const sort = searchParams.get("sort") || "";
+    const sortByCategory = searchParams.get("sortByCategory") || "";
     useEffect(() => {
         const fetchApi = async () => {
             try {
                 setLoading(true);
 
-                const res = await getProducts({ page, limit, sort });
+                const res = await getProducts({ page, limit, sort, sortByCategory });
                 setData(res.data.products);
                 setPagination(res.data.pagination);
                 setTotalProduct(res.data.totalProduct)
@@ -59,7 +63,7 @@ function Products() {
         };
 
         fetchApi();
-    }, [page, limit, sort, reload]);
+    }, [page, limit, sort, reload, sortByCategory]);
 
     const handleChangeMulti = async () => {
         try {
@@ -120,6 +124,20 @@ function Products() {
         }
     };
 
+    useEffect(() => {
+        try {
+            const fetchApi = async () => {
+                const res = await getListCategory();
+                if(res.data.code){
+                    setCategory(res.data.categories)
+                }
+            }
+            fetchApi()
+        } catch (err) {
+            error(err.response?.data?.message)
+        }
+    }, [])
+
     return (
 
         <div className="product-page">
@@ -160,8 +178,19 @@ function Products() {
                     <input placeholder="Tìm tên sản phẩm hoặc slug..." />
                 </div>
 
-                <select>
+                <select
+                    onChange={e =>
+                        setSearchParams({
+                            page: 1,
+                            limit,
+                            sort: e.target.value,
+                            sortByCategory: e.target.value
+                        })
+                    }
+                    value={sortByCategory}
+                >
                     <option>Danh mục: Tất cả</option>
+                    {renderCategoryOptions(category)}
                 </select>
 
                 <select
@@ -332,7 +361,7 @@ function Products() {
                     }
 
 
-                    {renderpagination(pagination, setSearchParams, limit, sort)}
+                    {renderpagination(pagination, setSearchParams, limit, sort, sortByCategory)}
 
                 </div>
 
