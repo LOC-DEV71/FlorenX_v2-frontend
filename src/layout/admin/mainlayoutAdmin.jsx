@@ -17,55 +17,111 @@ import {
 import { AiFillProduct } from "react-icons/ai";
 import { TfiControlEject } from "react-icons/tfi";
 import { GrArticle } from "react-icons/gr";
+import { useSelector } from "react-redux";
+import { IoMdChatboxes } from "react-icons/io";
+import { TbCategory } from "react-icons/tb";
+
+
 
 const { Header, Sider, Content } = Layout;
 
-const menuItems = [
-  {
-    key: "1",
-    icon: <MdDashboard />,
-    label: <Link to="/admin">Dashboard</Link>,
-  },
-  {
-    key: "2",
-    icon: <AiFillProduct />,
-    label: <Link to="/admin/products">Sản phẩm</Link>,
-  },
-  {
-    key: "3",
-    icon: <MdCategory />,
-    label: <Link to="/admin/categories">Danh mục</Link>,
-  },
-  {
-    key: "4",
-    icon: <MdShoppingCart />,
-    label: <Link to="/admin">Đơn hàng</Link>,
-  },
-  {
-    key: "5",
-    icon: <MdOutlineManageAccounts />,
-    label: <Link to="/admin/accounts">TK Quản trị</Link>,
-  },
-  {
-    key: "6",
-    icon: <TfiControlEject />,
-    label: <Link to="/admin/roles">Nhóm quyền</Link>,
-  },
-  {
-    key: "7",
-    icon: <MdAccountTree />,
-    label: <Link to="/admin">Phân quyền</Link>,
-  },
-  {
-    key: "8",
-    icon: <GrArticle />,
-    label: <Link to="/admin">Bài viết</Link>,
-  },
-];
+
 
 const MainLayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const role = useSelector(state => state.auth.role)
+  const permission = role?.permissions;
+  const exitProduct = permission?.includes("view_products");
+  const exitAccount = permission?.includes("view_accounts");
+  const exitProductCategory = permission?.includes("view_product_category");
+  const exitOders = permission?.includes("view_orders");
+  const exitRoles = permission?.includes("view_roles");
+  const exitPermissions = permission?.includes("view_permissions");
+  const exitNews = permission?.includes("view_news");
+  const exitNewsCategory = permission?.includes("view_news_category");
+  const menuItems = [
+    {
+      key: "1",
+      icon: <MdDashboard />,
+      label: <Link to="/admin">Dashboard</Link>,
+    },
+    ...(exitProduct
+      ? [
+        {
+          key: "2",
+          icon: <AiFillProduct />,
+          label: <Link to="/admin/products">Sản phẩm</Link>,
+        },
+      ]
+      : []),
+    ...(exitProductCategory
+      ? [
+        {
+          key: "3",
+          icon: <MdCategory />,
+          label: <Link to="/admin/categories">Danh mục</Link>,
+        }
+      ] : []
+    ),
+    ...(exitOders
+      ? [
+        {
+          key: "4",
+          icon: <MdShoppingCart />,
+          label: <Link to="/admin">Đơn hàng</Link>,
+        }
+      ] : []
+    )
+    ,
+    ...(exitAccount
+      ? [{
+        key: "5",
+        icon: <MdOutlineManageAccounts />,
+        label: <Link to="/admin/accounts">TK Quản trị</Link>,
+      }] : []
+    ),
+    ...(exitRoles
+      ? [{
+        key: "6",
+        icon: <TfiControlEject />,
+        label: <Link to="/admin/roles">Nhóm quyền</Link>,
+      }] : []
+    )
+    ,
+    ...(exitPermissions
+      ? [
+        {
+          key: "7",
+          icon: <MdAccountTree />,
+          label: <Link to="/admin/permission">Phân quyền</Link>,
+        }
+      ] : []
+    ),
+    ...(exitNewsCategory
+      ? [
 
+        {
+          key: "8",
+          icon: <TbCategory />,
+          label: <Link to="/admin/new-categories">Danh mục bài viết</Link>,
+        }
+      ] : []
+    ),
+    ...(exitNews
+      ? [{
+        key: "9",
+        icon: <GrArticle />,
+        label: <Link to="/admin/news">Bài viết</Link>,
+      }] : []
+    )
+    ,
+    {
+      key: "10",
+      icon: <IoMdChatboxes />,
+      label: <Link to="/admin/chat">CSKH</Link>,
+    }
+
+  ];
   const {
     token: { borderRadiusLG },
   } = theme.useToken();
@@ -78,7 +134,7 @@ const MainLayoutAdmin = () => {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f5f5f5" }}>
-      
+
       {/* SIDEBAR */}
       <Sider
         trigger={null}

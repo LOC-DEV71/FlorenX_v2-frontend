@@ -1,0 +1,326 @@
+.permission-page {
+    padding: 6px 24px 24px;
+
+    &__head {
+        margin-bottom: 20px;
+    }
+
+    &__title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    &__desc {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+}
+
+.permission-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.permission-sidebar {
+    background: #fff;
+    border: 1px solid #ececec;
+    border-radius: 14px;
+    overflow: hidden;
+
+    &__top {
+        padding: 16px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+}
+
+.permission-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+    border: 1px solid #dcdfe4;
+    border-radius: 10px;
+    padding: 0 14px;
+    background: #fff;
+
+    svg,
+    span {
+        color: #6b7280;
+        font-size: 15px;
+    }
+
+    input {
+        border: 0;
+        outline: 0;
+        background: transparent;
+        width: 100%;
+        font-size: 14px;
+        color: #111827;
+
+        &::placeholder {
+            color: #9ca3af;
+        }
+    }
+}
+
+.permission-role-list {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+}
+
+.permission-role-item {
+    width: 100%;
+    border: 1px solid #ececec;
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: #bfd3ff;
+        background: #f8fbff;
+    }
+
+    &.active {
+        border-color: #2563eb;
+        background: #eff6ff;
+
+        .permission-role-item__icon {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .permission-role-item__content h4 {
+            color: #1d4ed8;
+        }
+    }
+
+    &__icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #f3f4f6;
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    &__content {
+        min-width: 0;
+
+        h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 4px 0;
+            line-height: 1.4;
+        }
+
+        p {
+            margin: 0;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+    }
+}
+
+.permission-content {
+    background: #fff;
+    border: 1px solid #ececec;
+    border-radius: 14px;
+    padding: 20px;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #f1f1f1;
+        margin-bottom: 20px;
+
+        h3 {
+            margin: 0 0 6px 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+    }
+}
+
+.save-button {
+    height: 42px;
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+    border-radius: 10px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:hover {
+        opacity: 0.92;
+    }
+}
+
+.permission-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.permission-group-card {
+    border: 1px solid #ececec;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+
+    &__header {
+        padding: 16px 18px;
+        background: #fafafa;
+        border-bottom: 1px solid #ececec;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    &__body {
+        padding: 18px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+        gap: 14px 18px;
+    }
+}
+
+.permission-group-info {
+    h4 {
+        margin: 0 0 4px 0;
+        font-size: 17px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    p {
+        margin: 0;
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+}
+
+.permission-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: 1px solid #ececec;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: #cfd8e3;
+        background: #fafafa;
+    }
+
+    input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #2563eb;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    span {
+        font-size: 14px;
+        color: #1f2937;
+        line-height: 1.4;
+    }
+
+    &--all {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        min-width: 110px;
+        justify-content: center;
+
+        span {
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+    }
+}
+
+@media (max-width: 1200px) {
+    .permission-layout {
+        grid-template-columns: 280px 1fr;
+    }
+
+    .permission-group-card__body {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .permission-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .permission-content__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .save-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .permission-page {
+        padding: 6px 16px 20px;
+    }
+
+    .permission-group-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .permission-check--all {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

@@ -16,7 +16,7 @@ function App() {
         const res = await getMeAdmin();
 
         if (res.data.code) {
-          dispatch(login(res.data.admin));
+          dispatch(login(res.data));
         } else {
           dispatch(logout());
         }

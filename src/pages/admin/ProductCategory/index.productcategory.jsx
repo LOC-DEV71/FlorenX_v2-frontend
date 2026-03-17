@@ -168,8 +168,8 @@ function Categories() {
       setTypeChange("");
       setReload(prev => !prev);
 
-    } catch (error) {
-      console.log(error.response?.data.message);
+    } catch (err) {
+      error(err.response?.data.message);
     }
   };
 

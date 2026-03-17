@@ -1,0 +1,24 @@
+import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
+
+function PrivateRoutePermission({ permission }) {
+  const { isLogin, loading, role } = useSelector((state) => state.auth);
+
+  if (loading) return <div>Loading...</div>;
+
+  if (!isLogin) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  const permissions = role?.permissions || [];
+
+  const hasPermission = permissions.includes(permission);
+
+  if (!hasPermission) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return <Outlet />;
+}
+
+export default PrivateRoutePermission;
