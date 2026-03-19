@@ -21,6 +21,7 @@ import NewsCategoryAdmin from "../pages/admin/NewCategory/index.new.category";
 import NewsCategoryCreate from "../pages/admin/NewCategory/NewsCategoryCreate";
 import NewsCreate from "../pages/admin/News/NewsCreate";
 import CustomerSupportChat from "../pages/admin/Chat/index.chat";
+import UpdateNewsCategory from "../pages/admin/NewCategory/updateNewsCategory";
 
 function AdminRoutes() {
   return (
@@ -115,6 +116,9 @@ function AdminRoutes() {
         </Route>
         <Route element={<PrivateRoutePermission permission="create_news_category" />}>
           <Route path="new-categories/create" element={<NewsCategoryCreate />} />
+        </Route>
+        <Route element={<PrivateRoutePermission permission="update_news_category" />}>
+          <Route path="new-categories/update/:slug" element={<UpdateNewsCategory />} />
         </Route>
 
 

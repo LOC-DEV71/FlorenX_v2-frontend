@@ -1,7 +1,84 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./NewsCreate.scss";
+import TinyEditor from "../../../utils/tinyEditor";
+import { error, success } from "../../../utils/notift";
+import { getList } from "../../../services/admin/news.category.service";
+import { createNews } from "../../../services/admin/news.service";
 
 const NewsCreate = () => {
+  const [categories, setCategories] = useState([])
+  const [form, setForm] = useState({
+    title: "",
+    slug: "",
+    description: "",
+    content: "",
+    category_id: "",
+    status: "draft",
+    featured: "no",
+    views: 0,
+  });
+  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] =useState(null)
+  const fileInputRef = useRef(null);
+  const handleChange = (e) => {
+    const { id, value, type, files } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [id]: type === "file" ? files[0] || null : value,
+    }));
+  };
+
+  const handleEditorChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      content: value,
+    }));
+  };
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      try {
+        const res = await getList();
+        if(res.data.code){
+          setCategories(res.data.categories)
+        }
+      } catch (err) {
+        error(err.response?.data?.message)
+      }
+    }
+    fetchApi();
+  }, [])
+  const handleClearThumbnail = () => {
+    setThumbnail(null);
+    setThumbnailPreview(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const hanldeCreateNews = async () => {
+    try {
+      const formData = new FormData();
+
+      if (thumbnail) {
+        formData.append("thumbnail", thumbnail);
+      }
+
+      Object.keys(form).forEach(key => {
+        if (key === "slug" && !form.slug) return;
+        formData.append(key, form[key]);
+      });
+
+      const res = await createNews(formData);
+      if(res.data.code){
+        success(res.data.message)
+      }
+    } catch (err) {
+      error(err.response?.data?.message)
+    }
+  }
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -11,10 +88,7 @@ const NewsCreate = () => {
         </div>
 
         <div className="page-header__actions">
-          <button className="btn btn--outline" type="button">
-            Lưu nháp
-          </button>
-          <button className="btn btn--primary" type="button">
+          <button className="btn btn--primary" type="button" onClick={hanldeCreateNews}>
             Đăng bài
           </button>
         </div>
@@ -35,6 +109,8 @@ const NewsCreate = () => {
                     id="title"
                     type="text"
                     placeholder="Nhập tiêu đề bài viết"
+                    value={form.title}
+                    onChange={handleChange}
                   />
                 </div>
 
@@ -44,53 +120,71 @@ const NewsCreate = () => {
                     id="slug"
                     type="text"
                     placeholder="slug-bai-viet"
+                    value={form.slug}
+                    onChange={handleChange}
                   />
                 </div>
 
                 <div className="form-group form-group--full">
-                  <label htmlFor="excerpt">Mô tả ngắn</label>
+                  <label htmlFor="description">Mô tả ngắn</label>
                   <textarea
-                    id="excerpt"
+                    id="description"
                     rows="4"
                     placeholder="Nhập đoạn mô tả ngắn cho bài viết"
+                    value={form.description}
+                    onChange={handleChange}
                   />
                 </div>
 
                 <div className="form-group form-group--full">
                   <label htmlFor="content">Nội dung</label>
-                  <textarea
+                  <TinyEditor
                     id="content"
                     rows="12"
                     placeholder="Nhập nội dung bài viết..."
+                    value={form.content}
+                    onChange={handleEditorChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="categoryId">Danh mục</label>
-                  <select id="categoryId" defaultValue="">
-                    <option value="" disabled>
+                  <label htmlFor="category_id">Danh mục</label>
+                  <select
+                    id="category_id"
+                    value={form.category_id}
+                    onChange={handleChange}
+                  >
+                    <option value="">
                       Chọn danh mục
                     </option>
-                    <option value="1">Tin công nghệ</option>
-                    <option value="2">Khuyến mãi</option>
-                    <option value="3">Hướng dẫn</option>
+                    {categories && categories.map(item => (
+                      <option value={item._id}>{item.title}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="status">Trạng thái</label>
-                  <select id="status" defaultValue="draft">
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="hidden">Hidden</option>
+                  <select
+                    id="status"
+                    value={form.status}
+                    onChange={handleChange}
+                  >
+                    <option value="draft">Nháp</option>
+                    <option value="published">Xuất bản</option>
+                    <option value="hidden">Ẩn</option>
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="featured">Bài viết nổi bật</label>
-                  <select id="featured" defaultValue="false">
-                    <option value="false">Không</option>
-                    <option value="true">Có</option>
+                  <select
+                    id="featured"
+                    value={form.featured}
+                    onChange={handleChange}
+                  >
+                    <option value="no">Không</option>
+                    <option value="yes">Có</option>
                   </select>
                 </div>
 
@@ -101,16 +195,11 @@ const NewsCreate = () => {
                     type="number"
                     min="0"
                     placeholder="0"
+                    value={form.views}
+                    onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="deleted">Đánh dấu xóa</label>
-                  <select id="deleted" defaultValue="false">
-                    <option value="false">Không</option>
-                    <option value="true">Có</option>
-                  </select>
-                </div>
               </div>
             </div>
           </div>
@@ -124,27 +213,46 @@ const NewsCreate = () => {
 
             <div className="card__body">
               <div className="preview-box">
-                <div className="preview-box__thumb">Thumbnail</div>
+                <div className="preview-box__thumb">
+                  {thumbnailPreview ?
+                    <>
+                      <span onClick={handleClearThumbnail}>X</span>
+                      <img src={thumbnailPreview} alt="thumbnail" />
+                    </>:
+                    <>Thumbnail</>
+                  }
+                </div>
 
                 <div className="preview-box__upload">
-                  <label htmlFor="thumbnailFile" className="preview-box__upload-label">
+                  <label
+                    htmlFor="thumbnailFile"
+                    className="preview-box__upload-label"
+                  >
                     Chọn ảnh thumbnail
                   </label>
                   <input
                     id="thumbnailFile"
                     type="file"
                     accept="image/*"
+                    onChange={e => {
+                      const file = e.target.files[0];
+                      if(file){
+                        setThumbnail(file)
+                        setThumbnailPreview(URL.createObjectURL(file))
+                      }
+                    }}
                   />
                 </div>
 
                 <div className="preview-box__content">
-                  <h3>Tiêu đề bài viết</h3>
+                  <h3>{form.title || "Tiêu đề bài viết"}</h3>
                   <p>
-                    Mô tả ngắn của bài viết sẽ hiển thị tại đây để preview nhanh.
+                    {form.description ||
+                      "Mô tả ngắn của bài viết sẽ hiển thị tại đây để preview nhanh."}
                   </p>
                   <div className="preview-meta">
-                    <span className="badge">Draft</span>
-                    <span className="meta-text">0 lượt xem</span>
+                    <span className="badge">{form.status}</span>
+                    <span className="meta-text">{form.views} lượt xem</span>
                   </div>
                 </div>
               </div>

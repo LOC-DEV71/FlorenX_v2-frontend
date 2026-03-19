@@ -1,6 +1,6 @@
 .admin-page {
-  padding: 24px;
-  background: #f5f7fb;
+  padding: 28px;
+  background: #f3f6fb;
   min-height: 100vh;
   color: #1f2937;
 }
@@ -10,19 +10,20 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 
   h1 {
     margin: 0 0 6px;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    color: #111827;
+    color: #0f172a;
+    line-height: 1.2;
   }
 
   p {
     margin: 0;
     font-size: 14px;
-    color: #6b7280;
+    color: #64748b;
   }
 
   &__actions {
@@ -34,7 +35,7 @@
 
 .admin-form-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 24px;
 }
 
@@ -47,24 +48,26 @@
 
 .card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
 
   &__header {
-    padding: 18px 20px;
+    padding: 18px 22px;
     border-bottom: 1px solid #eef2f7;
+    background: linear-gradient(to bottom, #ffffff, #fbfdff);
 
     h2 {
       margin: 0;
       font-size: 16px;
-      font-weight: 600;
-      color: #111827;
+      font-weight: 700;
+      color: #0f172a;
     }
   }
 
   &__body {
-    padding: 20px;
+    padding: 22px;
   }
 }
 
@@ -86,29 +89,40 @@
   label {
     font-size: 13px;
     font-weight: 600;
-    color: #374151;
+    color: #334155;
   }
 
   input,
   textarea,
   select {
     width: 100%;
-    border: 1px solid #d1d5db;
+    border: 1px solid #dbe2ea;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 12px 14px;
     font-size: 14px;
-    color: #111827;
+    color: #0f172a;
     outline: none;
     transition: all 0.2s ease;
     box-sizing: border-box;
   }
 
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  input:hover,
+  textarea:hover,
+  select:hover {
+    border-color: #cbd5e1;
+  }
+
   input:focus,
   textarea:focus,
   select:focus {
-    border-color: #94a3b8;
-    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
   }
 
   textarea {
@@ -119,30 +133,32 @@
 
 .btn {
   height: 42px;
-  padding: 0 16px;
-  border-radius: 10px;
+  padding: 0 18px;
+  border-radius: 12px;
   border: 1px solid transparent;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
 
   &--primary {
-    background: #111827;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
     color: #fff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
 
     &:hover {
-      background: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
     }
   }
 
   &--outline {
     background: #fff;
-    color: #374151;
+    color: #334155;
     border-color: #d1d5db;
 
     &:hover {
-      background: #f9fafb;
+      background: #f8fafc;
     }
   }
 }
@@ -154,42 +170,105 @@
   li {
     margin-bottom: 10px;
     font-size: 14px;
-    color: #4b5563;
-    line-height: 1.5;
+    color: #475569;
+    line-height: 1.6;
   }
 }
 
 .preview-box {
-  border: 1px dashed #d1d5db;
-  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
   overflow: hidden;
-  background: #fafafa;
+  background: #fff;
 
   &__thumb {
-    height: 140px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #e5e7eb;
-    color: #6b7280;
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    color: #64748b;
     font-size: 14px;
     font-weight: 600;
+    overflow: hidden;
+    position: relative;
+
+    span{
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 5px;
+      background: red;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+
+      &:hover{
+        background: rgb(172, 0, 0);
+      }
+
+      &:active{
+        background: rgb(84, 0, 0);
+      }
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  &__upload {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef2f7;
+    background: #f8fafc;
+
+    input[type="file"] {
+      display: none;
+    }
+  }
+
+  &__upload-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px dashed #94a3b8;
+    border-radius: 12px;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+      background: #eff6ff;
+    }
   }
 
   &__content {
-    padding: 16px;
+    padding: 18px 16px;
 
     h3 {
       margin: 0 0 8px;
-      font-size: 16px;
-      color: #111827;
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
     }
 
     p {
-      margin: 0 0 12px;
+      margin: 0 0 14px;
       font-size: 14px;
-      color: #6b7280;
-      line-height: 1.5;
+      color: #64748b;
+      line-height: 1.6;
     }
   }
 }
@@ -197,12 +276,50 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
   background: #ecfdf5;
   color: #047857;
-  font-size: 12px;
-  font-weight: 600;
+
+  &--inactive {
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-form-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+
+    h1 {
+      font-size: 24px;
+    }
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    &__header,
+    &__body {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
 }
 
 @media (max-width: 1024px) {

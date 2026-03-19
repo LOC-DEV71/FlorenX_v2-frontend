@@ -1,14 +1,15 @@
-import React, { useRef, useState } from "react";
 import "./NewsCategoryCreate.scss";
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
-import { createNewsCategory } from "../../../services/admin/news.category.service";
-
-const NewsCategoryCreate = () => {
+import { updateNewsCategory, getBySlug } from "../../../services/admin/news.category.service";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+const UpdateNewsCategory = () => {
   const [form, setForm] = useState({
     title: "",
     slug: "",
     description: "",
+    id: "",
     status: "active",
   });
 
@@ -43,11 +44,12 @@ const NewsCategoryCreate = () => {
     }
   };
 
-  const handleCreateNewsCategory = async () => {
+  const handleUpdateNewsCategory = async () => {
     try {
       const formData = new FormData();
       formData.append("title", form.title);
       formData.append("description", form.description);
+      formData.append("id", form.id);
       formData.append("status", form.status);
 
       if (form.slug) {
@@ -58,21 +60,46 @@ const NewsCategoryCreate = () => {
         formData.append("thumbnail", thumbnail);
       }
 
-      const res = await createNewsCategory(formData);
+      const res = await updateNewsCategory(formData);
+      const data = res.data.newsCategory;
       if (res.data.code) {
         success(res.data.message)
         setForm(({
-          title: "",
-          slug: "",
-          description: "",
-          status: "active",
+          title: data.title,
+          slug: data.slug,
+          description: data.description,
+          status: data.status,
+          id: data._id
         }))
       }
     } catch (err) {
       error(err.response?.data.message)
     }
   }
+  const {slug} = useParams();
 
+    useEffect(() => {
+        const fetchApi = async () => {
+        try {
+            const res = await getBySlug(slug);
+            const data = res.data.newsCategory;
+            if(res.data.code){
+                setForm({
+                    title: data.title,
+                    slug: data.slug,
+                    description: data.description,
+                    status: data.status,
+                    id: data._id
+                })
+                setThumbnailPreview(data.thumbnail)
+                setThumbnail(data.thumbnail)
+            }
+        } catch (err) {
+            error(err.response?.data?.message)
+        }
+        }
+        fetchApi()
+    }, [])
   return (
     <div className="admin-page">
       <SEO title={"Tạo danh mục bài viết"} />
@@ -84,8 +111,8 @@ const NewsCategoryCreate = () => {
         </div>
 
         <div className="page-header__actions">
-          <button className="btn btn--primary" type="button" onClick={handleCreateNewsCategory}>
-            Lưu danh mục
+          <button className="btn btn--primary" type="button" onClick={handleUpdateNewsCategory}>
+            Cập nhật danh mục
           </button>
         </div>
       </div>
@@ -218,4 +245,4 @@ const NewsCategoryCreate = () => {
   );
 };
 
-export default NewsCategoryCreate;
+export default UpdateNewsCategory;
