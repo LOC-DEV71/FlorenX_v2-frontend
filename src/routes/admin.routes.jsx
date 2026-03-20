@@ -22,6 +22,8 @@ import NewsCategoryCreate from "../pages/admin/NewCategory/NewsCategoryCreate";
 import NewsCreate from "../pages/admin/News/NewsCreate";
 import CustomerSupportChat from "../pages/admin/Chat/index.chat";
 import UpdateNewsCategory from "../pages/admin/NewCategory/updateNewsCategory";
+import TrashPage from "../pages/admin/TrashCan/TrashPage";
+import SettingPage from "../pages/admin/Setting/SettingPage";
 
 function AdminRoutes() {
   return (
@@ -124,6 +126,13 @@ function AdminRoutes() {
 
         {/* cskh */}
         <Route path="chat" element={<CustomerSupportChat />} />
+
+
+        {/* trash can */}
+        <Route path="trashcan" element={<TrashPage />} />
+
+        {/* setting */}
+        <Route path="setting" element={<SettingPage />} />
       </Route>
     </Routes>
   );

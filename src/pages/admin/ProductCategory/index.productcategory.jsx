@@ -39,7 +39,7 @@ function Categories() {
     const fetchApi = async () => {
       try {
         setLoading(true);
-        const res = await getTreeCategory({sort});
+        const res = await getTreeCategory({ sort });
 
         if (res?.data?.code) {
           setCategories(res.data.categories || []);
@@ -56,7 +56,7 @@ function Categories() {
     };
 
     fetchApi();
-  }, [reload,sort]);
+  }, [reload, sort]);
 
   const categoryDisplayList = useMemo(() => {
     return flattenTree(categories);
@@ -173,6 +173,31 @@ function Categories() {
     }
   };
 
+  const handleDeleteOne = async (id) => {
+    try {
+      const ok = await confirm(
+        "Xoá danh mục?",
+        "Danh mục bị xoá sẽ chuyển vào thùng rác"
+      );
+
+      if (!ok) return;
+
+      const res = await changeMulti({
+        selectId: [id],
+        typeChange: "delete"
+      });
+
+      if (res.data.code) {
+        success(res.data.message);
+        setReload((prev) => !prev);
+        setSelectId((prev) => prev.filter((item) => item !== id));
+      } else {
+        error(res.data.message);
+      }
+    } catch (err) {
+      error(err.response?.data?.message || "Có lỗi xảy ra");
+    }
+  };
 
   return (
     <div className="category-page">
@@ -257,7 +282,7 @@ function Categories() {
         </select>
 
         <button className="reset" onClick={() => navigate("/admin/categories")}>
-          <MdDeleteOutline/> Xóa lọc
+          <MdDeleteOutline /> Xóa lọc
         </button>
 
         <select
@@ -411,7 +436,7 @@ function Categories() {
                   >
                     Edit
                   </Link>
-                  <button className="delete">Delete</button>
+                  <button className="delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
                 </div>
               </div>
             ))}

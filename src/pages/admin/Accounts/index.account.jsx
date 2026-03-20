@@ -32,7 +32,7 @@ function AccountAdmin() {
     try {
       const fetchApi = async () => {
 
-        const res = await getListAccount({page, limit, sort});
+        const res = await getListAccount({ page, limit, sort });
         if (res.data.code) {
           setAccounts(res.data.accounts)
         }
@@ -58,22 +58,48 @@ function AccountAdmin() {
           success(res.data.message)
         }
       }
-        const res = await changeMulti({
-          selectId,
-          typeChange
-        });
+      const res = await changeMulti({
+        selectId,
+        typeChange
+      });
 
-        if (res.data.code) {
-          success(res.data.message);
-        } else {
-          error(res.data.message);
-        }
-        setSelectId([]);
-        setTypeChange("");
-        setReload(prev => !prev);
+      if (res.data.code) {
+        success(res.data.message);
+      } else {
+        error(res.data.message);
+      }
+      setSelectId([]);
+      setTypeChange("");
+      setReload(prev => !prev);
 
     } catch (error) {
       console.log(error.response?.data.message);
+    }
+  };
+
+  const handleDeleteOne = async (id) => {
+    try {
+      const ok = await confirm(
+        "Xoá tài khoản?",
+        "Tài khoản bị xoá sẽ chuyển vào thùng rác"
+      );
+
+      if (!ok) return;
+
+      const res = await changeMulti({
+        selectId: [id],
+        typeChange: "delete"
+      });
+
+      if (res.data.code) {
+        success(res.data.message);
+        setReload((prev) => !prev);
+        setSelectId((prev) => prev.filter((item) => item !== id));
+      } else {
+        error(res.data.message);
+      }
+    } catch (err) {
+      error(err.response?.data?.message || "Có lỗi xảy ra");
     }
   };
 
@@ -119,7 +145,7 @@ function AccountAdmin() {
           <input placeholder="Tìm tên tài khoản hoặc email..." />
         </div>
 
-        <select 
+        <select
           value={sort}
           onChange={e =>
             setSearchParams({
@@ -149,7 +175,7 @@ function AccountAdmin() {
           <option value="fullname-desc">Tên Z-A</option>
         </select>
 
-        <button className="reset" 
+        <button className="reset"
           onClick={() =>
             navigate("/admin/accounts")
           }>
@@ -177,11 +203,11 @@ function AccountAdmin() {
         <div className="account-table">
           <div className="table-header">
             <div>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={accounts.length > 0 && selectId.length === accounts.length}
                 onChange={e => {
-                  if(e.target.checked){
+                  if (e.target.checked) {
                     setSelectId(accounts.map(item => item._id))
                   } else {
                     setSelectId([])
@@ -200,11 +226,11 @@ function AccountAdmin() {
           {accounts.map((item) => (
             <div className="table-row" key={item._id}>
               <div className="account-checkbox">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={selectId.includes(item._id)}
                   onChange={e => {
-                    if(e.target.checked){
+                    if (e.target.checked) {
                       setSelectId(prev => [...prev, item._id])
                     } else {
                       setSelectId(prev => prev.filter(id => id != item._id))
@@ -241,7 +267,7 @@ function AccountAdmin() {
                 <Link className="edit" to={`/admin/accounts/update/${item._id}`}>
                   Edit
                 </Link>
-                <button className="delete">Delete</button>
+                <button className="delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
               </div>
             </div>
           ))}

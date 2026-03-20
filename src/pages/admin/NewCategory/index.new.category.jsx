@@ -131,6 +131,32 @@ function NewsCategoryAdmin() {
     }
   };
 
+  const handleDeleteOne = async (id) => {
+    try {
+      const ok = await confirm(
+        "Xoá danh mục?",
+        "Danh mục bị xoá sẽ không thể khôi phục"
+      );
+
+      if (!ok) return;
+
+      const res = await changeMultiNewsCategory({
+        selectId: [id],
+        typeChange: "delete"
+      });
+
+      if (res.data.code) {
+        success(res.data.message);
+        setReload((prev) => !prev);
+        setSelectId((prev) => prev.filter((item) => item !== id));
+      } else {
+        error(res.data.message);
+      }
+    } catch (err) {
+      error(err.response?.data?.message || "Có lỗi xảy ra");
+    }
+  };
+
   return (
     <div className="category_news">
       <SEO title="Quản lý danh mục bài viết" />
@@ -291,79 +317,79 @@ function NewsCategoryAdmin() {
 
           {loading
             ? Array(limit)
-                .fill(0)
-                .map((_, i) => (
-                  <div className="category_news__table-row" key={i}>
-                    <div>
-                      <Skeleton.Avatar active shape style={{ width: 15, height: 15 }} />
-                    </div>
-                    <div className="category_news__info category_news__col-category">
-                      <Skeleton.Image active style={{ width: 50, height: 50 }} />
-                      <div>
-                        <Skeleton.Input active style={{ width: 180, marginBottom: 10 }} />
-                        <Skeleton.Input active style={{ width: 100, height: 20 }} />
-                      </div>
-                    </div>
-                    <Skeleton.Input active size="small" />
-                    <Skeleton.Input active size="small" />
-                    <Skeleton.Input active size="small" />
-                    <Skeleton.Input active size="small" />
-                    <Skeleton.Input active size="small" />
-                  </div>
-                ))
-            : categoryList.map((item) => (
-                <div className="category_news__table-row" key={item._id}>
-                  <div className="category_news__checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectId.includes(item._id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectId((prev) => [...prev, item._id]);
-                        } else {
-                          setSelectId((prev) =>
-                            prev.filter((id) => id !== item._id)
-                          );
-                        }
-                      }}
-                    />
-                  </div>
-
-                  <div className="category_news__info category_news__col-category">
-                    <div className="category_news__thumb">
-                      <img src={item.thumbnail} alt={item.title} />
-                    </div>
-                    <div>
-                      <p className="category_news__name">{item.title}</p>
-                      <span className="category_news__sub">
-                        Danh mục bài viết
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>{item.slug}</div>
-                  <div>{item?.quantity || 0}</div>
-                  <div>{formatCustom(item.createdAt)}</div>
-
+              .fill(0)
+              .map((_, i) => (
+                <div className="category_news__table-row" key={i}>
                   <div>
-                    <span className={`category_news__status ${item.status}`}>
-                      {item.status === "active"
-                        ? "Hoạt động"
-                        : "Không hoạt động"}
+                    <Skeleton.Avatar active shape style={{ width: 15, height: 15 }} />
+                  </div>
+                  <div className="category_news__info category_news__col-category">
+                    <Skeleton.Image active style={{ width: 50, height: 50 }} />
+                    <div>
+                      <Skeleton.Input active style={{ width: 180, marginBottom: 10 }} />
+                      <Skeleton.Input active style={{ width: 100, height: 20 }} />
+                    </div>
+                  </div>
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                  <Skeleton.Input active size="small" />
+                </div>
+              ))
+            : categoryList.map((item) => (
+              <div className="category_news__table-row" key={item._id}>
+                <div className="category_news__checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectId.includes(item._id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectId((prev) => [...prev, item._id]);
+                      } else {
+                        setSelectId((prev) =>
+                          prev.filter((id) => id !== item._id)
+                        );
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="category_news__info category_news__col-category">
+                  <div className="category_news__thumb">
+                    <img src={item.thumbnail} alt={item.title} />
+                  </div>
+                  <div>
+                    <p className="category_news__name">{item.title}</p>
+                    <span className="category_news__sub">
+                      Danh mục bài viết
                     </span>
                   </div>
-
-                  <div className="category_news__actions">
-                    <Link
-                      className="category_news__edit"
-                      to={`/admin/new-categories/update/${item.slug}`}
-                    >
-                      Edit
-                    </Link>
-                    <button className="category_news__delete">Delete</button>
-                  </div>
                 </div>
-              ))}
+
+                <div>{item.slug}</div>
+                <div>{item?.quantity || 0}</div>
+                <div>{formatCustom(item.createdAt)}</div>
+
+                <div>
+                  <span className={`category_news__status ${item.status}`}>
+                    {item.status === "active"
+                      ? "Hoạt động"
+                      : "Không hoạt động"}
+                  </span>
+                </div>
+
+                <div className="category_news__actions">
+                  <Link
+                    className="category_news__edit"
+                    to={`/admin/new-categories/update/${item.slug}`}
+                  >
+                    Edit
+                  </Link>
+                  <button className="category_news__delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
+                </div>
+              </div>
+            ))}
 
           {renderpagination(
             pagination,

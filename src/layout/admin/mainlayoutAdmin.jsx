@@ -20,6 +20,10 @@ import { GrArticle } from "react-icons/gr";
 import { useSelector } from "react-redux";
 import { IoMdChatboxes } from "react-icons/io";
 import { TbCategory } from "react-icons/tb";
+import { FaRegTrashCan } from "react-icons/fa6";
+import { IoSettings } from "react-icons/io5";
+import "./MainLayoutAdmin.scss";
+import Avatar from "../../assets/banner/avatar-none.jpg";
 
 
 
@@ -39,6 +43,7 @@ const MainLayoutAdmin = () => {
   const exitPermissions = permission?.includes("view_permissions");
   const exitNews = permission?.includes("view_news");
   const exitNewsCategory = permission?.includes("view_news_category");
+  const { admin } = useSelector((state) => state.auth);
   const menuItems = [
     {
       key: "1",
@@ -120,6 +125,18 @@ const MainLayoutAdmin = () => {
       icon: <IoMdChatboxes />,
       label: <Link to="/admin/chat">CSKH</Link>,
     }
+    ,
+    {
+      key: "11",
+      icon: <FaRegTrashCan />,
+      label: <Link to="/admin/trashcan">Thùng rác</Link>,
+    }
+    ,
+    {
+      key: "12",
+      icon: <IoSettings />,
+      label: <Link to="/admin/setting">Cài đặt</Link>,
+    }
 
   ];
   const {
@@ -150,6 +167,7 @@ const MainLayoutAdmin = () => {
           background: "#fff",
           borderRight: "1px solid #f0f0f0",
         }}
+        className="sider"
       >
         <div
           style={{
@@ -176,6 +194,14 @@ const MainLayoutAdmin = () => {
           defaultSelectedKeys={["1"]}
           items={menuItems}
         />
+        <div className="sider-bot">
+          <div>
+            <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
+            {collapsed ?  "" : <span>{admin.fullname}</span>}
+           
+          </div>
+          {/* <button>Đăng xuất</button> */}
+        </div>
       </Sider>
 
       {/* RIGHT SIDE */}

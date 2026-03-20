@@ -1,0 +1,172 @@
+.trash-page {
+  padding: 20px;
+  background: #f8fafc;
+  min-height: 100vh;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .trash-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .filter-left {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+
+      input,
+      select {
+        height: 42px;
+        padding: 0 14px;
+        border: 1px solid #dbe2ea;
+        border-radius: 8px;
+        outline: none;
+        background: #fff;
+      }
+
+      input {
+        min-width: 260px;
+      }
+    }
+  }
+
+  .trash-table-wrap {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .trash-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #eef2f7;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    thead {
+      background: #f1f5f9;
+
+      th {
+        color: #334155;
+        font-size: 14px;
+      }
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+  }
+
+  .type-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn,
+  .btn-action {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s;
+  }
+
+  .btn {
+    height: 40px;
+    padding: 0 14px;
+    font-weight: 600;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &.btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    &.btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    &.btn-success {
+      background: #16a34a;
+      color: white;
+    }
+
+    &.btn-outline {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+    }
+
+    &.btn-light {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+  }
+
+  .btn-action {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+
+    &.restore {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    &.delete {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+  }
+}

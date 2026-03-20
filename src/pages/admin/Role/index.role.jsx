@@ -2,7 +2,7 @@ import "./Roles.scss";
 import { BsCalendarCheck, BsCheck2Circle } from "react-icons/bs";
 import { CiWarning } from "react-icons/ci";
 import { RiErrorWarningLine } from "react-icons/ri";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CgMathPlus } from "react-icons/cg";
 import { Statistic, Skeleton } from "antd";
 import CountUp from "react-countup";
@@ -10,7 +10,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { MdDeleteOutline } from "react-icons/md";
 import SEO from "../../../utils/SEO";
 import { useEffect, useState } from "react";
-import { confirm, error } from "../../../utils/notift";
+import { confirm, error, success } from "../../../utils/notift";
 import { changeMulti, getListRolesIndex } from "../../../services/admin/roles.admin.service";
 
 const formatter = (value) => (
@@ -20,57 +20,111 @@ const formatter = (value) => (
 function Roles() {
     const [loading, setLoading] = useState(true);
     const [roles, setRoles] = useState([]);
+    const [summary, setSummary] = useState({
+        totalRoles: 0,
+        activeRoles: 0,
+        inactiveRoles: 0,
+        systemRoles: 0,
+    });
 
-
-    const [pagination, setPagination] = useState([])
+    const [pagination, setPagination] = useState([]);
     const [typeChange, setTypeChange] = useState("");
-    const [selectId, setSelectId] = useState([])
+    const [selectId, setSelectId] = useState([]);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [reload, setReload] = useState(false)
-    const navigate = useNavigate();
+    const [reload, setReload] = useState(false);
+
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 5;
     const sort = searchParams.get("sort") || "";
+
     useEffect(() => {
-        try {
-            const fetchApi = async () => {
-                const res = await getListRolesIndex({sort, limit, page});
+        const fetchApi = async () => {
+            try {
+                setLoading(true);
+
+                const res = await getListRolesIndex({ sort, limit, page });
+
                 if (res.data.code) {
-                    setRoles(res.data.roles)
+                    setRoles(res.data.roles || []);
+                    setSummary(
+                        res.data.summary || {
+                            totalRoles: 0,
+                            activeRoles: 0,
+                            inactiveRoles: 0,
+                            systemRoles: 0,
+                        }
+                    );
                 }
+            } catch (err) {
+                error(err.response?.data?.message || "Có lỗi xảy ra!");
+            } finally {
+                setLoading(false);
             }
-            fetchApi()
-        } catch (err) {
-            error(err.response?.data.message)
-        } finally {
-            setLoading(false)
-        }
-    }, [reload, sort, limit, page])
+        };
 
-
+        fetchApi();
+    }, [reload, sort, limit, page]);
 
     const handleChangeMulti = async () => {
         try {
+            if (!typeChange) {
+                error("Vui lòng chọn hành động!");
+                return;
+            }
+
+            if (selectId.length === 0) {
+                error("Vui lòng chọn ít nhất 1 role!");
+                return;
+            }
 
             if (typeChange === "delete") {
                 const ok = await confirm(
-                    "Xoá sản phẩm?",
-                    "Sản phẩm bị xóa sẽ chuyển vào thùng rác"
+                    "Xoá role?",
+                    "Các role bị xóa sẽ chuyển vào thùng rác"
                 );
 
                 if (!ok) return;
-                const res = await changeMulti({ selectId, typeChange })
+
+                const res = await changeMulti({ selectId, typeChange });
+
                 if (res.data.code) {
-                    success(res.data.message)
+                    success(res.data.message);
+                } else {
+                    error(res.data.message);
                 }
             }
 
             setSelectId([]);
             setTypeChange("");
             setReload(prev => !prev);
+        } catch (err) {
+            error(err.response?.data?.message || "Có lỗi xảy ra!");
+        }
+    };
 
-        } catch (error) {
-            console.log(error.response?.data.message);
+    const handleDeleteOne = async (id) => {
+        try {
+            const ok = await confirm(
+                "Xoá role?",
+                "Role bị xoá sẽ chuyển vào thùng rác"
+            );
+
+            if (!ok) return;
+
+            const res = await changeMulti({
+                selectId: [id],
+                typeChange: "delete"
+            });
+
+            if (res.data.code) {
+                success(res.data.message);
+                setReload((prev) => !prev);
+                setSelectId((prev) => prev.filter((item) => item !== id));
+            } else {
+                error(res.data.message);
+            }
+        } catch (err) {
+            error(err.response?.data?.message || "Có lỗi xảy ra");
         }
     };
 
@@ -78,26 +132,43 @@ function Roles() {
         <div className="product-page">
             <h2 className="product-page__title">Quản Lý nhóm quyền</h2>
             <SEO title="Quản lý nhóm quyền" />
+
             {/* Stats */}
             <div className="product-stats">
                 <div className="stat-card stat-total">
                     <p><BsCalendarCheck /> Total Roles</p>
-                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={12} formatter={formatter} />}
+                    {loading ? (
+                        <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+                    ) : (
+                        <Statistic value={summary.totalRoles} formatter={formatter} />
+                    )}
                 </div>
 
                 <div className="stat-card stat-active">
                     <p><BsCheck2Circle /> Active Roles</p>
-                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={8} formatter={formatter} />}
+                    {loading ? (
+                        <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+                    ) : (
+                        <Statistic value={summary.activeRoles} formatter={formatter} />
+                    )}
                 </div>
 
                 <div className="stat-card stat-out">
                     <p><RiErrorWarningLine /> Inactive Roles</p>
-                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={4} formatter={formatter} />}
+                    {loading ? (
+                        <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+                    ) : (
+                        <Statistic value={summary.inactiveRoles} formatter={formatter} />
+                    )}
                 </div>
 
                 <div className="stat-card stat-low">
                     <p><CiWarning /> System Roles</p>
-                    {loading ? <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} /> : <Statistic value={3} formatter={formatter} />}
+                    {loading ? (
+                        <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
+                    ) : (
+                        <Statistic value={summary.systemRoles} formatter={formatter} />
+                    )}
                 </div>
             </div>
 
@@ -113,11 +184,14 @@ function Roles() {
                 </select>
 
                 <select
-                    onChange={e => setSearchParams({
-                        page: 1,
-                        limit,
-                        sort: e.target.value
-                    })}
+                    value={sort}
+                    onChange={e =>
+                        setSearchParams({
+                            page: 1,
+                            limit,
+                            sort: e.target.value
+                        })
+                    }
                 >
                     <option value="">-- Sắp xếp theo --</option>
                     <option value="title-asc">Sắp xếp theo tên A-Z</option>
@@ -126,7 +200,16 @@ function Roles() {
                     <option value="slug-desc">Sắp xếp theo slug Z-A</option>
                 </select>
 
-                <button className="reset">
+                <button
+                    className="reset"
+                    onClick={() =>
+                        setSearchParams({
+                            page: 1,
+                            limit: 5,
+                            sort: ""
+                        })
+                    }
+                >
                     <MdDeleteOutline /> Xóa lọc
                 </button>
 
@@ -134,13 +217,15 @@ function Roles() {
                     onChange={e => setTypeChange(e.target.value)}
                     value={typeChange}
                 >
-                    <option value="" >-- Chọn hành động --</option>
+                    <option value="">-- Chọn hành động --</option>
                     <option value="delete">Xóa nhiều role</option>
                 </select>
 
-                <button className="activity" onClick={handleChangeMulti}>Áp dụng</button>
+                <button className="activity" onClick={handleChangeMulti}>
+                    Áp dụng
+                </button>
 
-                <Link className="create" to={"/admin/roles/create"}>
+                <Link className="create" to="/admin/roles/create">
                     <CgMathPlus /> Tạo mới
                 </Link>
             </div>
@@ -155,9 +240,9 @@ function Roles() {
                                 checked={roles.length > 0 && roles.length === selectId.length}
                                 onChange={e => {
                                     if (e.target.checked) {
-                                        setSelectId(roles.map(item => item._id))
+                                        setSelectId(roles.map(item => item._id));
                                     } else {
-                                        setSelectId([])
+                                        setSelectId([]);
                                     }
                                 }}
                             />
@@ -194,9 +279,9 @@ function Roles() {
                                         checked={selectId.includes(item._id)}
                                         onChange={e => {
                                             if (e.target.checked) {
-                                                setSelectId(prev => [...prev, item._id])
+                                                setSelectId(prev => [...prev, item._id]);
                                             } else {
-                                                setSelectId(prev => prev.filter(i => i != item._id))
+                                                setSelectId(prev => prev.filter(i => i !== item._id));
                                             }
                                         }}
                                     />
@@ -208,19 +293,23 @@ function Roles() {
                                     </div>
                                 </div>
 
-                                <div className="role-description" dangerouslySetInnerHTML={{ __html: item.description }} />
+                                <div
+                                    className="role-description"
+                                    dangerouslySetInnerHTML={{ __html: item.description }}
+                                />
                                 <div>{item.slug}</div>
 
                                 <div className="actions">
-                                    <Link className="edit" to={`/admin/roles/update/${item.slug}`}>Edit</Link>
+                                    <Link className="edit" to={`/admin/roles/update/${item.slug}`}>
+                                        Edit
+                                    </Link>
                                 </div>
 
                                 <div className="actions">
-                                    <button className="delete">Delete</button>
+                                    <button className="delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
                                 </div>
                             </div>
-                        ))
-                    }
+                        ))}
                 </div>
             </div>
         </div>

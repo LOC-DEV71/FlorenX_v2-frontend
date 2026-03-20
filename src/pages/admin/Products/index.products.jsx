@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { renderpagination } from "../../../utils/pagination";
 import { Skeleton } from "antd";
-import { error, success, confirm  } from "../../../utils/notift";
+import { error, success, confirm } from "../../../utils/notift";
 import { getListCategory } from "../../../services/admin/product.category.admin";
 import { renderCategoryOptions } from "../../../utils/buildTree";
 const formatter = (value) => (
@@ -75,8 +75,8 @@ function Products() {
                 );
 
                 if (!ok) return;
-                const res = await changeMulti({selectId, typeChange})
-                if(res.data.code){
+                const res = await changeMulti({ selectId, typeChange })
+                if (res.data.code) {
                     success(res.data.message)
                 }
             }
@@ -128,7 +128,7 @@ function Products() {
         try {
             const fetchApi = async () => {
                 const res = await getListCategory();
-                if(res.data.code){
+                if (res.data.code) {
                     setCategory(res.data.categories)
                 }
             }
@@ -136,7 +136,33 @@ function Products() {
         } catch (err) {
             error(err.response?.data?.message)
         }
-    }, [])
+    }, []);
+
+    const handleDeleteOne = async (id) => {
+        try {
+            const ok = await confirm(
+                "Xoá sản phẩm?",
+                "Sản phẩm bị xoá sẽ chuyển vào thùng rác"
+            );
+
+            if (!ok) return;
+
+            const res = await changeMulti({
+                selectId: [id],
+                typeChange: "delete"
+            });
+
+            if (res.data.code) {
+                success(res.data.message);
+                setReload((prev) => !prev);
+                setSelectId((prev) => prev.filter((item) => item !== id));
+            } else {
+                error(res.data.message);
+            }
+        } catch (err) {
+            error(err.response?.data?.message || "Có lỗi xảy ra");
+        }
+    };
 
     return (
 
@@ -353,7 +379,7 @@ function Products() {
 
                                 <div className="actions">
                                     <Link className="edit" to={`/admin/products/update/${item.slug}`}>Edit</Link>
-                                    <button className="delete">Delete</button>
+                                    <button className="delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
                                 </div>
 
                             </div>
