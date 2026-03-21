@@ -1,5 +1,6 @@
 import SEO from "../../../utils/SEO"
 import HeroSection from "./HeroSection"
+import SaleSection from "./SaleSection"
 
 function Home(){
     
@@ -10,6 +11,7 @@ function Home(){
                 description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
             />
             <HeroSection/>
+            <SaleSection/>
         </>
     )
 }

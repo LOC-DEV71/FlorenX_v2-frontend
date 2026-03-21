@@ -39,7 +39,7 @@ function MainLayout() {
   }, []);
 
   return (
-    <>
+    <>  
       <Header setOpenMenu={setOpenMenu} />
 
       {openMenu && (

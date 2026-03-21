@@ -1,269 +1,347 @@
-.setting-page {
-  .page-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 24px;
+.form-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
-    h2 {
-      margin: 0 0 6px;
-      font-size: 28px;
-      font-weight: 700;
-      color: #1f1f1f;
+  label {
+    font-weight: 600;
+  }
+
+  input,
+  select,
+  textarea {
+    height: 36px;
+    border-radius: 5px;
+    border: 1px solid #d9d9d9;
+    outline: none;
+    padding: 0 15px;
+    background: white;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  img {
+    width: 100%;
+    max-width: 220px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  label[id="file"] {
+    border: 1px dashed blue;
+    width: 150px;
+    height: 150px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    background: white;
+
+    .des {
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+body {
+  position: relative;
+}
+
+.setting {
+  &_top {
+    margin-bottom: 20px;
+    background: #e5e5e5;
+    padding: 20px;
+    border-radius: 8px;
+
+    span {
+      color: rgb(0, 87, 226);
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 10px 0;
     }
 
     p {
       margin: 0;
-      color: #8c8c8c;
-      font-size: 14px;
+      padding: 0;
+    }
+  }
+
+  &_bot {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+
+    &-left {
+      &--identify,
+      &--basic,
+      &--saleBanner,
+      &--hero,
+      &--slider {
+        margin-bottom: 20px;
+        background: #e5e5e5;
+        border-radius: 8px;
+        padding: 20px;
+
+        > span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: black;
+          font-weight: 800;
+
+          svg {
+            color: rgb(0, 87, 226);
+            font-size: 20px;
+          }
+        }
+      }
+
+      &--identify,
+      &--saleBanner {
+        .main {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-top: 15px;
+        }
+      }
+
+      &--basic {
+        .main {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-top: 15px;
+
+          .form-input {
+            display: grid;
+            grid-template-columns: 170px 1fr;
+            align-items: center;
+            gap: 15px;
+          }
+        }
+      }
+
+      &--hero,
+      &--slider {
+        .main-column {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-top: 15px;
+        }
+      }
     }
 
-    .save-btn {
-      height: 42px;
-      padding: 0 18px;
+    &-right {
+      &--feature {
+        background: #e5e5e5;
+        border-radius: 8px;
+        padding: 20px;
+
+        h3 {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: black;
+          font-weight: 800;
+          margin-top: 0;
+
+          svg {
+            color: rgb(0, 87, 226);
+            font-size: 20px;
+          }
+        }
+
+        .main {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .form-feature {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: white;
+          padding: 12px 14px;
+          border-radius: 8px;
+
+          span {
+            font-weight: 600;
+            font-size: 16px;
+
+            p {
+              color: gray;
+              margin: 4px 0 0;
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &-change {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    background: #f5f5f5;
+    width: fit-content;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 10;
+
+    button {
+      background: #3d2fc4;
+      color: white;
+      font-size: 16px;
+      padding: 10px 16px;
+      border-radius: 15px;
       border: none;
-      border-radius: 10px;
-      background: #1677ff;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
 
       &:hover {
-        background: #4096ff;
-      }
-    }
-  }
-
-  .setting-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-
-  .setting-card {
-    padding: 22px;
-    background: #fff;
-    border: 1px solid #f0f0f0;
-    border-radius: 18px;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-
-    h3 {
-      margin: 0 0 20px;
-      font-size: 18px;
-      font-weight: 700;
-      color: #222;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 18px;
-
-      &:last-child {
-        margin-bottom: 0;
+        background: #271e80;
       }
 
-      label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
-      }
-
-      input,
-      textarea,
-      select {
-        width: 100%;
-        min-height: 44px;
-        padding: 10px 14px;
-        border: 1px solid #d9d9d9;
-        border-radius: 10px;
-        outline: none;
-        font-size: 14px;
-        background: #fff;
-        transition: 0.2s;
-
-        &:focus {
-          border-color: #1677ff;
-          box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.08);
-        }
-      }
-
-      textarea {
-        resize: none;
-      }
-    }
-
-    .upload-box {
-      height: 44px;
-      border: 1px dashed #bfbfbf;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      padding: 0 14px;
-      color: #8c8c8c;
-      background: #fafafa;
-      cursor: pointer;
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 24px;
-
-      label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-        cursor: pointer;
-      }
-    }
-
-    .color-list {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .color-item {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 3px solid transparent;
-
-        &.active {
-          box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
-        }
-
-        &.blue {
-          background: #1677ff;
-        }
-
-        &.green {
-          background: #16a34a;
-        }
-
-        &.orange {
-          background: #f97316;
-        }
-
-        &.purple {
-          background: #7c3aed;
-        }
-      }
-    }
-
-    .switch-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      span {
-        font-size: 14px;
-        color: #444;
-      }
-    }
-
-    .fake-switch {
-      position: relative;
-      width: 50px;
-      height: 28px;
-      border-radius: 999px;
-      background: #d9d9d9;
-      transition: 0.2s;
-
-      &::after {
-        content: "";
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        width: 20px;
-        height: 20px;
-        background: #fff;
-        border-radius: 50%;
-        transition: 0.2s;
-      }
-
-      &.active {
-        background: #1677ff;
-
-        &::after {
-          left: 26px;
-        }
+      &:active {
+        background: #191162;
       }
     }
   }
 }
-.setting-page {
-  .banner-setting-card {
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+
+.isActive {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.dynamic-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #ddd;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+
+  h4 {
+    margin: 0;
+  }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr;
+  gap: 15px;
+  align-items: start;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.btn-add,
+.btn-delete {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-add {
+  background: #3d2fc4;
+  color: white;
+  align-self: flex-start;
+
+  &:hover {
+    background: #2d2197;
+  }
+}
+
+.btn-delete {
+  background: #ffe3e3;
+  color: #c92a2a;
+
+  &:hover {
+    background: #ffc9c9;
+  }
+}
+
+@media (max-width: 1200px) {
+  .setting {
+    &_bot {
+      grid-template-columns: 1fr;
     }
+  }
 
-    .banner-preview {
-      margin-top: 8px;
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 
-      .preview-label {
-        display: inline-block;
-        margin-bottom: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
-      }
-
-      .preview-box {
-        min-height: 220px;
-        border-radius: 16px;
-        overflow: hidden;
-        background: linear-gradient(135deg, #0f172a, #1677ff);
-        padding: 28px;
-        display: flex;
-        align-items: center;
-      }
-
-      .preview-content {
-        max-width: 420px;
-        color: #fff;
-
-        .preview-tag {
-          margin: 0 0 10px;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 1.5px;
-          color: #dbeafe;
+@media (max-width: 768px) {
+  .setting {
+    &_bot {
+      &-left {
+        &--identify,
+        &--basic,
+        &--saleBanner {
+          .main {
+            grid-template-columns: 1fr !important;
+          }
         }
 
-        h4 {
-          margin: 0 0 12px;
-          font-size: 28px;
-          font-weight: 700;
-          line-height: 1.3;
-        }
-
-        p {
-          margin: 0 0 18px;
-          font-size: 14px;
-          line-height: 1.6;
-          color: rgba(255, 255, 255, 0.9);
-        }
-
-        button {
-          height: 40px;
-          padding: 0 18px;
-          border: none;
-          border-radius: 10px;
-          background: #fff;
-          color: #1677ff;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
+        &--basic {
+          .main {
+            .form-input {
+              grid-template-columns: 1fr;
+            }
+          }
         }
       }
     }
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-change {
+    width: 100%;
+    justify-content: space-between;
   }
 }

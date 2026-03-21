@@ -6,7 +6,7 @@ const settingService = {
     return res.data;
   },
 
-  update: async (formData) => {
+  update: async (formData) => { 
     const res = await axiosAdmin.patch("/settings/update", formData, {
       headers: {
         "Content-Type": "multipart/form-data"

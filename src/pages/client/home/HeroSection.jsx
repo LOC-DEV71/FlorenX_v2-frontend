@@ -1,28 +1,75 @@
-import { Link } from "react-router-dom";
-import banner from "../../../assets/banner/banner2.png";
 import "./HeroSection.scss";
-import TypingAnimation from "../../../utils/typing-animation";
+import { Carousel, Skeleton } from "antd";
+import { useSelector } from "react-redux";
+import Link from "antd/es/typography/Link";
 
-function HeroSection(){
+function HeroSection() {
+    const settingState = useSelector((state) => state.setting);
+    const setting = settingState?.settings;
+    const loading = settingState?.loading;
+
+    const banner = setting?.section_hero || [];
+    const sectionHeroSlider = setting?.section_hero_slider || [];
+
+    const bannerBottom = banner.slice(0, 2);
+    const bannerRight = banner.slice(2);
+
     return (
-        <div className="hero_section">
-            <div className="hero_section_left">
-                <div className="hero_section_left-top">
-                    <p className="title">CÔNG NGHỆ TƯƠNG LAI</p>
-                    <h1>
-                        <TypingAnimation title={`Nâng Tầm Trải Nghiệm Kỹ Thuật Số Của Bạn`}/>
-                    </h1>
-                    <p>Giải phóng hiệu năng tối đa với phần cứng thế hệ mới của chúng tôi. Được thiết kế dành cho người sáng tạo, game thủ và những người có tầm nhìn.</p>
+        <section className="hero_section">
+            <div className="hero_grid">
+                <div className="hero_grid-left">
+                    <div className="top">
+                        <Carousel arrows infinite={false} autoplay>
+                            {loading ? (
+                                <>
+                                    <Skeleton.Node active style={{ width: "100%", height: 180 }} />
+                                </>
+                            ) : (
+                                sectionHeroSlider.map((item) => (
+                                    <Link className="carousel_item" key={item._id}>
+                                        <img src={item.image} alt={item.title || item.image} />
+                                    </Link>
+                                ))
+                            )}
+                        </Carousel>
+                    </div>
+
+                    <div className="bot">
+
+
+                        {loading ? (
+                            <>
+                                <Skeleton.Node active style={{ width: "100%", height: 180 }} />
+                                <Skeleton.Node active style={{ width: "100%", height: 180 }} />
+                            </>
+                        ) : (
+                            bannerBottom.map((item) => (
+                                <Link className="banner_item" key={item._id}>
+                                    <img src={item.image} alt={item.title || ""} />
+                                </Link>
+                            ))
+                        )}
+                    </div>
                 </div>
-                <div className="hero_section_left-bot" >
-                    <Link>Bắt đầu mua hàng</Link>
+
+                <div className="hero_grid-right">
+                    {loading ? (
+                        <>
+                            <Skeleton.Node active style={{ width: "100%", height: 180 }} />
+                            <Skeleton.Node active style={{ width: "100%", height: 180 }} />
+                            <Skeleton.Node active style={{ width: "100%", height: 180 }} />
+                        </>
+                    ) : (
+                        bannerRight.map((item) => (
+                            <Link className="right_item" key={item._id}>
+                                <img src={item.image} alt={item.title || ""} />
+                            </Link>
+                        ))
+                    )}
                 </div>
             </div>
-            <div className="hero_section_right">
-                <img src={banner} alt="" />
-            </div>
-        </div>
-    )
+        </section>
+    );
 }
 
-export default HeroSection
+export default HeroSection;

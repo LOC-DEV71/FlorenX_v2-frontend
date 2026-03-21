@@ -1,17 +1,18 @@
 import "./footer.scss";
-import logo from "../../../assets/logo/logo_main.png";
 import {HashLink} from "react-router-hash-link";
+import { useSelector } from "react-redux";
 
 function Footer() {
+    const settings = useSelector((state) => state.setting.settings);
     return (
         <footer className="footer_layout_client">
 
             <div className="footer_layout_client-top">
 
                 <div className="footer_layout_client-logo">
-                    <img src={logo} alt="logo" />
+                    <img src={settings?.logo} alt="logo" />
                     <p>
-                        FlorenX - Nền tảng công nghệ và gaming gear chất lượng cao.
+                        {settings?.websiteName} - Nền tảng công nghệ và gaming gear chất lượng cao.
                     </p>
                 </div>
 
@@ -42,7 +43,7 @@ function Footer() {
             </div>
 
             <div className="footer_layout_client-bottom">
-                <p>© 2026 Veltrix Gear. All rights reserved.</p>
+                <p>© 2026 {settings?.websiteName}. All rights reserved.</p>
             </div>
 
         </footer>

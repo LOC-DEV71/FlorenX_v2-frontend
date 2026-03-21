@@ -5,9 +5,11 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getMeAdmin } from "./services/admin/auth.admin.service";
 import { login, logout, setLoading } from "./redux/authSlice";
+import settingService from "./services/admin/setting.service";
+import { setSettings } from "./redux/settingSlice";
 
 function App() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); 
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -26,6 +28,20 @@ function App() {
     };
 
     checkLogin();
+  }, [dispatch]);
+
+
+   useEffect(() => {
+    const fetchSetting = async () => {
+      try {
+        const res = await settingService.getDetail();
+        dispatch(setSettings(res.data));
+      } catch (err) {
+        console.error("Load settings failed", err);
+      }
+    };
+
+    fetchSetting();
   }, [dispatch]);
 
   return (

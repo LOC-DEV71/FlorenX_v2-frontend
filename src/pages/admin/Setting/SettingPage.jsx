@@ -1,56 +1,87 @@
-import React, { useEffect, useState } from "react";
+import { RiListSettingsLine } from "react-icons/ri";
+import { GiPlatform } from "react-icons/gi";
+import { MdOutlineFeaturedPlayList } from "react-icons/md";
+import { IoIosColorPalette } from "react-icons/io";
+import { MdDriveFolderUpload } from "react-icons/md";
+import { MdOutlineViewCarousel } from "react-icons/md";
+import { BsImages } from "react-icons/bs";
+import { Switch } from "antd";
 import "./SettingPage.scss";
+import { useEffect, useState } from "react";
 import settingService from "../../../services/admin/setting.service";
-import { confirm, error, success } from "../../../utils/notift";
+import { error, success } from "../../../utils/notift";
 
-const SettingPage = () => {
+const defaultForm = {
+  websiteName: "",
+  contactEmail: "",
+  contactPhone: "",
+  address: "",
+
+  themeColor: "blue",
+  themeMode: "light",
+
+  logo: "",
+  favicon: "",
+
+  postPerPage: 10,
+  autoApprovePost: false,
+  showFeaturedPost: false,
+
+  sessionTimeout: 60,
+  twoFactorAuth: false,
+  strangeLoginAlert: false,
+
+  saleBanner: {
+    isActive: false,
+    title: "",
+    shortDescription: "",
+    discountText: "",
+    redirectLink: "",
+    desktopImage: "",
+    mobileImage: "",
+    startDate: "",
+    endDate: ""
+  },
+
+  section_hero: [
+    {
+      image: "",
+      title: "",
+      desc: "",
+      tag: "",
+      link: ""
+    }
+  ],
+
+  section_hero_slider: [
+    {
+      image: "",
+      title: "",
+      tag: "",
+      link: ""
+    }
+  ]
+};
+
+function SettingPage() {
+  const [form, setForm] = useState(defaultForm);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    websiteName: "",
-    contactEmail: "",
-    contactPhone: "",
-    address: "",
+  const normalizeDate = (dateValue) => {
+    if (!dateValue) return "";
+    try {
+      return new Date(dateValue).toISOString().split("T")[0];
+    } catch {
+      return "";
+    }
+  };
 
-    themeColor: "blue",
-    themeMode: "light",
-
-    postPerPage: 10,
-    autoApprovePost: false,
-    showFeaturedPost: false,
-
-    sessionTimeout: 60,
-    twoFactorAuth: false,
-    strangeLoginAlert: false,
-
-    saleBannerIsActive: false,
-    saleBannerTitle: "",
-    saleBannerShortDescription: "",
-    saleBannerDiscountText: "",
-    saleBannerRedirectLink: "",
-    saleBannerStartDate: "",
-    saleBannerEndDate: "",
-
-    logoPreview: "",
-    faviconPreview: "",
-    bannerDesktopPreview: "",
-    bannerMobilePreview: ""
-  });
-
-  const [files, setFiles] = useState({
-    logo: null,
-    favicon: null,
-    bannerDesktop: null,
-    bannerMobile: null
-  });
-
-  const fetchSetting = async () => {
+  const fetchDetail = async () => {
     try {
       setLoading(true);
       const res = await settingService.getDetail();
-      const data = res?.data;
-
-      if (!data) return;
+      const data = res?.data || {};
 
       setForm({
         websiteName: data.websiteName || "",
@@ -61,492 +92,815 @@ const SettingPage = () => {
         themeColor: data.themeColor || "blue",
         themeMode: data.themeMode || "light",
 
-        postPerPage: data.postPerPage || 10,
-        autoApprovePost: data.autoApprovePost || false,
-        showFeaturedPost: data.showFeaturedPost || false,
+        logo: data.logo || "",
+        favicon: data.favicon || "",
 
-        sessionTimeout: data.sessionTimeout || 60,
-        twoFactorAuth: data.twoFactorAuth || false,
-        strangeLoginAlert: data.strangeLoginAlert || false,
+        postPerPage: data.postPerPage ?? 10,
+        autoApprovePost: data.autoApprovePost ?? false,
+        showFeaturedPost: data.showFeaturedPost ?? false,
 
-        saleBannerIsActive: data.saleBanner?.isActive || false,
-        saleBannerTitle: data.saleBanner?.title || "",
-        saleBannerShortDescription: data.saleBanner?.shortDescription || "",
-        saleBannerDiscountText: data.saleBanner?.discountText || "",
-        saleBannerRedirectLink: data.saleBanner?.redirectLink || "",
-        saleBannerStartDate: data.saleBanner?.startDate
-          ? new Date(data.saleBanner.startDate).toISOString().split("T")[0]
-          : "",
-        saleBannerEndDate: data.saleBanner?.endDate
-          ? new Date(data.saleBanner.endDate).toISOString().split("T")[0]
-          : "",
+        sessionTimeout: data.sessionTimeout ?? 60,
+        twoFactorAuth: data.twoFactorAuth ?? false,
+        strangeLoginAlert: data.strangeLoginAlert ?? false,
 
-        logoPreview: data.logo || "",
-        faviconPreview: data.favicon || "",
-        bannerDesktopPreview: data.saleBanner?.desktopImage || "",
-        bannerMobilePreview: data.saleBanner?.mobileImage || ""
+        saleBanner: {
+          isActive: data.saleBanner?.isActive ?? false,
+          title: data.saleBanner?.title || "",
+          shortDescription: data.saleBanner?.shortDescription || "",
+          discountText: data.saleBanner?.discountText || "",
+          redirectLink: data.saleBanner?.redirectLink || "",
+          desktopImage: data.saleBanner?.desktopImage || "",
+          mobileImage: data.saleBanner?.mobileImage || "",
+          startDate: normalizeDate(data.saleBanner?.startDate),
+          endDate: normalizeDate(data.saleBanner?.endDate)
+        },
+
+        section_hero:
+          data.section_hero?.length > 0
+            ? data.section_hero.map((item) => ({
+                image: item.image || "",
+                title: item.title || "",
+                desc: item.desc || "",
+                tag: item.tag || "",
+                link: item.link || ""
+              }))
+            : [
+                {
+                  image: "",
+                  title: "",
+                  desc: "",
+                  tag: "",
+                  link: ""
+                }
+              ],
+
+        section_hero_slider:
+          data.section_hero_slider?.length > 0
+            ? data.section_hero_slider.map((item) => ({
+                image: item.image || "",
+                title: item.title || "",
+                tag: item.tag || "",
+                link: item.link || ""
+              }))
+            : [
+                {
+                  image: "",
+                  title: "",
+                  tag: "",
+                  link: ""
+                }
+              ]
       });
-    } catch (err) {
-      console.error("Lỗi lấy settings:", err);
-      error("Không thể tải dữ liệu cài đặt!");
+    } catch (error) {
+      console.error("Get setting detail error:", error);
+      alert("Không thể tải cài đặt");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSetting();
+    fetchDetail();
   }, []);
 
+  const onChangeSwitch = (field, checked) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: checked
+    }));
+  };
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { id, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [id]: value
     }));
   };
 
-  const handleColorChange = (color) => {
+  const handleSaleBannerChange = (e) => {
+    const { id, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      themeColor: color
+      saleBanner: {
+        ...prev.saleBanner,
+        [id]: value
+      }
     }));
   };
 
-  const handleFileChange = (e) => {
-    const { name, files: inputFiles } = e.target;
-    const file = inputFiles?.[0];
+  const handleSaleBannerSwitch = (checked) => {
+    setForm((prev) => ({
+      ...prev,
+      saleBanner: {
+        ...prev.saleBanner,
+        isActive: checked
+      }
+    }));
+  };
+
+  const handleFileChange = (e, field) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    setFiles((prev) => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: file
+      [field]: file
     }));
+  };
 
-    const previewUrl = URL.createObjectURL(file);
+  const handleSaleBannerFile = (e, field) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (name === "logo") {
-      setForm((prev) => ({ ...prev, logoPreview: previewUrl }));
-    }
-    if (name === "favicon") {
-      setForm((prev) => ({ ...prev, faviconPreview: previewUrl }));
-    }
-    if (name === "bannerDesktop") {
-      setForm((prev) => ({ ...prev, bannerDesktopPreview: previewUrl }));
-    }
-    if (name === "bannerMobile") {
-      setForm((prev) => ({ ...prev, bannerMobilePreview: previewUrl }));
-    }
+    setForm((prev) => ({
+      ...prev,
+      saleBanner: {
+        ...prev.saleBanner,
+        [field]: file
+      }
+    }));
+  };
+
+  const handleHeroChange = (index, field, value) => {
+    const updated = [...form.section_hero];
+    updated[index][field] = value;
+
+    setForm((prev) => ({
+      ...prev,
+      section_hero: updated
+    }));
+  };
+
+  const handleHeroImageChange = (e, index) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const updated = [...form.section_hero];
+    updated[index].image = file;
+    updated[index].hasNewImage = true;
+
+    setForm((prev) => ({
+      ...prev,
+      section_hero: updated
+    }));
+  };
+
+  const addHeroItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      section_hero: [
+        ...prev.section_hero,
+        {
+          image: "",
+          title: "",
+          desc: "",
+          tag: "",
+          link: ""
+        }
+      ]
+    }));
+  };
+
+  const removeHeroItem = (index) => {
+    const updated = form.section_hero.filter((_, i) => i !== index);
+    setForm((prev) => ({
+      ...prev,
+      section_hero: updated.length
+        ? updated
+        : [
+            {
+              image: "",
+              title: "",
+              desc: "",
+              tag: "",
+              link: ""
+            }
+          ]
+    }));
+  };
+
+  const handleSliderChange = (index, field, value) => {
+    const updated = [...form.section_hero_slider];
+    updated[index][field] = value;
+
+    setForm((prev) => ({
+      ...prev,
+      section_hero_slider: updated
+    }));
+  };
+
+  const handleSliderImageChange = (e, index) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const updated = [...form.section_hero_slider];
+    updated[index].image = file;
+    updated[index].hasNewImage = true;
+
+    setForm((prev) => ({
+      ...prev,
+      section_hero_slider: updated
+    }));
+  };
+
+  const addSliderItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      section_hero_slider: [
+        ...prev.section_hero_slider,
+        {
+          image: "",
+          title: "",
+          tag: "",
+          link: ""
+        }
+      ]
+    }));
+  };
+
+  const removeSliderItem = (index) => {
+    const updated = form.section_hero_slider.filter((_, i) => i !== index);
+    setForm((prev) => ({
+      ...prev,
+      section_hero_slider: updated.length
+        ? updated
+        : [
+            {
+              image: "",
+              title: "",
+              tag: "",
+              link: ""
+            }
+          ]
+    }));
   };
 
   const handleSubmit = async () => {
-    const isConfirm = await confirm("Bạn có chắc muốn lưu thay đổi cài đặt không?");
-    if (!isConfirm) return;
-
     try {
-      setLoading(true);
+      setSubmitting(true);
 
       const formData = new FormData();
 
-      formData.append("websiteName", form.websiteName);
-      formData.append("contactEmail", form.contactEmail);
-      formData.append("contactPhone", form.contactPhone);
-      formData.append("address", form.address);
+      formData.append("websiteName", form.websiteName || "");
+      formData.append("contactEmail", form.contactEmail || "");
+      formData.append("contactPhone", form.contactPhone || "");
+      formData.append("address", form.address || "");
 
-      formData.append("themeColor", form.themeColor);
-      formData.append("themeMode", form.themeMode);
+      formData.append("themeColor", form.themeColor || "blue");
+      formData.append("themeMode", form.themeMode || "light");
 
-      formData.append("postPerPage", form.postPerPage);
+      formData.append("postPerPage", form.postPerPage ?? 10);
       formData.append("autoApprovePost", form.autoApprovePost);
       formData.append("showFeaturedPost", form.showFeaturedPost);
 
-      formData.append("sessionTimeout", form.sessionTimeout);
+      formData.append("sessionTimeout", form.sessionTimeout ?? 60);
       formData.append("twoFactorAuth", form.twoFactorAuth);
       formData.append("strangeLoginAlert", form.strangeLoginAlert);
 
-      formData.append("saleBannerIsActive", form.saleBannerIsActive);
-      formData.append("saleBannerTitle", form.saleBannerTitle);
+      formData.append("saleBannerIsActive", form.saleBanner.isActive);
+      formData.append("saleBannerTitle", form.saleBanner.title || "");
       formData.append(
         "saleBannerShortDescription",
-        form.saleBannerShortDescription
+        form.saleBanner.shortDescription || ""
       );
-      formData.append("saleBannerDiscountText", form.saleBannerDiscountText);
-      formData.append("saleBannerRedirectLink", form.saleBannerRedirectLink);
-      formData.append("saleBannerStartDate", form.saleBannerStartDate);
-      formData.append("saleBannerEndDate", form.saleBannerEndDate);
+      formData.append(
+        "saleBannerDiscountText",
+        form.saleBanner.discountText || ""
+      );
+      formData.append(
+        "saleBannerRedirectLink",
+        form.saleBanner.redirectLink || ""
+      );
+      formData.append("saleBannerStartDate", form.saleBanner.startDate || "");
+      formData.append("saleBannerEndDate", form.saleBanner.endDate || "");
 
-      if (files.logo) {
-        formData.append("logo", files.logo);
+      if (form.logo instanceof File) {
+        formData.append("logo", form.logo);
       }
-      if (files.favicon) {
-        formData.append("favicon", files.favicon);
+
+      if (form.favicon instanceof File) {
+        formData.append("favicon", form.favicon);
       }
-      if (files.bannerDesktop) {
-        formData.append("bannerDesktop", files.bannerDesktop);
+
+      if (form.saleBanner.desktopImage instanceof File) {
+        formData.append("bannerDesktop", form.saleBanner.desktopImage);
       }
-      if (files.bannerMobile) {
-        formData.append("bannerMobile", files.bannerMobile);
+
+      if (form.saleBanner.mobileImage instanceof File) {
+        formData.append("bannerMobile", form.saleBanner.mobileImage);
       }
+
+      const heroItems = form.section_hero.map((item) => ({
+        title: item.title || "",
+        desc: item.desc || "",
+        tag: item.tag || "",
+        link: item.link || "",
+        image: item.image instanceof File ? "" : item.image || "",
+        hasNewImage: item.image instanceof File
+      }));
+
+      const sliderItems = form.section_hero_slider.map((item) => ({
+        title: item.title || "",
+        tag: item.tag || "",
+        link: item.link || "",
+        image: item.image instanceof File ? "" : item.image || "",
+        hasNewImage: item.image instanceof File
+      }));
+
+      formData.append("sectionHeroItems", JSON.stringify(heroItems));
+      formData.append("sectionHeroSliderItems", JSON.stringify(sliderItems));
+
+      form.section_hero.forEach((item) => {
+        if (item.image instanceof File) {
+          formData.append("sectionHeroImages", item.image);
+        }
+      });
+
+      form.section_hero_slider.forEach((item) => {
+        if (item.image instanceof File) {
+          formData.append("sectionHeroSliderImages", item.image);
+        }
+      });
 
       const res = await settingService.update(formData);
-      console.log("Cập nhật thành công:", res);
-
-      success("Lưu cài đặt thành công!");
-      await fetchSetting();
+      console.log("UPDATE RES:", res);
+      success(res?.message || "Cập nhật thành công!");
+      fetchDetail();
     } catch (err) {
-      console.error("Lỗi cập nhật settings:", err);
-      error(err?.response?.data?.message || "Cập nhật cài đặt thất bại!");
+      console.log("Update setting error:", err);
+      error(err?.response?.data?.message || "Cập nhật thất bại");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
+  const renderFileInfo = (value, label = "Đã chọn file") => {
+    if (value instanceof File) {
+      return <span className="file-name">{value.name}</span>;
+    }
+
+    if (typeof value === "string" && value) {
+      return <img src={value} alt={label} />;
+    }
+
+    return null;
+  };
+
+  if (loading) {
+    return <div className="setting">Đang tải dữ liệu...</div>;
+  }
+
   return (
-    <div className="setting-page">
-      <div className="page-header">
-        <div>
-          <h2>Cài đặt hệ thống</h2>
-          <p>Thiết lập giao diện và thông tin chung cho trang quản trị</p>
-        </div>
-        <button className="save-btn" onClick={handleSubmit} disabled={loading}>
-          {loading ? "Đang lưu..." : "Lưu thay đổi"}
-        </button>
+    <div className="setting">
+      <div className="setting_top">
+        <span>
+          <RiListSettingsLine /> ADMIN SETTINGS
+        </span>
+        <h1>Cài đặt hệ thống</h1>
+        <p>
+          Quản lý bản sắc cốt lõi, nhận diện thương hiệu và các tùy chọn khu
+          vực của tổ chức bạn trên toàn bộ môi trường Veltrix Gear.
+        </p>
       </div>
 
-      <div className="setting-grid">
-        <div className="setting-card">
-          <h3>Thông tin website</h3>
+      <div className="setting_bot">
+        <div className="setting_bot-left">
+          <div className="setting_bot-left--identify">
+            <span>
+              <GiPlatform /> NHẬN DIỆN HỆ THỐNG
+            </span>
 
-          <div className="form-group">
-            <label>Tên website</label>
-            <input
-              type="text"
-              name="websiteName"
-              value={form.websiteName}
-              onChange={handleChange}
-            />
+            <div className="main">
+              <div className="form-input">
+                <label htmlFor="websiteName">Tên website</label>
+                <input
+                  type="text"
+                  id="websiteName"
+                  value={form.websiteName}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="contactEmail">Email liên hệ</label>
+                <input
+                  type="text"
+                  id="contactEmail"
+                  value={form.contactEmail}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="contactPhone">Phone liên hệ</label>
+                <input
+                  type="text"
+                  id="contactPhone"
+                  value={form.contactPhone}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="address">Địa chỉ</label>
+                <input
+                  type="text"
+                  id="address"
+                  value={form.address}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Email liên hệ</label>
-            <input
-              type="text"
-              name="contactEmail"
-              value={form.contactEmail}
-              onChange={handleChange}
-            />
+          <div className="setting_bot-left--basic">
+            <span>
+              <IoIosColorPalette /> STYLE CƠ BẢN
+            </span>
+
+            <div className="main">
+              <div className="form-input">
+                <label htmlFor="logo" id="file">
+                  <div>
+                    <MdDriveFolderUpload /> <br />
+                    <span className="des">Click để tải logo</span>
+                  </div>
+                </label>
+                <input
+                  type="file"
+                  id="logo"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "logo")}
+                />
+                {renderFileInfo(form.logo, "logo-preview")}
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="favicon" id="file">
+                  <div>
+                    <MdDriveFolderUpload /> <br />
+                    <span className="des">Click để tải icon logo</span>
+                  </div>
+                </label>
+                <input
+                  type="file"
+                  id="favicon"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "favicon")}
+                />
+                {renderFileInfo(form.favicon, "favicon-preview")}
+              </div>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Số điện thoại</label>
-            <input
-              type="text"
-              name="contactPhone"
-              value={form.contactPhone}
-              onChange={handleChange}
-            />
+          <div className="setting_bot-left--saleBanner">
+            <span>
+              <IoIosColorPalette /> CHƯƠNG TRÌNH GIẢM GIÁ
+            </span>
+
+            <div className="main">
+              <div className="isActive full-width">
+                TRẠNG THÁI:
+                <Switch
+                  checked={form.saleBanner.isActive}
+                  onChange={handleSaleBannerSwitch}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="title">Tiêu đề</label>
+                <input
+                  type="text"
+                  id="title"
+                  value={form.saleBanner.title}
+                  onChange={handleSaleBannerChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="shortDescription">Mô tả ngắn</label>
+                <input
+                  type="text"
+                  id="shortDescription"
+                  value={form.saleBanner.shortDescription}
+                  onChange={handleSaleBannerChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="discountText">Text giảm giá</label>
+                <input
+                  type="text"
+                  id="discountText"
+                  value={form.saleBanner.discountText}
+                  onChange={handleSaleBannerChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="redirectLink">Link điều hướng</label>
+                <input
+                  type="text"
+                  id="redirectLink"
+                  value={form.saleBanner.redirectLink}
+                  onChange={handleSaleBannerChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="startDate">Ngày bắt đầu</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={form.saleBanner.startDate}
+                  onChange={handleSaleBannerChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="endDate">Ngày kết thúc</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={form.saleBanner.endDate}
+                  onChange={handleSaleBannerChange}
+                />
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="desktopImage" id="file">
+                  <div>
+                    <MdDriveFolderUpload /> <br />
+                    <span className="des">Banner desktop</span>
+                  </div>
+                </label>
+                <input
+                  type="file"
+                  id="desktopImage"
+                  accept="image/*"
+                  onChange={(e) => handleSaleBannerFile(e, "desktopImage")}
+                />
+                {renderFileInfo(form.saleBanner.desktopImage, "desktop-banner")}
+              </div>
+
+              <div className="form-input">
+                <label htmlFor="mobileImage" id="file">
+                  <div>
+                    <MdDriveFolderUpload /> <br />
+                    <span className="des">Banner mobile</span>
+                  </div>
+                </label>
+                <input
+                  type="file"
+                  id="mobileImage"
+                  accept="image/*"
+                  onChange={(e) => handleSaleBannerFile(e, "mobileImage")}
+                />
+                {renderFileInfo(form.saleBanner.mobileImage, "mobile-banner")}
+              </div>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Địa chỉ</label>
-            <textarea
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              rows="4"
-            />
-          </div>
-        </div>
+          <div className="setting_bot-left--hero">
+            <span>
+              <BsImages /> HERO SECTION
+            </span>
 
-        <div className="setting-card">
-          <h3>Giao diện</h3>
+            <div className="main-column">
+              {form.section_hero.map((item, index) => (
+                <div className="dynamic-card" key={index}>
+                  <div className="card-header">
+                    <h4>Hero item #{index + 1}</h4>
+                    <button
+                      type="button"
+                      className="btn-delete"
+                      onClick={() => removeHeroItem(index)}
+                    >
+                      Xóa
+                    </button>
+                  </div>
 
-          <div className="form-group">
-            <label>Màu chủ đạo</label>
-            <div className="color-list">
-              {["blue", "green", "orange", "purple"].map((color) => (
-                <span
-                  key={color}
-                  className={`color-item ${color} ${
-                    form.themeColor === color ? "active" : ""
-                  }`}
-                  onClick={() => handleColorChange(color)}
-                ></span>
+                  <div className="card-grid">
+                    <div className="form-input">
+                      <label htmlFor={`hero-image-${index}`} id="file">
+                        <div>
+                          <MdDriveFolderUpload /> <br />
+                          <span className="des">Upload ảnh hero</span>
+                        </div>
+                      </label>
+                      <input
+                        type="file"
+                        id={`hero-image-${index}`}
+                        accept="image/*"
+                        onChange={(e) => handleHeroImageChange(e, index)}
+                      />
+                      {renderFileInfo(item.image, `hero-${index}`)}
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tiêu đề</label>
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(e) =>
+                          handleHeroChange(index, "title", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Mô tả</label>
+                      <input
+                        type="text"
+                        value={item.desc}
+                        onChange={(e) =>
+                          handleHeroChange(index, "desc", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tag</label>
+                      <input
+                        type="text"
+                        value={item.tag}
+                        onChange={(e) =>
+                          handleHeroChange(index, "tag", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="form-input full-width">
+                      <label>Link</label>
+                      <input
+                        type="text"
+                        value={item.link}
+                        onChange={(e) =>
+                          handleHeroChange(index, "link", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
               ))}
+
+              <button type="button" className="btn-add" onClick={addHeroItem}>
+                + Thêm hero item
+              </button>
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Chế độ giao diện</label>
-            <div className="radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="themeMode"
-                  value="light"
-                  checked={form.themeMode === "light"}
-                  onChange={handleChange}
+          <div className="setting_bot-left--slider">
+            <span>
+              <MdOutlineViewCarousel /> HERO SECTION SLIDER
+            </span>
+
+            <div className="main-column">
+              {form.section_hero_slider.map((item, index) => (
+                <div className="dynamic-card" key={index}>
+                  <div className="card-header">
+                    <h4>Slider item #{index + 1}</h4>
+                    <button
+                      type="button"
+                      className="btn-delete"
+                      onClick={() => removeSliderItem(index)}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+
+                  <div className="card-grid">
+                    <div className="form-input">
+                      <label htmlFor={`slider-image-${index}`} id="file">
+                        <div>
+                          <MdDriveFolderUpload /> <br />
+                          <span className="des">Upload ảnh slider</span>
+                        </div>
+                      </label>
+                      <input
+                        type="file"
+                        id={`slider-image-${index}`}
+                        accept="image/*"
+                        onChange={(e) => handleSliderImageChange(e, index)}
+                      />
+                      {renderFileInfo(item.image, `slider-${index}`)}
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tiêu đề</label>
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(e) =>
+                          handleSliderChange(index, "title", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tag</label>
+                      <input
+                        type="text"
+                        value={item.tag}
+                        onChange={(e) =>
+                          handleSliderChange(index, "tag", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="form-input full-width">
+                      <label>Link</label>
+                      <input
+                        type="text"
+                        value={item.link}
+                        onChange={(e) =>
+                          handleSliderChange(index, "link", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button type="button" className="btn-add" onClick={addSliderItem}>
+                + Thêm slider item
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="setting_bot-right">
+          <div className="setting_bot-right--feature">
+            <h3>
+              <MdOutlineFeaturedPlayList /> QUẢN LÝ TÍNH NĂNG
+            </h3>
+
+            <div className="main">
+              <div className="form-feature">
+                <span className="des">
+                  Auto Approve Post
+                  <p>Tự động duyệt bài viết</p>
+                </span>
+                <Switch
+                  checked={form.autoApprovePost}
+                  onChange={(checked) =>
+                    onChangeSwitch("autoApprovePost", checked)
+                  }
                 />
-                Sáng
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="themeMode"
-                  value="dark"
-                  checked={form.themeMode === "dark"}
-                  onChange={handleChange}
+              </div>
+
+              <div className="form-feature">
+                <span className="des">
+                  Show Featured Post
+                  <p>Hiển thị bài viết nổi bật</p>
+                </span>
+                <Switch
+                  checked={form.showFeaturedPost}
+                  onChange={(checked) =>
+                    onChangeSwitch("showFeaturedPost", checked)
+                  }
                 />
-                Tối
-              </label>
-            </div>
-          </div>
+              </div>
 
-          <div className="form-group">
-            <label>Logo</label>
-            <input
-              type="file"
-              name="logo"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {form.logoPreview && (
-              <img
-                src={form.logoPreview}
-                alt="logo"
-                style={{ width: 120, marginTop: 8 }}
-              />
-            )}
-          </div>
+              <div className="form-feature">
+                <span className="des">
+                  Two Factor Auth
+                  <p>Xác thực 2 bước</p>
+                </span>
+                <Switch
+                  checked={form.twoFactorAuth}
+                  onChange={(checked) =>
+                    onChangeSwitch("twoFactorAuth", checked)
+                  }
+                />
+              </div>
 
-          <div className="form-group">
-            <label>Favicon</label>
-            <input
-              type="file"
-              name="favicon"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {form.faviconPreview && (
-              <img
-                src={form.faviconPreview}
-                alt="favicon"
-                style={{ width: 50, marginTop: 8 }}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="setting-card">
-          <h3>Cấu hình bài viết</h3>
-
-          <div className="form-group">
-            <label>Số bài viết mỗi trang</label>
-            <input
-              type="number"
-              name="postPerPage"
-              value={form.postPerPage}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Duyệt bài tự động</label>
-            <div className="switch-row">
-              <input
-                type="checkbox"
-                name="autoApprovePost"
-                checked={form.autoApprovePost}
-                onChange={handleChange}
-              />
-              <span>{form.autoApprovePost ? "Đang bật" : "Đang tắt"}</span>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Hiển thị bài nổi bật</label>
-            <div className="switch-row">
-              <input
-                type="checkbox"
-                name="showFeaturedPost"
-                checked={form.showFeaturedPost}
-                onChange={handleChange}
-              />
-              <span>{form.showFeaturedPost ? "Đang bật" : "Đang tắt"}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="setting-card">
-          <h3>Bảo mật</h3>
-
-          <div className="form-group">
-            <label>Thời gian hết phiên đăng nhập</label>
-            <select
-              name="sessionTimeout"
-              value={form.sessionTimeout}
-              onChange={handleChange}
-            >
-              <option value="30">30 phút</option>
-              <option value="60">60 phút</option>
-              <option value="120">120 phút</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Xác thực 2 bước</label>
-            <div className="switch-row">
-              <input
-                type="checkbox"
-                name="twoFactorAuth"
-                checked={form.twoFactorAuth}
-                onChange={handleChange}
-              />
-              <span>{form.twoFactorAuth ? "Đang bật" : "Đang tắt"}</span>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Thông báo đăng nhập lạ</label>
-            <div className="switch-row">
-              <input
-                type="checkbox"
-                name="strangeLoginAlert"
-                checked={form.strangeLoginAlert}
-                onChange={handleChange}
-              />
-              <span>{form.strangeLoginAlert ? "Đang bật" : "Đang tắt"}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="setting-card banner-setting-card">
-          <h3>Cài đặt banner sale</h3>
-
-          <div className="form-group">
-            <label>Bật banner sale</label>
-            <div className="switch-row">
-              <input
-                type="checkbox"
-                name="saleBannerIsActive"
-                checked={form.saleBannerIsActive}
-                onChange={handleChange}
-              />
-              <span>{form.saleBannerIsActive ? "Đang bật" : "Đang tắt"}</span>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Tiêu đề banner</label>
-            <input
-              type="text"
-              name="saleBannerTitle"
-              value={form.saleBannerTitle}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Mô tả ngắn</label>
-            <textarea
-              rows="3"
-              name="saleBannerShortDescription"
-              value={form.saleBannerShortDescription}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Phần trăm giảm giá nổi bật</label>
-            <input
-              type="text"
-              name="saleBannerDiscountText"
-              value={form.saleBannerDiscountText}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Link điều hướng</label>
-            <input
-              type="text"
-              name="saleBannerRedirectLink"
-              value={form.saleBannerRedirectLink}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Ảnh desktop banner</label>
-            <input
-              type="file"
-              name="bannerDesktop"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {form.bannerDesktopPreview && (
-              <img
-                src={form.bannerDesktopPreview}
-                alt="banner desktop"
-                style={{ width: 160, marginTop: 8 }}
-              />
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Ảnh mobile banner</label>
-            <input
-              type="file"
-              name="bannerMobile"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {form.bannerMobilePreview && (
-              <img
-                src={form.bannerMobilePreview}
-                alt="banner mobile"
-                style={{ width: 120, marginTop: 8 }}
-              />
-            )}
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Ngày bắt đầu</label>
-              <input
-                type="date"
-                name="saleBannerStartDate"
-                value={form.saleBannerStartDate}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Ngày kết thúc</label>
-              <input
-                type="date"
-                name="saleBannerEndDate"
-                value={form.saleBannerEndDate}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="banner-preview">
-            <span className="preview-label">Xem trước</span>
-            <div className="preview-box">
-              <div className="preview-content">
-                <p className="preview-tag">SALE EVENT</p>
-                <h4>{form.saleBannerTitle || "Chưa có tiêu đề"}</h4>
-                <p>{form.saleBannerShortDescription || "Chưa có mô tả"}</p>
-                <button>Xem ngay</button>
+              <div className="form-feature">
+                <span className="des">
+                  Strange Login Alert
+                  <p>Cảnh báo đăng nhập bất thường</p>
+                </span>
+                <Switch
+                  checked={form.strangeLoginAlert}
+                  onChange={(checked) =>
+                    onChangeSwitch("strangeLoginAlert", checked)
+                  }
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <div className="setting-change">
+        <p>Bạn có muốn lưu bảng cài đặt?</p>
+        <button onClick={handleSubmit} disabled={submitting}>
+          {submitting ? "Đang lưu..." : "Lưu Cài Đặt"}
+        </button>
+      </div>
     </div>
   );
-};
+}
 
 export default SettingPage;
