@@ -12,7 +12,7 @@ const NewsCreate = () => {
     slug: "",
     description: "",
     content: "",
-    category_id: "",
+    slug_category: "",
     status: "draft",
     featured: "no",
     views: 0,
@@ -148,17 +148,17 @@ const NewsCreate = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="category_id">Danh mục</label>
+                  <label htmlFor="slug_category">Danh mục</label>
                   <select
-                    id="category_id"
-                    value={form.category_id}
+                    id="slug_category"
+                    value={form.slug_category}
                     onChange={handleChange}
                   >
                     <option value="">
                       Chọn danh mục
                     </option>
                     {categories && categories.map(item => (
-                      <option value={item._id}>{item.title}</option>
+                      <option value={item.slug}>{item.title}</option>
                     ))}
                   </select>
                 </div>

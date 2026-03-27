@@ -153,11 +153,13 @@ body {
     }
 
     &-right {
+      
       &--feature {
         background: #e5e5e5;
         border-radius: 8px;
         padding: 20px;
-
+        position: sticky;
+        top: 0;
         h3 {
           display: flex;
           align-items: center;

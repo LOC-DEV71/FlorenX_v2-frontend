@@ -831,7 +831,7 @@ function SettingPage() {
         </div>
 
         <div className="setting_bot-right">
-          <div className="setting_bot-right--feature">
+          <div className="setting_bot-right--feature">  
             <h3>
               <MdOutlineFeaturedPlayList /> QUẢN LÝ TÍNH NĂNG
             </h3>

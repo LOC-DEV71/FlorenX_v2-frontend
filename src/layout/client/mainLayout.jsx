@@ -39,7 +39,7 @@ function MainLayout() {
   }, []);
 
   return (
-    <>  
+    <div className="client_layout">  
       <Header setOpenMenu={setOpenMenu} />
 
       {openMenu && (
@@ -56,7 +56,7 @@ function MainLayout() {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
 

@@ -18,10 +18,10 @@ function Footer() {
 
                 <div className="footer_layout_client-column">
                     <h4>Sản phẩm</h4>
-                    <a href="#">PC Gaming</a>
-                    <a href="#">Laptop</a>
-                    <a href="#">Linh kiện</a>
-                    <a href="#">Phụ kiện</a>
+                    <HashLink smooth to="/#products">PC Gaming</HashLink>
+                    <HashLink  smooth to="/#products">Laptop</HashLink>
+                    <HashLink  smooth to="/#products">Màn Hình</HashLink>
+                    <HashLink  smooth to="/#products">Bàn Phím</HashLink>
                 </div>
 
                 <div className="footer_layout_client-column">
@@ -36,8 +36,8 @@ function Footer() {
                     <h4>Công ty</h4>
                     <HashLink smooth to="/#">Trang chủ</HashLink>
                     <HashLink smooth to="/#">Giới thiệu</HashLink>
-                    <a href="#">Tuyển dụng</a>
-                    <a href="#">Tin tức</a>
+                    <HashLink smooth to="/#sale">Giảm giá</HashLink>
+                    <HashLink smooth to="/#news">Tin tức</HashLink>
                 </div>
 
             </div>

@@ -1,196 +1,193 @@
 header {
-    border-bottom: 1px solid var(--color-border);
-    position: fixed;
-    width: 100%;
-    z-index: 999;
-    top: 0;
-    left: 0;
-    background: var(--color-primary-rgb, 0.8);
-    backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: fixed;
+  width: 100%;
+  z-index: 999;
+  top: 0;
+  left: 0;
+
+  background: rgba(10, 10, 12, 0.4);
+  backdrop-filter: blur(12px);
 }
 
 .header_layout_client {
-    display: grid;
-    grid-template-columns: 170px 1fr 350px 180px;
+  display: grid;
+  grid-template-columns: 170px 1fr 350px 180px;
+  align-items: center;
+
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 12px 20px;
+
+  gap: 20px;
+
+  &-category {
+    cursor: pointer;
+
+    .search {
+      display: none;
+    }
+
+    svg {
+      transition: 0.2s;
+      color: #e5e7eb;
+    }
+
+    svg:hover {
+      color: #fff;
+      transform: scale(1.1);
+    }
+  }
+
+  &-logo {
+    display: flex;
     align-items: center;
-    
 
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 12px 20px;
+    img {
+      width: 160px;
+      filter: brightness(1.1);
+    }
+  }
 
+  &-menu {
+    display: flex;
+    gap: 30px;
+
+    a {
+      text-decoration: none;
+      font-weight: 500;
+      color: #d1d5db;
+      transition: 0.2s;
+
+      &:hover {
+        color: #ffffff;
+      }
+    }
+  }
+
+  &-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    transition: 0.2s;
+
+    &:focus-within {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    svg {
+      color: #9ca3af;
+      font-size: 20px;
+    }
+
+    input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+
+      font-size: 15px;
+      color: #f9fafb;
+
+      &::placeholder {
+        color: #6b7280;
+      }
+    }
+  }
+
+  &-card {
+    display: flex;
+    justify-content: flex-end;
     gap: 20px;
+    font-size: 20px;
+    cursor: pointer;
 
-    &-category{
-        cursor: pointer;
-
-        .search {
-            display: none;
-        }
-
-        svg {
-            transition: 0.2s;
-            color: var(--color-text-primary);
-        }
-
-        svg:hover {
-            color: var(--color-primary);
-            transform: scale(1.1);
-        }
+    .search {
+      display: none;
     }
 
-    &-logo {
-        display: flex;
-        align-items: center;
-        img {
-            width: 160px;
-        }
+    svg {
+      transition: 0.2s;
+      color: #d1d5db;
     }
 
-    &-menu {
-        display: flex;
-        gap: 30px;
-
-        a {
-            text-decoration: none;
-            font-weight: 500;
-            color: var(--color-text-primary);
-            transition: 0.2s;
-
-            &:hover {
-                color: var(--color-primary);
-            }
-        }
+    svg:hover {
+      color: #ffffff;
+      transform: scale(1.1);
     }
-
-    &-search {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-
-        background: var(--color-bg);
-        border-radius: 30px;
-        border: 1px solid var(--color-border);
-
-        transition: 0.2s;
-
-        &:focus-within {
-            border-color: var(--color-primary);
-        }
-
-        svg {
-            color: var(--color-text-secondary);
-            font-size: 20px;
-        }
-
-        input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-
-            font-size: 15px;
-            color: var(--color-text-primary);
-
-            &::placeholder {
-                color: var(--color-text-secondary);
-            }
-        }
-    }
-
-    &-card {
-        display: flex;
-        justify-content: flex-end;
-        gap: 20px;
-        font-size: 20px;
-        cursor: pointer;
-
-        .search {
-            display: none;
-        }
-
-        svg {
-            transition: 0.2s;
-            color: var(--color-text-primary);
-        }
-
-        svg:hover {
-            color: var(--color-primary);
-            transform: scale(1.1);
-        }
-    }
+  }
 }
 
+/* Responsive giữ nguyên */
 @media (max-width: 1024px) {
+  .header_layout_client {
+    display: flex;
+    justify-content: space-around;
+  }
 
-    .header_layout_client {
-        display: flex;
-        justify-content: space-around;
-    }
+  .header_layout_client-menu {
+    display: none;
+  }
 
-    .header_layout_client-menu {
-        display: none;
-    }
+  .header_layout_client-search {
+    display: none;
+  }
 
-    .header_layout_client-search {
-        display: none;
-    }
+  .header_layout_client-card .search {
+    display: block;
+  }
 
-    .header_layout_client-card .search {
-        display: block;
-    }
+  .header_layout_client-logo {
+    justify-self: start;
+  }
 
-    .header_layout_client-logo {
-        justify-self: start;
-    }
-
-    .header_layout_client-card {
-        justify-self: end;
-    }
-
+  .header_layout_client-card {
+    justify-self: end;
+  }
 }
-
 
 @media (max-width: 768px) {
+  .header_layout_client {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto;
+    gap: 12px;
+  }
 
-    .header_layout_client {
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto;
-        gap: 12px;
-    }
+  .header_layout_client-logo {
+    grid-column: 1/2;
+  }
 
-    .header_layout_client-logo {
-        grid-column: 1/2;
-    }
+  .header_layout_client-card {
+    grid-column: 2/3;
+  }
 
-    .header_layout_client-card {
-        grid-column: 2/3;
-    }
-
-    .header_layout_client-menu {
-        display: none;
-    }
-
+  .header_layout_client-menu {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
+  .header_layout_client-search {
+    padding: 6px 10px;
+  }
 
-    .header_layout_client-search {
-        padding: 6px 10px;
-    }
+  .header_layout_client-search input {
+    font-size: 14px;
+  }
 
-    .header_layout_client-search input {
-        font-size: 14px;
-    }
+  .header_layout_client-card {
+    font-size: 18px;
+    gap: 14px;
+  }
 
-    .header_layout_client-card {
-        font-size: 18px;
-        gap: 14px;
-    }
-
-    .header_layout_client-logo img {
-        width: 110px;
-    }
-
+  .header_layout_client-logo img {
+    width: 110px;
+  }
 }

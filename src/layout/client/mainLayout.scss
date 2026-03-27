@@ -1,50 +1,76 @@
+
 .category-overlay {
   position: fixed;
   top: 77px;
   left: 0;
   width: 260px;
-  height: calc(100vh - 77px);
+  height: calc(100vh - 70px);
   z-index: 999;
   overflow-y: auto;
   padding: 12px;
 
- background: var(--color-primary-rgb, 0.8);
-   backdrop-filter: blur(8px);
-  border-right: 1px solid var(--color-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  background: rgba(10, 10, 12, 0.7);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 
-  color: black;
+  color: #f3f4f6;
   font-weight: 600;
 
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f9fafb;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
   .ant-menu {
-    background: transparent;
-    border-inline-end: none;
-    color: black;
+    background: transparent !important;
+    border-inline-end: none !important;
+    color: #e5e7eb !important;
     font-weight: 600;
   }
 
-  .ant-menu-submenu-title,
-  .ant-menu-item {
-    color: black;
+  .ant-menu-item,
+  .ant-menu-submenu-title {
+    color: #d1d5db !important;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: 10px;
     margin: 4px 0;
-    transition: 0.2s;
+    transition: 0.2s ease;
   }
 
   .ant-menu-item:hover,
   .ant-menu-submenu-title:hover {
-    background: rgba(255, 255, 255, 0.18);
-    color: black;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
   }
 
   .ant-menu-item-selected {
-    background: rgba(255, 255, 255, 0.22) !important;
-    color: black !important;
-    font-weight: 600;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+
+  .ant-menu-submenu-selected > .ant-menu-submenu-title {
+    color: #ffffff !important;
   }
 
   .ant-menu-submenu-arrow {
-    color: black;
+    color: #9ca3af !important;
+  }
+
+  .ant-menu-item .ant-menu-title-content,
+  .ant-menu-submenu-title .ant-menu-title-content {
+    color: inherit !important;
   }
 }
