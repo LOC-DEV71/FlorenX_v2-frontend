@@ -1,0 +1,369 @@
+.login-client {
+  min-height: 100vh;
+  background: #03050a;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+
+  &__input-wrapper {
+    position: relative;
+  }
+
+  &__input-wrapper .ant-input {
+    padding-right: 42px;
+  }
+
+  &__eye {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #cbd5e1;
+    font-size: 18px;
+    transition: 0.2s ease;
+
+    &:hover {
+      color: #22d3ee;
+    }
+
+    .anticon {
+      color: inherit;
+    }
+  }
+
+  &__back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10;
+    padding: 10px 14px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #22d3ee;
+      border-color: #22d3ee;
+      background: #06111f;
+    }
+  }
+
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  &__left {
+    flex: 1;
+    padding: 80px 40px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    p {
+      font-size: 25px;
+    }
+  }
+
+  &__brand {
+    color: #22d3ee;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  &__title {
+    font-size: 46px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  &__desc {
+    color: #d1d5db;
+    max-width: 420px;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  &__right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 56px;
+  }
+
+  &__box {
+    width: 100%;
+    max-width: 520px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 40px;
+      color: #ffffff;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+  }
+
+  &__sub {
+    margin: 0 0 32px;
+    color: #cbd5e1;
+    font-size: 16px;
+  }
+
+  &__form-group {
+    margin-bottom: 24px;
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #f1f5f9;
+      text-transform: uppercase;
+    }
+
+    .ant-input,
+    .ant-input-password {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #334155;
+      color: #ffffff;
+      border-radius: 0;
+      min-height: 40px;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    .ant-input {
+      padding: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .ant-input::placeholder,
+    .ant-input-password input::placeholder {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .ant-input:hover,
+    .ant-input-password:hover {
+      border-bottom-color: #22d3ee;
+    }
+
+    .ant-input:focus,
+    .ant-input-focused,
+    .ant-input-password-focused,
+    .ant-input-password:focus-within {
+      border: none;
+      border-bottom: 1px solid #22d3ee;
+      box-shadow: none;
+    }
+
+    .ant-input-password .ant-input {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      min-height: auto;
+      height: auto;
+      padding: 0 0 10px;
+    }
+
+    .ant-input-password-icon {
+      color: #cbd5e1;
+
+      .anticon {
+        color: #cbd5e1;
+      }
+
+      &:hover {
+        color: #22d3ee;
+
+        .anticon {
+          color: #22d3ee;
+        }
+      }
+    }
+  }
+
+  &__options {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -4px;
+    margin-bottom: 24px;
+    font-size: 14px;
+  }
+
+  &__forgot {
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      color: #22d3ee;
+    }
+  }
+
+  &__btn {
+    width: 100%;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    height: 42px;
+    background: #2d5aa3;
+    color: #ffffff;
+    border: none;
+    margin-bottom: 26px;
+    font-size: 16px;
+
+    &:hover {
+      background: #244b88;
+    }
+  }
+
+  &__divider {
+    text-align: center;
+    margin: 10px 0 24px;
+
+    span {
+      color: #cbd5e1;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+  }
+
+  &__google-wrap {
+    margin-bottom: 12px;
+  }
+
+  &__google-title {
+    margin-bottom: 12px;
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  &__btn-google {
+    width: 100%;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+
+    &:hover {
+      border-color: #22d3ee;
+      background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+      box-shadow:
+        0 12px 34px rgba(34, 211, 238, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    > div {
+      width: 100% !important;
+    }
+
+    iframe {
+      width: 100% !important;
+      min-height: 46px !important;
+      border-radius: 999px !important;
+    }
+  }
+
+  &__register {
+    margin-top: 36px;
+    font-size: 15px;
+    text-align: center;
+    color: #cbd5e1;
+
+    a {
+      color: #22d3ee;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 500;
+
+      &:hover {
+        color: #67e8f9;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .login-client {
+    min-height: 100vh;
+
+    &__container {
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    &__left {
+      display: none;
+    }
+
+    &__right {
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    &__box {
+      max-width: 100%;
+
+      h2 {
+        font-size: 34px;
+      }
+    }
+
+    &__sub {
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    &__back {
+      top: 16px;
+      left: 16px;
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+
+    &__btn {
+      height: 50px;
+      font-size: 16px;
+    }
+
+    &__btn-google {
+      min-height: 54px;
+      padding: 5px;
+      border-radius: 14px;
+    }
+  }
+}

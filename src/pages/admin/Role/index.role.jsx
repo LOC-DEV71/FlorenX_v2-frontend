@@ -54,6 +54,7 @@ function Roles() {
                             systemRoles: 0,
                         }
                     );
+                    setPagination(res.data.pagination || []);
                 }
             } catch (err) {
                 error(err.response?.data?.message || "Có lỗi xảy ra!");
@@ -96,7 +97,7 @@ function Roles() {
 
             setSelectId([]);
             setTypeChange("");
-            setReload(prev => !prev);
+            setReload((prev) => !prev);
         } catch (err) {
             error(err.response?.data?.message || "Có lỗi xảy ra!");
         }
@@ -129,13 +130,12 @@ function Roles() {
     };
 
     return (
-        <div className="product-page">
-            <h2 className="product-page__title">Quản Lý nhóm quyền</h2>
+        <div className="admin-role-page">
+            <h2 className="admin-role-page__title">Quản Lý nhóm quyền</h2>
             <SEO title="Quản lý nhóm quyền" />
 
-            {/* Stats */}
-            <div className="product-stats">
-                <div className="stat-card stat-total">
+            <div className="admin-role-stats">
+                <div className="admin-role-stat-card admin-role-stat-total">
                     <p><BsCalendarCheck /> Total Roles</p>
                     {loading ? (
                         <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
@@ -144,7 +144,7 @@ function Roles() {
                     )}
                 </div>
 
-                <div className="stat-card stat-active">
+                <div className="admin-role-stat-card admin-role-stat-active">
                     <p><BsCheck2Circle /> Active Roles</p>
                     {loading ? (
                         <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
@@ -153,7 +153,7 @@ function Roles() {
                     )}
                 </div>
 
-                <div className="stat-card stat-out">
+                <div className="admin-role-stat-card admin-role-stat-out">
                     <p><RiErrorWarningLine /> Inactive Roles</p>
                     {loading ? (
                         <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
@@ -162,7 +162,7 @@ function Roles() {
                     )}
                 </div>
 
-                <div className="stat-card stat-low">
+                <div className="admin-role-stat-card admin-role-stat-low">
                     <p><CiWarning /> System Roles</p>
                     {loading ? (
                         <Skeleton.Avatar active shape style={{ width: 35, height: 35 }} />
@@ -172,9 +172,8 @@ function Roles() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="product-filters">
-                <div className="search">
+            <div className="admin-role-filters">
+                <div className="admin-role-search">
                     <SearchOutlined />
                     <input placeholder="Tìm tên role hoặc slug..." />
                 </div>
@@ -201,7 +200,7 @@ function Roles() {
                 </select>
 
                 <button
-                    className="reset"
+                    className="admin-role-reset"
                     onClick={() =>
                         setSearchParams({
                             page: 1,
@@ -221,19 +220,18 @@ function Roles() {
                     <option value="delete">Xóa nhiều role</option>
                 </select>
 
-                <button className="activity" onClick={handleChangeMulti}>
+                <button className="admin-role-activity" onClick={handleChangeMulti}>
                     Áp dụng
                 </button>
 
-                <Link className="create" to="/admin/roles/create">
+                <Link className="admin-role-create" to="/admin/roles/create">
                     <CgMathPlus /> Tạo mới
                 </Link>
             </div>
 
-            {/* Table */}
-            <div className="table-wrapper">
-                <div className="product-table">
-                    <div className="table-header role-table-header">
+            <div className="admin-role-table-wrapper">
+                <div className="admin-role-table">
+                    <div className="admin-table-header admin-role-table-header">
                         <div>
                             <input
                                 type="checkbox"
@@ -247,7 +245,7 @@ function Roles() {
                                 }}
                             />
                         </div>
-                        <div className="col-product">Title</div>
+                        <div className="admin-role-col-title">Title</div>
                         <div>Description</div>
                         <div>Slug</div>
                         <div>Edit</div>
@@ -256,12 +254,12 @@ function Roles() {
 
                     {loading
                         ? Array(5).fill(0).map((_, i) => (
-                            <div className="table-row role-table-row" key={i}>
+                            <div className="admin-table-row admin-role-table-row" key={i}>
                                 <div>
                                     <Skeleton.Avatar active shape style={{ width: 15, height: 15 }} />
                                 </div>
 
-                                <div className="product-info col-product">
+                                <div className="admin-role-info admin-role-col-title">
                                     <Skeleton.Input active style={{ width: 180, height: 20 }} />
                                 </div>
 
@@ -272,8 +270,8 @@ function Roles() {
                             </div>
                         ))
                         : roles.map((item) => (
-                            <div className="table-row role-table-row" key={item._id}>
-                                <div className="product-checkbox">
+                            <div className="admin-table-row admin-role-table-row" key={item._id}>
+                                <div className="admin-role-checkbox">
                                     <input
                                         type="checkbox"
                                         checked={selectId.includes(item._id)}
@@ -287,26 +285,32 @@ function Roles() {
                                     />
                                 </div>
 
-                                <div className="product-info col-product">
+                                <div className="admin-role-info admin-role-col-title">
                                     <div>
-                                        <p className="product-name">{item.title}</p>
+                                        <p className="admin-role-name">{item.title}</p>
                                     </div>
                                 </div>
 
                                 <div
-                                    className="role-description"
+                                    className="admin-role-description"
                                     dangerouslySetInnerHTML={{ __html: item.description }}
                                 />
+
                                 <div>{item.slug}</div>
 
-                                <div className="actions">
-                                    <Link className="edit" to={`/admin/roles/update/${item.slug}`}>
+                                <div className="admin-role-actions">
+                                    <Link className="admin-role-edit" to={`/admin/roles/update/${item.slug}`}>
                                         Edit
                                     </Link>
                                 </div>
 
-                                <div className="actions">
-                                    <button className="delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
+                                <div className="admin-role-actions">
+                                    <button
+                                        className="admin-role-delete"
+                                        onClick={() => handleDeleteOne(item._id)}
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         ))}

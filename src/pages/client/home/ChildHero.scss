@@ -1,0 +1,130 @@
+.hero-banner {
+  display: block;
+  width: 100%;
+  height: 100vh;
+
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+
+    background: #f97316; // cam
+    color: #fff;
+
+    padding: 6px 14px;
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+
+    transition: all 0.3s ease;
+  }
+
+  &:hover &__badge {
+    background: #fb923c;
+    transform: translateX(-50%) scale(1.05);
+  }
+
+  
+
+  &__title {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+
+    margin: 0;
+    width: max-content;
+    max-width: calc(100% - 24px);
+
+    color: #22c55e;
+    font-size: 60px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.25;
+
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: #4ade80;
+      text-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
+    }
+  }
+
+  &:hover &__title {
+    color: #4ade80;
+    text-shadow: 0 0 16px rgba(34, 197, 94, 0.8);
+  }
+}
+
+
+@media (max-width: 768px) {
+  .hero-banner {
+    width: 100%;
+    height: auto; 
+    min-height: unset;
+
+    &__img {
+      width: 100%;
+      height: auto; 
+      object-fit: cover;
+      object-position: 25% top; 
+    }
+
+    &__title {
+      top: 18px;
+      width: calc(100% - 24px);
+
+      font-size: 16px;
+      letter-spacing: 1.2px;
+      line-height: 1.3;
+    }
+  }
+}
+
+//
+//
+@media (max-width: 480px) {
+  .hero-banner {
+    &__img {
+      object-position: 20% top; 
+    }
+
+    &__title {
+      top: 12px;
+      font-size: 14px;
+      width: calc(100% - 20px);
+    }
+  }
+}

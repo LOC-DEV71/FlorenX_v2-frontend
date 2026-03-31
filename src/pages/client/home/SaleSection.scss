@@ -18,6 +18,7 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
+    display: block;
 
     &.mobile {
       display: none;
@@ -157,8 +158,18 @@
 
 @media (max-width: 768px) {
   .sale-banner {
-    height: 100vh;
-    min-height: 100vh;
+    width: 100%;
+    height: auto;
+    min-height: unset;
+
+    .sale-bg {
+      position: relative;
+      inset: unset;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      object-position: center;
+    }
 
     .sale-bg.desktop {
       display: none;
@@ -168,40 +179,110 @@
       display: block;
     }
 
+    .sale-overlay {
+      z-index: 1;
+    }
+
+    .sale-content-container {
+      position: absolute;
+      inset: 0;
+      align-items: center;
+    }
+
     .sale-content-inner {
       padding: 0 16px;
     }
 
+    .sale-content {
+      max-width: 300px;
+    }
+
     .sale-countdown {
-      top: 16px;
-      right: 16px;
+      top: 12px;
+      right: 12px;
+    }
+
+    .sale-tag {
+      font-size: 9px;
+      letter-spacing: 1.4px;
+      margin-bottom: 8px;
     }
 
     .sale-title {
-      font-size: 34px;
-      line-height: 1.1;
+      font-size: 24px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      letter-spacing: -0.4px;
     }
 
     .sale-desc {
-      font-size: 14px;
-      margin-bottom: 18px;
+      font-size: 12px;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .sale-actions {
+      gap: 8px;
     }
 
     .sale-discount,
     .sale-btn {
-      min-height: 40px;
-      border-radius: 10px;
-      font-size: 14px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 12px;
     }
   }
 
   .sale-time {
-    gap: 6px;
+    gap: 4px;
 
     span {
-      min-width: 30px;
-      height: 30px;
-      font-size: 12px;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .sale-banner {
+    .sale-content {
+      max-width: 240px;
+    }
+
+    .sale-countdown {
+      top: 10px;
+      right: 10px;
+    }
+
+    .sale-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .sale-desc {
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+
+    .sale-discount,
+    .sale-btn {
+      min-height: 30px;
+      padding: 0 10px;
+      font-size: 11px;
+    }
+  }
+
+  .sale-time {
+    gap: 3px;
+
+    span {
+      min-width: 22px;
+      height: 22px;
+      font-size: 9px;
     }
   }
 }

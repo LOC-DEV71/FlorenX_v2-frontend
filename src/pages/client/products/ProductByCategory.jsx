@@ -5,12 +5,15 @@ import { useSelector } from "react-redux";
 import "./ProductByCategory.scss";
 import { getBySlug } from "../../../services/client/product.category.client";
 import { LoadingOutlined } from "@ant-design/icons"
-import { Skeleton } from 'antd';
-import NoData from "../../../assets/banner/empty.png"
+import NoData from "../../../assets/banner/empty.png";
+import { renderpagination } from "../../../utils/pagination.client.utils";
+import SEO from "../../../utils/SEO";
+
 
 function ProductByCategory() {
     const { category } = useParams();
     const [data, setData] = useState([]);
+    const [pagination, setPagination] = useState([]);
     const [categoryList, setCategoryList] = useState([]);
 
     const settings = useSelector((state) => state.setting.settings);
@@ -18,37 +21,42 @@ function ProductByCategory() {
     const heroItem = section_hero.find((item) => item.tag === category);
     const loadingUi = useSelector((state) => state.setting.loading);
 
+
     const [searchParams, setSearchParams] = useSearchParams();
 
     const navigate = useNavigate();
 
     const price = Number(searchParams.get("price")) || 0;
     const discount = (searchParams.get("discount")) || "false";
+    const limit = searchParams.get("limit") || 6;
+    const page = searchParams.get("page") || 1;
+
     const [loading, setLoading] = useState(false);
+
+
+
     const [loadingCate, setLoadingCate] = useState(false);
 
     useEffect(() => {
         const fetchProducts = async () => {
             if (!category) return;
 
-            setLoading(true);
+                setLoading(true);
             try {
-                const res = await getProductByCategory({ category, price, discount });
+                const res = await getProductByCategory({ category, price, discount, limit, page });
                 if (res?.data?.code) {
                     setData(res.data.products);
-                } else {
-                    setData([]);
-                }
+                    setPagination(res.data.pagination);
+                } 
             } catch (error) {
                 console.error("Error fetching products:", error);
-                setData([]);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProducts();
-    }, [category, price, discount]);
+    }, [category, price, discount, limit, page]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -79,16 +87,22 @@ function ProductByCategory() {
         50000000,
         500000000
     ];
+
+
     return (
         <>
             {loadingUi ?
                 <div className="product-by-category" >
                     <div className="loading">
-                        <LoadingOutlined />
+                        <span className="spinner "></span>
                     </div>
                 </div>
                 : (
                     <div className="product-by-category" id={`${category}`}>
+                             <SEO 
+                                title={`Veltrix - ${heroItem?.title || category || "Accessories"}`} 
+                                description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
+                            />
                         <div className="container">
                             <div className="breadcrumb">
                                 <span>Home</span>
@@ -105,7 +119,7 @@ function ProductByCategory() {
                                     </h1>
                                     <p className="hero__desc">
                                         {heroItem?.description ||
-                                            "Curated essentials for the modern lifestyle. Precision-crafted pieces designed to elevate your daily ritual."}
+                                            "Những vật dụng thiết yếu được tuyển chọn kỹ lưỡng cho lối sống hiện đại. Những món đồ được chế tác tỉ mỉ nhằm nâng tầm cuộc sống thường nhật của bạn."}
                                     </p>
                                 </div>
 
@@ -176,9 +190,9 @@ function ProductByCategory() {
                                 </aside>
 
                                 <div className="products-section" >
-                                    {loading ? (
+                                    {loading  ? (
                                         <div className="product-grid-loading">
-                                            Đang tải sản phẩm <LoadingOutlined />
+                                            Đang tải sản phẩm <span className="spinner"></span>
                                         </div>
                                     ) : data?.length === 0 ? (
                                         <div className="no-product">
@@ -199,7 +213,7 @@ function ProductByCategory() {
 
                                                 return (
                                                     <Link
-                                                        to={`/product/${item.slug || item._id}`}
+                                                        to={`/products/detail/${item.slug || item._id}`}
                                                         className="product-card"
                                                         key={item._id || index}
                                                     >
@@ -208,6 +222,9 @@ function ProductByCategory() {
                                                                 <span className="badge-sale">
                                                                     -{discountPercentage}%
                                                                 </span>
+                                                            )}
+                                                            {item.featured && (
+                                                                <span className="featured-badge">Nổi bật</span>
                                                             )}
 
                                                             <img
@@ -246,16 +263,20 @@ function ProductByCategory() {
                                                                 <span className="rating">★ 4.8</span>
                                                                 <span className="reviews">(120 reviews)</span>
                                                             </div>
-                                                        </div>                                                    
+                                                        </div>
                                                     </Link>
                                                 );
                                             })}
                                         </div>
                                     )}
 
+                                    <div className="load-more-wrap">
+                                        {renderpagination(pagination, setSearchParams, limit, price)}
+                                    </div>
+
                                     <div className="banner">
                                         <div className="banner__overlay">
-                                            <span className="banner__tag">Discount Percentage</span>
+                                            <span className="banner__tag">GIẢM GIÁ THEO PHẦN TRĂM</span>
                                             <h2>Sản phẩm giảm giá sâu</h2>
                                             <p>
                                                 Khám phá những sản phẩm công nghệ cao cấp với mức
@@ -269,13 +290,8 @@ function ProductByCategory() {
                                                     })
                                                 }
                                                 to={"#product-by-category"}
-                                                smooth
-                                            >Explore Collection</button>
+                                            >KHÁM PHÁ BỘ SƯU TẬP</button>
                                         </div>
-                                    </div>
-
-                                    <div className="load-more-wrap">
-                                        <button className="load-more" >Load More</button>
                                     </div>
                                 </div>
                             </div>

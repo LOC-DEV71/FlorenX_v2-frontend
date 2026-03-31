@@ -1,4 +1,4 @@
-.product-page {
+.admin-product-page {
     &__title {
         font-size: 24px;
         font-weight: 600;
@@ -6,7 +6,7 @@
     }
 }
 
-.product-stats {
+.admin-product-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
@@ -17,7 +17,7 @@
     border: 1px solid #eee;
 }
 
-.stat-card {
+.admin-stat-card {
     background: white;
     padding: 18px;
     border-radius: 10px;
@@ -34,37 +34,37 @@
     }
 }
 
-.stat-total svg {
+.admin-stat-total svg {
     color: #2563eb;
     background: rgb(216, 232, 255);
     font-size: 16px;
 }
 
-.stat-active svg {
+.admin-stat-active svg {
     color: #16a34a;
     background: #ecfdf5;
     font-size: 16px;
 }
 
-.stat-out svg {
+.admin-stat-out svg {
     color: #dc2626;
     background: #fef2f2;
     font-size: 16px;
 }
 
-.stat-low svg {
+.admin-stat-low svg {
     color: #d97706;
     background: #fffbeb;
     font-size: 16px;
 }
 
-.product-filters {
+.admin-product-filters {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 10px;
     margin-bottom: 20px;
 
-    .activity {
+    .admin-activity {
         background: #22C55E;
         color: white;
         border: none;
@@ -77,13 +77,12 @@
         gap: 10px;
         font-weight: 600;
 
-
         &:active {
             background: #008f34;
         }
     }
 
-    .reset {
+    .admin-reset {
         background: #ff5441;
         color: white;
         border: none;
@@ -112,7 +111,7 @@
         border: 1px solid #ddd;
     }
 
-    .search {
+    .admin-search {
         display: flex;
         align-items: center;
         border: 1px solid #ddd;
@@ -131,7 +130,7 @@
         }
     }
 
-    .create {
+    .admin-create {
         font-weight: 600px;
         background: #3273ff;
         border: 10px;
@@ -149,21 +148,21 @@
     }
 }
 
-.table-wrapper {
+.admin-table-wrapper {
     overflow-x: auto;
     width: 100%;
 }
 
-.table-wrapper::-webkit-scrollbar {
+.admin-table-wrapper::-webkit-scrollbar {
     height: 8px;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb {
+.admin-table-wrapper::-webkit-scrollbar-thumb {
     background: #d1d5db;
     border-radius: 10px;
 }
 
-.product-table {
+.admin-product-table {
     min-width: 1000px;
     background: white;
     border-radius: 10px;
@@ -171,7 +170,7 @@
     overflow: hidden;
 }
 
-.table-header {
+.admin-table-header {
     display: grid;
     grid-template-columns: 50px 300px repeat(6, 1fr) 150px;
     padding: 14px;
@@ -185,7 +184,7 @@
     gap: 10px;
 }
 
-.table-row {
+.admin-table-row {
     display: grid;
     grid-template-columns: 50px 300px repeat(6, 1fr) 150px;
     padding: 14px;
@@ -195,7 +194,7 @@
     gap: 10px;
     position: relative;
 
-    .featured {
+    .admin-featured {
         position: absolute;
         top: 10px;
         left: 10px;
@@ -209,33 +208,33 @@
         padding: 3px;
     }
 
-    .yes {
+    .admin-yes {
         display: block;
     }
 
-    .no {
+    .admin-no {
         display: none;
     }
 }
 
-.table-row:hover {
+.admin-table-row:hover {
     background: #f9fafb;
 }
 
-.col-product {
+.admin-col-product {
     position: sticky;
     left: 0;
     background: white;
     z-index: 4;
 }
 
-.product-info {
+.admin-product-info {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.product-images {
+.admin-product-images {
     display: flex;
 
     img {
@@ -251,41 +250,42 @@
     }
 }
 
-.product-name {
+.admin-product-name {
     font-weight: 500;
 }
 
-.product-sub {
+.admin-product-sub {
     font-size: 12px;
     color: #777;
 }
 
-.status {
+.admin-status {
     padding: 4px 10px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
 }
 
-.status.active {
+.admin-status.active {
     background: #e6f7ed;
     color: #22a06b;
 }
-.status.inactive {
+
+.admin-status.inactive {
     background: #ffc6c6;
     color: #d05a5a;
 }
 
-.status.low {
+.admin-status.low {
     background: #fff3cd;
     color: #b7791f;
 }
 
-.actions {
+.admin-actions {
     display: flex;
     gap: 6px;
 
-    .edit {
+    .admin-edit {
         border: none;
         background: #3273ff;
         padding: 6px 10px;
@@ -294,7 +294,8 @@
         color: white;
         font-weight: 600;
     }
-    .delete {
+
+    .admin-delete {
         border: none;
         background: #ff5441;
         padding: 6px 10px;
@@ -306,50 +307,51 @@
         &:hover {
             background: #d05a5a;
         }
-        &:active{
+
+        &:active {
             background: rgb(143, 1, 1);
         }
     }
 }
 
-@media(max-width: 1400px) {
-    .product-filters {
+@media (max-width: 1400px) {
+    .admin-product-filters {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
-@media(max-width: 1024px) {
-    .product-stats {
+@media (max-width: 1024px) {
+    .admin-product-stats {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .product-filters {
+    .admin-product-filters {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-@media(max-width: 768px) {
-    .product-stats {
+@media (max-width: 768px) {
+    .admin-product-stats {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .product-filters {
+    .admin-product-filters {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media(max-width: 600px) {
-    .product-stats {
+@media (max-width: 600px) {
+    .admin-product-stats {
         display: flex;
         flex-direction: column;
     }
 
-    .product-filters {
+    .admin-product-filters {
         display: grid;
         grid-template-columns: 1fr;
     }

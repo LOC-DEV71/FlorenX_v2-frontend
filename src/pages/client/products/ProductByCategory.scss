@@ -108,6 +108,23 @@
         margin-bottom: 32px;
         padding-bottom: 14px;
         border-bottom: 1px solid #e6e6e8;
+        overflow-y: hidden;
+        &::-webkit-scrollbar {
+            height: 7px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 10px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
 
         a {
             background: transparent;
@@ -286,7 +303,7 @@
             position: relative;
             overflow: hidden;
             background: #161616;
-            aspect-ratio: 0.82 / 1;
+            aspect-ratio: 1.1 / 1;
 
             img {
                 width: 100%;
@@ -308,6 +325,20 @@
                 padding: 6px 10px;
                 border-radius: 999px;
                 box-shadow: 0 8px 20px rgba(255, 77, 79, 0.28);
+            }
+
+            .featured-badge {
+               position: absolute;
+                top: 10px;
+                right: 10px;
+                background: linear-gradient(to right, rgb(226, 1, 1), rgb(255, 115, 0));
+                font-weight: 600;
+                font-size: 12px;
+                border: dashed;
+                border-width: 2px 4px;
+                border-radius: 40px;
+                color: white;
+                padding: 3px;
             }
         }
 
@@ -470,6 +501,11 @@
             padding: 0 16px;
         }
 
+        .filters{
+            position: none;
+
+        }
+
         .hero {
             gap: 20px;
 
@@ -494,6 +530,7 @@
 
         .filters {
             order: 1;
+            position: static;
         }
 
         .products-section {
@@ -501,7 +538,7 @@
         }
 
         .product-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 24px;
         }
 

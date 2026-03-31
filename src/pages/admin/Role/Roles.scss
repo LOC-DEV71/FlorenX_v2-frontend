@@ -1,12 +1,226 @@
-.role-table-header {
+.admin-role-page {
+    &__title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+}
+
+.admin-role-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+}
+
+.admin-role-stat-card {
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+
+    p {
+        font-size: 14px;
+        color: #777;
+    }
+
+    h3 {
+        margin-top: 5px;
+        font-size: 22px;
+    }
+}
+
+.admin-role-stat-total svg {
+    color: #2563eb;
+    background: rgb(216, 232, 255);
+    font-size: 16px;
+}
+
+.admin-role-stat-active svg {
+    color: #16a34a;
+    background: #ecfdf5;
+    font-size: 16px;
+}
+
+.admin-role-stat-out svg {
+    color: #dc2626;
+    background: #fef2f2;
+    font-size: 16px;
+}
+
+.admin-role-stat-low svg {
+    color: #d97706;
+    background: #fffbeb;
+    font-size: 16px;
+}
+
+.admin-role-filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    .admin-role-activity {
+        background: #22C55E;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 600;
+
+        &:active {
+            background: #008f34;
+        }
+    }
+
+    .admin-role-reset {
+        background: #ff5441;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 600;
+
+        &:active {
+            background: rgb(150, 0, 0);
+        }
+
+        svg {
+            font-size: 18px;
+        }
+    }
+
+    input,
+    select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+
+    .admin-role-search {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding-left: 5px;
+
+        input {
+            width: 100%;
+            border: none;
+            outline: none;
+
+            &:focus {
+                border: none;
+                outline: none;
+            }
+        }
+    }
+
+    .admin-role-create {
+        background: #3273ff;
+        border: 10px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-weight: 600;
+
+        &:active {
+            background: #004ae9;
+            box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+        }
+    }
+}
+
+.admin-role-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.admin-role-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.admin-role-table-wrapper::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+}
+
+.admin-role-table {
+    min-width: 1000px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.admin-table-header {
+    display: grid;
+    padding: 14px;
+    font-weight: 600;
+    background: #fafafa;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    gap: 10px;
+}
+
+.admin-role-table-header {
     grid-template-columns: 50px 250px 1.8fr 220px 100px 100px;
 }
 
-.role-table-row {
+.admin-table-row {
+    display: grid;
+    padding: 14px;
+    align-items: center;
+    border-bottom: 1px solid #f3f3f3;
+    transition: background 0.2s;
+    gap: 10px;
+}
+
+.admin-role-table-row {
     grid-template-columns: 50px 250px 1.8fr 220px 100px 100px;
 }
 
-.role-description {
+.admin-table-row:hover {
+    background: #f9fafb;
+}
+
+.admin-role-col-title {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 4;
+}
+
+.admin-role-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-role-name {
+    font-weight: 500;
+}
+
+.admin-role-description {
     font-size: 14px;
     color: #555;
     line-height: 1.4;
@@ -14,4 +228,83 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.admin-role-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.admin-role-edit {
+    border: none;
+    background: #3273ff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-role-delete {
+    border: none;
+    background: #ff5441;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+
+    &:hover {
+        background: #d05a5a;
+    }
+
+    &:active {
+        background: rgb(143, 1, 1);
+    }
+}
+
+@media (max-width: 1400px) {
+    .admin-role-filters {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .admin-role-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-role-filters {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-role-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-role-filters {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-role-stats {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .admin-role-filters {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
 }

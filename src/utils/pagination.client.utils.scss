@@ -1,0 +1,123 @@
+.pagination {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+
+  .pagination_left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #4b4b4b;
+    backdrop-filter: blur(10px);
+  }
+
+  button {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+
+    &:hover:not(:disabled):not(.active) {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.09);
+      border-color: #4b4b4b;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+
+    &.active {
+      background: #4d46d3;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    &.nav-btn {
+      padding: 0 16px;
+      color: rgba(255, 255, 255, 0.86);
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.06);
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &:disabled {
+        opacity: 0.35;
+        background: rgba(255, 255, 255, 0.02);
+      }
+    }
+  }
+
+  .pagination_right {
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.22s ease;
+
+    &:hover,
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    option {
+      background: #0b0d12;
+      color: #fff;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .pagination {
+    gap: 10px;
+
+    .pagination_left {
+      gap: 6px;
+      padding: 6px;
+    }
+
+    button {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+
+    .pagination_right {
+      height: 36px;
+      font-size: 12px;
+      padding: 0 12px;
+    }
+  }
+}

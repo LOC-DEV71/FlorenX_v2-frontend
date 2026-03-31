@@ -108,6 +108,167 @@ header {
     gap: 20px;
     font-size: 20px;
     cursor: pointer;
+    align-items: center;
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #00e0b8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .profile_wrapper {
+      position: relative;
+    }
+
+    .avatar {
+      width: 47px;
+      height: 47px;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      transition: 0.3s;
+
+      &:hover {
+        border-color: #fff;
+        transform: scale(1.05);
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+
+    .profile_modal {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      width: 280px;
+      background: rgba(10, 10, 12, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      z-index: 1000;
+      animation: fadeInProfile 0.2s ease;
+    }
+
+    .profile_modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .profile_modal-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+
+    .profile_modal-info {
+      h4 {
+        margin: 0;
+        font-size: 15px;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: #9ca3af;
+        word-break: break-word;
+      }
+    }
+
+    .profile_modal-menu {
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      cursor: default;
+
+      a,
+      button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        text-decoration: none;
+        background: transparent;
+        border: none;
+        padding: 12px 14px;
+        border-radius: 10px;
+        color: #e5e7eb;
+        font-size: 14px;
+        text-align: left;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      a:hover,
+      button:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+      }
+
+      svg {
+        font-size: 16px;
+        color: inherit;
+      }
+    }
+
+    @keyframes fadeInProfile {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      border: 1px solid gray;
+      padding: 3px 15px;
+      border-radius: 8px;
+      background: rgb(0, 0, 0);
+      text-decoration: none;
+
+      &:hover {
+        background: gray;
+      }
+    }
 
     .search {
       display: none;
