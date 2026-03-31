@@ -81,7 +81,7 @@ function Header({ setOpenMenu }) {
                   onClick={() => setOpenProfile((prev) => !prev)}
                 >
                   <img
-                  src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.email}`}
+                  src={user?.avatar ? user?.avatar : `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.email}`}
                   alt="avatar"
                 />                 
                 </div>
@@ -91,7 +91,7 @@ function Header({ setOpenMenu }) {
                     <div className="profile_modal-header">
                       <div className="profile_modal-avatar">
                         <img
-                          src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.email}`}
+                          src={user?.avatar ? user?.avatar : `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.email}`}
                           alt="avatar"
                         />
                       </div>
@@ -103,10 +103,10 @@ function Header({ setOpenMenu }) {
                     </div>
 
                     <div className="profile_modal-menu">
-                      <Link to="/account" onClick={() => setOpenProfile(false)}>
+                      <HashLink smooth to="/account/#user-profile-page" onClick={() => setOpenProfile(false)}>
                         <UserOutlined />
                         <span>Thông tin cá nhân</span>
-                      </Link>
+                      </HashLink>
 
                       <Link to="/don-hang" onClick={() => setOpenProfile(false)}>
                         <FileTextOutlined />
@@ -118,10 +118,10 @@ function Header({ setOpenMenu }) {
                         <span>Yêu thích</span>
                       </Link>
 
-                      <Link to="/gio-hang" onClick={() => setOpenProfile(false)}>
+                      <HashLink smooth to="/gio-hang/#cart-page" onClick={() => setOpenProfile(false)}>
                         <ShoppingCartOutlined />
                         <span>Giỏ hàng</span>
-                      </Link>
+                      </HashLink>
 
                       {/* pages/client/auth/logout */}
                       <LogoutClient setOpenProfile={setOpenProfile} />
@@ -131,9 +131,16 @@ function Header({ setOpenMenu }) {
               </div>
             </>
           ) : (
-            <Link className="login" to="/login">
-              Đăng nhập
-            </Link>
+            <>
+              {isLogin === false && 
+                <HashLink smooth to="/gio-hang/#cart-page">
+                  <ShoppingCartOutlined />
+                </HashLink>
+              }
+              <Link className="login" to="/login">
+                Đăng nhập
+              </Link>
+            </>
           )}
         </div>
       </div>

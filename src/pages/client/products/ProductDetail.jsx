@@ -3,6 +3,9 @@ import "./ProductDeatil.scss";
 import { getProductBySlug } from "../../../services/client/product.service";
 import { Link, useParams } from "react-router-dom";
 import SEO from "../../../utils/SEO";
+import { error, success } from "../../../utils/notift";
+import { addToCart } from "../../../services/client/cart.service";
+import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 
 function ProductDeatil() {
   const { slug } = useParams();
@@ -12,7 +15,7 @@ function ProductDeatil() {
   const [thumbnail, setThumbnail] = useState("");
   const [products, setProducts] = useState([]);
   const [overview, setOverview] = useState(true);
-
+  const [liked, setLiked] = useState(false);
   useEffect(() => {
     let isMounted = true;
 
@@ -51,6 +54,18 @@ function ProductDeatil() {
     };
   }, [slug]);
 
+  const handleAddtoCart = async () => {
+    try {
+      const res = await addToCart({ productId: data?._id });
+      if (res.data.code) {
+        success(res.data.message);
+      }
+    } catch (err) {
+      error("Thêm giỏ hàng không thành công");
+      console.error(err.response?.data.message);
+    }
+  }
+
   const finalPrice = useMemo(() => {
     const price = Number(data?.price) || 0;
     const discountPercentage = Number(data?.discountPercentage) || 0;
@@ -74,6 +89,8 @@ function ProductDeatil() {
   }, [data?.specs]);
 
 
+  console.log(data?._id)
+
   if (loading) {
     return (
       <div className="product-page loading-page">
@@ -86,10 +103,10 @@ function ProductDeatil() {
 
   return (
     <div className="product-page">
-       <SEO 
-            title={data?.title} 
-            description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
-        />
+      <SEO
+        title={data?.title}
+        description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
+      />
       <main className="container">
         <section className="hero">
           <div className="hero__left">
@@ -163,7 +180,7 @@ function ProductDeatil() {
               <button type="button" className="btn btn--primary">
                 Mua ngay
               </button>
-              <button type="button" className="btn btn--dark">
+              <button type="button" className="btn btn--dark" onClick={handleAddtoCart}>
                 Thêm vào giỏ
               </button>
             </div>
@@ -215,139 +232,139 @@ function ProductDeatil() {
             </section>
           ) : (
             <section className="review-section">
-  <div className="review-hero">
-    <div className="review-score">
-      <div className="review-score__value">4.8</div>
-      <div className="review-score__stars">★★★★★</div>
-      <p>Dựa trên 128 đánh giá khách hàng</p>
-    </div>
+              <div className="review-hero">
+                <div className="review-score">
+                  <div className="review-score__value">4.8</div>
+                  <div className="review-score__stars">★★★★★</div>
+                  <p>Dựa trên 128 đánh giá khách hàng</p>
+                </div>
 
-    <div className="review-bars">
-      <div className="review-bar">
-        <span>5 sao</span>
-        <div className="bar-track">
-          <div className="bar-fill" style={{ width: "82%" }}></div>
-        </div>
-        <strong>82%</strong>
-      </div>
+                <div className="review-bars">
+                  <div className="review-bar">
+                    <span>5 sao</span>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ width: "82%" }}></div>
+                    </div>
+                    <strong>82%</strong>
+                  </div>
 
-      <div className="review-bar">
-        <span>4 sao</span>
-        <div className="bar-track">
-          <div className="bar-fill" style={{ width: "12%" }}></div>
-        </div>
-        <strong>12%</strong>
-      </div>
+                  <div className="review-bar">
+                    <span>4 sao</span>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ width: "12%" }}></div>
+                    </div>
+                    <strong>12%</strong>
+                  </div>
 
-      <div className="review-bar">
-        <span>3 sao</span>
-        <div className="bar-track">
-          <div className="bar-fill" style={{ width: "4%" }}></div>
-        </div>
-        <strong>4%</strong>
-      </div>
+                  <div className="review-bar">
+                    <span>3 sao</span>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ width: "4%" }}></div>
+                    </div>
+                    <strong>4%</strong>
+                  </div>
 
-      <div className="review-bar">
-        <span>2 sao</span>
-        <div className="bar-track">
-          <div className="bar-fill" style={{ width: "1%" }}></div>
-        </div>
-        <strong>1%</strong>
-      </div>
+                  <div className="review-bar">
+                    <span>2 sao</span>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ width: "1%" }}></div>
+                    </div>
+                    <strong>1%</strong>
+                  </div>
 
-      <div className="review-bar">
-        <span>1 sao</span>
-        <div className="bar-track">
-          <div className="bar-fill" style={{ width: "1%" }}></div>
-        </div>
-        <strong>1%</strong>
-      </div>
-    </div>
-  </div>
+                  <div className="review-bar">
+                    <span>1 sao</span>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ width: "1%" }}></div>
+                    </div>
+                    <strong>1%</strong>
+                  </div>
+                </div>
+              </div>
 
-  <div className="review-list">
-    <div className="review-card featured">
-      <div className="review-card__top">
-        <div className="review-user">
-          <div className="review-avatar">L</div>
-          <div>
-            <strong>Lộc Lâm</strong>
-            <span>Đã mua hàng</span>
-          </div>
-        </div>
-        <div className="review-stars">★★★★★</div>
-      </div>
+              <div className="review-list">
+                <div className="review-card featured">
+                  <div className="review-card__top">
+                    <div className="review-user">
+                      <div className="review-avatar">L</div>
+                      <div>
+                        <strong>Lộc Lâm</strong>
+                        <span>Đã mua hàng</span>
+                      </div>
+                    </div>
+                    <div className="review-stars">★★★★★</div>
+                  </div>
 
-      <h4>Hiệu năng vượt mong đợi</h4>
-      <p>
-        Máy chạy rất mượt, chiến game ngon, nhiệt độ ổn định. Thiết kế đẹp,
-        LED nhìn cực nổi bật vào buổi tối. Shop tư vấn cũng rất nhiệt tình.
-      </p>
+                  <h4>Hiệu năng vượt mong đợi</h4>
+                  <p>
+                    Máy chạy rất mượt, chiến game ngon, nhiệt độ ổn định. Thiết kế đẹp,
+                    LED nhìn cực nổi bật vào buổi tối. Shop tư vấn cũng rất nhiệt tình.
+                  </p>
 
-      <div className="review-tags">
-        <span>Hiệu năng tốt</span>
-        <span>Đóng gói kỹ</span>
-        <span>Đáng tiền</span>
-      </div>
-    </div>
+                  <div className="review-tags">
+                    <span>Hiệu năng tốt</span>
+                    <span>Đóng gói kỹ</span>
+                    <span>Đáng tiền</span>
+                  </div>
+                </div>
 
-    <div className="review-grid">
-      <div className="review-card">
-        <div className="review-card__top">
-          <div className="review-user">
-            <div className="review-avatar alt">A</div>
-            <div>
-              <strong>Nguyễn An</strong>
-              <span>2 ngày trước</span>
-            </div>
-          </div>
-          <div className="review-stars">★★★★☆</div>
-        </div>
+                <div className="review-grid">
+                  <div className="review-card">
+                    <div className="review-card__top">
+                      <div className="review-user">
+                        <div className="review-avatar alt">A</div>
+                        <div>
+                          <strong>Nguyễn An</strong>
+                          <span>2 ngày trước</span>
+                        </div>
+                      </div>
+                      <div className="review-stars">★★★★☆</div>
+                    </div>
 
-        <p>
-          Giá hợp lý, build đẹp, chạy các tác vụ đồ họa tốt. Giao hàng chậm hơn
-          dự kiến một chút nhưng tổng thể vẫn rất hài lòng.
-        </p>
-      </div>
+                    <p>
+                      Giá hợp lý, build đẹp, chạy các tác vụ đồ họa tốt. Giao hàng chậm hơn
+                      dự kiến một chút nhưng tổng thể vẫn rất hài lòng.
+                    </p>
+                  </div>
 
-      <div className="review-card">
-        <div className="review-card__top">
-          <div className="review-user">
-            <div className="review-avatar pink">H</div>
-            <div>
-              <strong>Hải Nam</strong>
-              <span>1 tuần trước</span>
-            </div>
-          </div>
-          <div className="review-stars">★★★★★</div>
-        </div>
+                  <div className="review-card">
+                    <div className="review-card__top">
+                      <div className="review-user">
+                        <div className="review-avatar pink">H</div>
+                        <div>
+                          <strong>Hải Nam</strong>
+                          <span>1 tuần trước</span>
+                        </div>
+                      </div>
+                      <div className="review-stars">★★★★★</div>
+                    </div>
 
-        <p>
-          Phần ngoại hình quá đẹp, case chắc chắn, hiệu năng ổn định. Chơi AAA
-          setting cao vẫn mượt, rất đáng tiền trong tầm giá.
-        </p>
-      </div>
-    </div>
-  </div>
+                    <p>
+                      Phần ngoại hình quá đẹp, case chắc chắn, hiệu năng ổn định. Chơi AAA
+                      setting cao vẫn mượt, rất đáng tiền trong tầm giá.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-  <div className="review-form">
-    <div className="review-form__head">
-      <h3>Chia sẻ cảm nhận của bạn</h3>
-      <div className="review-form__stars">☆ ☆ ☆ ☆ ☆</div>
-    </div>
+              <div className="review-form">
+                <div className="review-form__head">
+                  <h3>Chia sẻ cảm nhận của bạn</h3>
+                  <div className="review-form__stars">☆ ☆ ☆ ☆ ☆</div>
+                </div>
 
-    <div className="review-form__group">
-      <input type="text" placeholder="Tên của bạn" />
-      <input type="text" placeholder="Tiêu đề đánh giá" />
-    </div>
+                <div className="review-form__group">
+                  <input type="text" placeholder="Tên của bạn" />
+                  <input type="text" placeholder="Tiêu đề đánh giá" />
+                </div>
 
-    <textarea placeholder="Hãy chia sẻ trải nghiệm thực tế sau khi sử dụng sản phẩm..." />
+                <textarea placeholder="Hãy chia sẻ trải nghiệm thực tế sau khi sử dụng sản phẩm..." />
 
-    <button type="button" className="btn btn--primary">
-      Gửi đánh giá
-    </button>
-  </div>
-</section>
+                <button type="button" className="btn btn--primary">
+                  Gửi đánh giá
+                </button>
+              </div>
+            </section>
           )
         }
 
@@ -400,22 +417,33 @@ function ProductDeatil() {
                       {discountPercentage > 0 ? (
                         <>
                           <span className="price-old">
-                            {originalPrice.toLocaleString("vi-VN")} VNĐ
+                            {originalPrice.toLocaleString("vi-VN")}đ
                           </span>
                           <span className="price-new">
-                            {finalPrice.toLocaleString("vi-VN")} VNĐ
+                            {finalPrice.toLocaleString("vi-VN")}đ
                           </span>
                         </>
                       ) : (
                         <span className="price-new">
-                          {originalPrice.toLocaleString("vi-VN")} VNĐ
+                          {originalPrice.toLocaleString("vi-VN")}đ
                         </span>
                       )}
                     </div>
 
                     <div className="product-card__meta">
-                      <span className="rating">★ 4.8</span>
-                      <span className="reviews">(120 reviews)</span>
+                      <div className="left">
+                        <span className="rating">★ 4.8</span>
+                        <span className="reviews">(120 reviews)</span>
+                      </div>
+
+                      <div className="favorite">
+                        <div className="favorite" onClick={(e) => {
+                          e.preventDefault();
+                          setLiked(!liked);
+                        }}>
+                          {liked ? <HeartFilled style={{ color: "red" }} /> : <HeartOutlined />}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </Link>

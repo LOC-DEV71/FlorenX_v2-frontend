@@ -17,6 +17,23 @@
   color: #f3f4f6;
   font-weight: 600;
 
+  &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: #888;
+      }
+
   .close-btn {
     width: 32px;
     height: 32px;

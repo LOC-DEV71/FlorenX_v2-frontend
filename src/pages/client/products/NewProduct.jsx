@@ -64,7 +64,7 @@ function AutoVideoSection({
 
   return (
     <>
-      <section className="product-intro">
+      <section className="product-intro" >
         <div className="product-intro__container">
           <div className="product-intro__heading product-intro__heading--center">
             <span className={`product-intro__tag ${tagClassName}`.trim()}>
@@ -160,7 +160,7 @@ function NewProduct() {
 
   return (
     <>
-      <section ref={heroSectionRef} className="child-hero" id="child-hero">
+      <section ref={heroSectionRef} className="child-hero" >
         <video
           ref={heroVideoRef}
           className="child-hero__video"
@@ -168,6 +168,7 @@ function NewProduct() {
           muted
           playsInline
           preload="metadata"
+          id="hero-video"
         />
 
         <div className="child-hero__overlay" />

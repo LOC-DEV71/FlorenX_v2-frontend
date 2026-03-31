@@ -6,8 +6,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 17, 21, 0.85);
-  backdrop-filter: blur(6px);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
 }
 
 .product-loading {
@@ -37,7 +38,7 @@
 
 .product-page {
   min-height: 100vh;
-  background: #0f1115;
+  background: black;
   color: #e5e7eb;
   font-family: "Inter", sans-serif;
 
@@ -65,7 +66,7 @@
         margin-bottom: 14px;
         border: 1px solid #232937;
         border-radius: 16px;
-        background: #151821;
+        background: gray;
         overflow: hidden;
 
         img {
@@ -347,13 +348,11 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.04),
-        transparent 30%,
-        transparent 70%,
-        rgba(255, 255, 255, 0.03)
-      );
+      background: linear-gradient(135deg,
+          rgba(255, 255, 255, 0.04),
+          transparent 30%,
+          transparent 70%,
+          rgba(255, 255, 255, 0.03));
       pointer-events: none;
     }
 
@@ -721,6 +720,11 @@
         font-weight: 600;
         line-height: 1.5;
         color: #fff;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        /* số dòng */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
 
       &__price {
@@ -745,22 +749,32 @@
       &__meta {
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 13px;
+        justify-content: space-between;
 
-        .rating {
-          font-weight: 600;
-          color: #4f46e5;
+        .left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: orange;
         }
 
-        .reviews {
-          color: #b5b5b5;
+        .favorite {
+          font-size: 18px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: #ff4d4f;
+            transform: scale(1.1);
+          }
         }
+
       }
     }
   }
 
   @media (max-width: 991px) {
+
     .hero,
     .overview,
     .review-section .review-hero,
@@ -825,6 +839,20 @@
 
     .related-products .product-grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .product-card__title {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      /* số dòng */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-card__info {
+      .price-new {
+        font-size: 15px;
+      }
     }
   }
 }

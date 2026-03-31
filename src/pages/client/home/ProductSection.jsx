@@ -10,7 +10,7 @@ function ProductSection() {
             {section?.map((item) => (
                 <HashLink
                     className="product_section_item"
-                    to={`/${item.link}/${item.tag}`}
+                    to={`/${item.link}/${item.tag}/#product-by-category`}
                     key={item._id}
                     smooth
                 >

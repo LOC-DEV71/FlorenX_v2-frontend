@@ -4,7 +4,7 @@ import { getProductByCategory } from "../../../services/client/product.service";
 import { useSelector } from "react-redux";
 import "./ProductByCategory.scss";
 import { getBySlug } from "../../../services/client/product.category.client";
-import { LoadingOutlined } from "@ant-design/icons"
+import { LoadingOutlined, HeartOutlined, HeartFilled } from "@ant-design/icons"
 import NoData from "../../../assets/banner/empty.png";
 import { renderpagination } from "../../../utils/pagination.client.utils";
 import SEO from "../../../utils/SEO";
@@ -20,6 +20,8 @@ function ProductByCategory() {
     const section_hero = settings?.section_hero || [];
     const heroItem = section_hero.find((item) => item.tag === category);
     const loadingUi = useSelector((state) => state.setting.loading);
+    const [liked, setLiked] = useState(false);
+
 
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -41,13 +43,13 @@ function ProductByCategory() {
         const fetchProducts = async () => {
             if (!category) return;
 
-                setLoading(true);
+            setLoading(true);
             try {
                 const res = await getProductByCategory({ category, price, discount, limit, page });
                 if (res?.data?.code) {
                     setData(res.data.products);
                     setPagination(res.data.pagination);
-                } 
+                }
             } catch (error) {
                 console.error("Error fetching products:", error);
             } finally {
@@ -98,11 +100,11 @@ function ProductByCategory() {
                     </div>
                 </div>
                 : (
-                    <div className="product-by-category" id={`${category}`}>
-                             <SEO 
-                                title={`Veltrix - ${heroItem?.title || category || "Accessories"}`} 
-                                description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
-                            />
+                    <div className="product-by-category" id="product-by-category">
+                        <SEO
+                            title={`Veltrix - ${heroItem?.title || category || "Accessories"}`}
+                            description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
+                        />
                         <div className="container">
                             <div className="breadcrumb">
                                 <span>Home</span>
@@ -174,7 +176,7 @@ function ProductByCategory() {
                                                             });
                                                         }}
                                                     />
-                                                    Dưới {value.toLocaleString("vi-VN")} VNĐ
+                                                    Dưới {value.toLocaleString("vi-VN")}đ
                                                 </label>
                                             ))}
                                         </div>
@@ -190,7 +192,7 @@ function ProductByCategory() {
                                 </aside>
 
                                 <div className="products-section" >
-                                    {loading  ? (
+                                    {loading ? (
                                         <div className="product-grid-loading">
                                             Đang tải sản phẩm <span className="spinner"></span>
                                         </div>
@@ -246,22 +248,33 @@ function ProductByCategory() {
                                                                 {discountPercentage > 0 ? (
                                                                     <>
                                                                         <span className="price-old">
-                                                                            {originalPrice.toLocaleString("vi-VN")} VNĐ
+                                                                            {originalPrice.toLocaleString("vi-VN")}đ
                                                                         </span>
                                                                         <span className="price-new">
-                                                                            {finalPrice.toLocaleString("vi-VN")} VNĐ
+                                                                            {finalPrice.toLocaleString("vi-VN")}đ
                                                                         </span>
                                                                     </>
                                                                 ) : (
                                                                     <span className="price-new">
-                                                                        {originalPrice.toLocaleString("vi-VN")} VNĐ
+                                                                        {originalPrice.toLocaleString("vi-VN")}đ
                                                                     </span>
                                                                 )}
                                                             </div>
 
                                                             <div className="product-card__meta">
-                                                                <span className="rating">★ 4.8</span>
-                                                                <span className="reviews">(120 reviews)</span>
+                                                                <div className="left">
+                                                                    <span className="rating">★ 4.8</span>
+                                                                    <span className="reviews">(120 reviews)</span>
+                                                                </div>
+
+                                                                <div className="favorite">
+                                                                    <div className="favorite" onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        setLiked(!liked);
+                                                                    }}>
+                                                                        {liked ? <HeartFilled style={{ color: "red" }} /> : <HeartOutlined />}
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </Link>

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 
 export const renderCategoryOptions = (categories, level = 0) => {
     return categories.flatMap((category) => [
@@ -15,7 +15,7 @@ export const renderCategoryOptions = (categories, level = 0) => {
 export const mapCategoryToMenuItems = (categories) => {
   return categories.map((item) => ({
     key: String(item._id),
-    label: <Link to={`/products/${item.slug}`}>{item.title}</Link>,
+    label: <HashLink smooth to={`/products/${item.slug}/#product-by-category`}>{item.title}</HashLink>,
     children:
       item.children && item.children.length > 0
         ? mapCategoryToMenuItems(item.children)

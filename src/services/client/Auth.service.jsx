@@ -19,3 +19,7 @@ export const getMe = () => {
 export const logout = async () => {
   return axiosAdmin.post("/auth/logout");
 }
+
+export const update = async (data) => {
+  return axiosAdmin.post("/auth/update", data);
+}

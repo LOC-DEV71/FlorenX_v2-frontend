@@ -353,6 +353,10 @@
             margin: 0 0 10px;
             color: #fff;
             min-height: 48px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* số dòng */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         &__price {
@@ -374,19 +378,27 @@
             }
         }
 
-        &__meta {
+        .product-card__meta {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
+            justify-content: space-between;
 
-            .rating {
-                color: #4f46e5;
-                font-weight: 600;
+            .left {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: orange;
             }
 
-            .reviews {
-                color: #b5b5b5;
+            .favorite {
+                font-size: 18px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    color: #ff4d4f;
+                    transform: scale(1.1);
+                }
             }
         }
     }
@@ -540,6 +552,12 @@
         .product-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 24px;
+            .product-card__title{
+                display: -webkit-box;
+                -webkit-line-clamp: 3; /* số dòng */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
         }
 
         .banner {

@@ -54,7 +54,7 @@ function NewsSection() {
                                     </div>
                                 ))
                                 : news.map(item => (
-                                    <Link className="news_client_item" to={`/news/${item.slug}`} key={item.id}>
+                                    <Link className="news_client_item" to={`/news/${item.slug}`} key={item._id}>
                                         <img src={item.thumbnail} alt="" />
                                         <p>{item.title}</p>
                                     </Link>
@@ -76,7 +76,7 @@ function NewsSection() {
                                     </div>
                                 ))
                                 : voucher.map(item => (
-                                    <Link className="news_client_item" to={`/news/${item.slug}`} key={item.id}>
+                                    <Link className="news_client_item" to={`/news/${item.slug}`} key={item._id}>
                                         <img src={item.thumbnail} alt="" />
                                         <p>{item.title}</p>
                                     </Link>

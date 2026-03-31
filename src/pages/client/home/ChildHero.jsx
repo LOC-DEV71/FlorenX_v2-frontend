@@ -1,10 +1,10 @@
 import "./ChildHero.scss";
 import heroImage from "../../../assets/banner/newproduct.png";
-import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 
 function ChildHero() {
   return (
-    <Link to="/products/new-product/laptop-gaming" className="hero-banner">
+    <HashLink smooth to="/products/new-product/laptop-gaming/#hero-video" className="hero-banner">
       
       <img src={heroImage} alt="new product" className="hero-banner__img" />
       <span className="hero-banner__badge">CHỈ CÓ TẠI VELTRIX</span>
@@ -12,7 +12,7 @@ function ChildHero() {
         LAPTOP GAMING VELTRIX GEAR 1.0
       </h1>
 
-    </Link>
+    </HashLink>
   );
 }
 
