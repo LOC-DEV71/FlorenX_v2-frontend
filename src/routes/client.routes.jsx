@@ -9,6 +9,7 @@ import RegisterClient from "../pages/client/authClient/register.client";
 import NewProduct from "../pages/client/products/NewProduct";
 import AccountClient from "../pages/client/account/Account";
 import Cart from "../pages/client/cart/cart";
+import FavoritesPage from "../pages/client/FavoritesPage/FavoritesPage";
 
 function ClientRoutes(){
     return(
@@ -27,6 +28,7 @@ function ClientRoutes(){
                 <Route path="/register" element={<RegisterClient/>}/>
                 <Route path="/account" element={<AccountClient/>}/>
                 <Route path="/gio-hang" element={<Cart/>}/>
+                <Route path="/yeu-thich" element={<FavoritesPage/>}/>
             </Route>
         </Routes>
     )

@@ -113,10 +113,10 @@ function Header({ setOpenMenu }) {
                         <span>Đơn hàng</span>
                       </Link>
 
-                      <Link to="/yeu-thich" onClick={() => setOpenProfile(false)}>
+                      <HashLink smooth to="/yeu-thich/#favorite-page__label" onClick={() => setOpenProfile(false)}>
                         <HeartOutlined />
                         <span>Yêu thích</span>
-                      </Link>
+                      </HashLink>
 
                       <HashLink smooth to="/gio-hang/#cart-page" onClick={() => setOpenProfile(false)}>
                         <ShoppingCartOutlined />

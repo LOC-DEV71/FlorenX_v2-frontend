@@ -9,3 +9,7 @@ export const addToCart = (data) => {
 export const getCart = () => {
     return axiosAdmin.get("/cart", )
 }
+
+export const updateQuantity = (data) => {
+    return axiosAdmin.post("/cart/update-quantity", data)
+}

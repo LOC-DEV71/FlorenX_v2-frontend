@@ -6,6 +6,9 @@ import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
 import { addToCart } from "../../../services/client/cart.service";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
+import { addLike, getListLike } from "../../../services/client/like.service";
+import Loading from "../../../utils/loading";
+import NoData from "../../../assets/banner/empty.png";
 
 function ProductDeatil() {
   const { slug } = useParams();
@@ -15,7 +18,7 @@ function ProductDeatil() {
   const [thumbnail, setThumbnail] = useState("");
   const [products, setProducts] = useState([]);
   const [overview, setOverview] = useState(true);
-  const [liked, setLiked] = useState(false);
+  const [likeIds, setLikedIds] = useState([]);
   useEffect(() => {
     let isMounted = true;
 
@@ -54,7 +57,25 @@ function ProductDeatil() {
     };
   }, [slug]);
 
+
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const res = await getListLike();
+        if (res?.data?.code) {
+          setLikedIds(res.data.likes)
+        }
+      } catch (error) {
+        console.error("Error fetching likes:", error);
+      }
+    };
+
+    fetchLikes();
+  }, [likeIds]);
+
+
   const handleAddtoCart = async () => {
+    setLoading(true)
     try {
       const res = await addToCart({ productId: data?._id });
       if (res.data.code) {
@@ -63,6 +84,23 @@ function ProductDeatil() {
     } catch (err) {
       error("Thêm giỏ hàng không thành công");
       console.error(err.response?.data.message);
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleByNow = async () => {
+    setLoading(true)
+    try {
+      const res = await addToCart({ productId: data?._id });
+      if (res.data.code) {
+        window.location.href = "/gio-hang#cart-page";
+      }
+    } catch (err) {
+      error("Thêm giỏ hàng không thành công");
+      console.error(err.response?.data.message);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -88,16 +126,34 @@ function ProductDeatil() {
     return Object.entries(data?.specs || {});
   }, [data?.specs]);
 
+  const handleLike = async (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLikedIds(prev => [...prev, productId])
 
-  console.log(data?._id)
+    try {
+      if (likeIds.includes(productId)) {
+        const res = await addLike({ productId: productId, type: "clear" });
+        if (res.data.code) {
+          success(res.data.message)
+
+        }
+      } else {
+        const res = await addLike({ productId: productId, type: "add" });
+        if (res.data.code) {
+          success(res.data.message)
+        }
+      }
+    } catch (err) {
+      console.error(err.response?.data.message)
+    }
+
+  };
+
 
   if (loading) {
     return (
-      <div className="product-page loading-page">
-        <main className="container">
-          <div className="product-loading">Đang tải <span className="spinner "></span></div>
-        </main>
-      </div>
+      <Loading />
     );
   }
 
@@ -177,7 +233,7 @@ function ProductDeatil() {
             </p>
 
             <div className="cta">
-              <button type="button" className="btn btn--primary">
+              <button type="button" className="btn btn--primary" onClick={handleByNow}>
                 Mua ngay
               </button>
               <button type="button" className="btn btn--dark" onClick={handleAddtoCart}>
@@ -373,83 +429,88 @@ function ProductDeatil() {
             <h2>Sản phẩm liên quan</h2>
           </div>
 
-          <div className="product-grid">
-            {products?.map((item, index) => {
-              const originalPrice = Number(item?.price) || 0;
-              const discountPercentage = Number(item?.discountPercentage) || 0;
-              const finalPrice =
-                discountPercentage > 0
-                  ? originalPrice - (originalPrice * discountPercentage) / 100
-                  : originalPrice;
+          {products.length === 0 ? (
+            <div className="no-product">
+              <div className="img">
+                <img src={NoData} alt="No data" />
+                <span>Không có sản phẩm liên quan</span>
+              </div>
+            </div>
+          ) : (
+            <div className="product-grid">
+              {products.map((item, index) => {
+                const originalPrice = Number(item?.price) || 0;
+                const discountPercentage = Number(item?.discountPercentage) || 0;
+                const finalPrice =
+                  discountPercentage > 0
+                    ? originalPrice - (originalPrice * discountPercentage) / 100
+                    : originalPrice;
 
-              return (
-                <Link
-                  to={`/products/detail/${item.slug || item._id}`}
-                  className="product-card"
-                  key={item._id || index}
-                >
-                  <div className="product-card__thumb">
-                    {discountPercentage > 0 && (
-                      <span className="badge-sale">
-                        -{discountPercentage}%
-                      </span>
-                    )}
-                    {item.featured && (
-                      <span className="featured-badge">Nổi bật</span>
-                    )}
+                return (
+                  <Link
+                    to={`/products/detail/${item.slug || item._id}`}
+                    className="product-card"
+                    key={item._id || index}
+                  >
+                    <div className="product-card__thumb">
+                      {discountPercentage > 0 && (
+                        <span className="badge-sale">-{discountPercentage}%</span>
+                      )}
 
-                    <img
-                      src={
-                        item?.thumbnail ||
-                        item?.image ||
-                        "https://via.placeholder.com/400x500?text=Product"
-                      }
-                      alt={item?.title || item?.name || "Product image"}
-                    />
-                  </div>
+                      {item.featured && (
+                        <span className="featured-badge">Nổi bật</span>
+                      )}
 
-                  <div className="product-card__info">
-                    <h3 className="product-card__title">
-                      {item?.title || item?.name || "Product name"}
-                    </h3>
+                      <img
+                        src={
+                          item?.thumbnail ||
+                          "https://via.placeholder.com/400x500?text=Product"
+                        }
+                        alt={item?.title || "Product image"}
+                      />
+                    </div>
 
-                    <div className="product-card__price">
-                      {discountPercentage > 0 ? (
+                    <div className="product-card__info">
+                      <h3 className="product-card__title">
+                        {item?.title || "Product name"}
+                      </h3>
+
+                      <div className="product-card__price">
                         <>
-                          <span className="price-old">
+                          <span className={`price-old ${discountPercentage > 0 ? "" : "visibility"}`}>
                             {originalPrice.toLocaleString("vi-VN")}đ
                           </span>
                           <span className="price-new">
                             {finalPrice.toLocaleString("vi-VN")}đ
                           </span>
                         </>
-                      ) : (
-                        <span className="price-new">
-                          {originalPrice.toLocaleString("vi-VN")}đ
-                        </span>
-                      )}
-                    </div>
 
-                    <div className="product-card__meta">
-                      <div className="left">
-                        <span className="rating">★ 4.8</span>
-                        <span className="reviews">(120 reviews)</span>
                       </div>
 
-                      <div className="favorite">
-                        <div className="favorite" onClick={(e) => {
-                          e.preventDefault();
-                          setLiked(!liked);
-                        }}>
-                          {liked ? <HeartFilled style={{ color: "red" }} /> : <HeartOutlined />}
+                      <div className="product-card__meta">
+                        <div className="left">
+                          <span className="rating">★ 4.8</span>
+                          <span className="reviews">(120 reviews)</span>
+                        </div>
+
+                        <div
+                          className="favorite"
+                          onClick={(e) => handleLike(e, item._id)}
+                        >
+                          {likeIds.includes(item?._id) ? (
+                            <HeartFilled style={{ color: "red" }} />
+                          ) : (
+                            <HeartOutlined />
+                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
         </section>
       </main>
     </div>

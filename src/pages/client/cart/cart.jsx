@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { getCart } from "../../../services/client/cart.service";
+import { getCart, updateQuantity } from "../../../services/client/cart.service";
 import "./cart.scss";
 import { Link } from "react-router-dom";
 import { getProductByCategory } from "../../../services/client/product.service";
-import { HeartOutlined, HeartFilled } from "@ant-design/icons";
+import { HeartOutlined, HeartFilled, DeleteOutlined } from "@ant-design/icons";
+import { addLike, getListLike } from "../../../services/client/like.service";
+import { success } from "../../../utils/notift";
+import Loading from "../../../utils/loading";
 
 
 function Cart() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [liked, setLiked] = useState(false);
-
+  const [likeIds, setLikedIds] = useState([]);
+  const [updatingIds, setUpdatingIds] = useState([]);
+  const [reload, setReload] = useState(false)
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -28,7 +32,7 @@ function Cart() {
     };
 
     fetchCart();
-  }, []);
+  }, [reload]);
 
   const formatPrice = (price) => {
     return Number(price || 0).toLocaleString("vi-VN") + "đ";
@@ -67,13 +71,91 @@ function Cart() {
     fetchCart();
   }, [])
 
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const res = await getListLike();
+        if (res?.data?.code) {
+          setLikedIds(res.data.likes)
+        }
+      } catch (error) {
+        console.error("Error fetching likes:", error);
+      }
+    };
+
+    fetchLikes();
+  }, [likeIds]);
+  const handleLike = async (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLikedIds(prev => [...prev, productId])
+
+    try {
+      if (likeIds.includes(productId)) {
+        const res = await addLike({ productId: productId, type: "clear" });
+        if (res.data.code) {
+          success(res.data.message)
+
+        }
+      } else {
+        const res = await addLike({ productId: productId, type: "add" });
+        if (res.data.code) {
+          success(res.data.message)
+        }
+      }
+    } catch (err) {
+      console.error(err.response?.data.message)
+    }
+
+  };
+
+  const handleQuantity = async (item, type) => {
+    const oldQuantity = Number(item.quantity) || 1;
+
+    let newQuantity = oldQuantity;
+    if (type === "increase") newQuantity = oldQuantity + 1;
+    if (type === "decrease") newQuantity = oldQuantity - 1;
+
+
+    setData((prev) =>
+      prev.map((p) =>
+        p._id === item._id ? { ...p, quantity: newQuantity } : p
+      )
+    );
+
+    setUpdatingIds((prev) => [...prev, item._id]);
+
+    try {
+      const res = await updateQuantity({
+        productId: item._id,
+        quantity: newQuantity,
+      });
+
+      if (!res?.data?.code) {
+        throw new Error("Update quantity failed");
+      }
+
+      if(res?.data?.reload){
+        setReload(prev => !prev)
+      }
+    } catch (error) {
+      setData((prev) =>
+        prev.map((p) =>
+          p._id === item._id ? { ...p, quantity: oldQuantity } : p
+        )
+      );
+      console.error(error);
+    } finally {
+      setUpdatingIds((prev) => prev.filter((id) => id !== item._id));
+    }
+  };
+
+
 
   return (
     <div className="cart-page" id="cart-page">
       {loading && (
-        <div className="loading-cart">
-          <span className="spinner"></span>
-        </div>
+        <Loading/>
       )}
       <div className="cart-page__inner">
         {loading ? (
@@ -122,9 +204,30 @@ function Cart() {
                       </div>
 
                       <div className="cart-product__qty">
-                        <button>-</button>
-                        <span>{quantity}</span>
-                        <button>+</button>
+                        {quantity === 1 ? 
+                        
+                        <button
+                          onClick={() => handleQuantity(item, "decrease")}
+                        > 
+                          <DeleteOutlined />
+                        </button> : 
+                        
+                        <button
+                          onClick={() => handleQuantity(item, "decrease")}
+                          disabled={updatingIds.includes(item._id)}
+                        >
+                          -
+                        </button>}
+                        
+
+                        <input type="number" value={quantity} disabled />
+
+                        <button
+                          onClick={() => handleQuantity(item, "increase")}
+                          disabled={updatingIds.includes(item._id)}
+                        >
+                          +
+                        </button>
                       </div>
 
                       <div className="cart-product__price">
@@ -250,13 +353,13 @@ function Cart() {
                       <span className="reviews">(120 reviews)</span>
                     </div>
 
-                    <div className="favorite">
-                      <div className="favorite" onClick={(e) => {
-                        e.preventDefault();
-                        setLiked(!liked);
-                      }}>
-                        {liked ? <HeartFilled style={{ color: "red" }} /> : <HeartOutlined />}
-                      </div>
+                    <div
+                      className="favorite"
+                      onClick={(e) => handleLike(e, item._id)}
+                    >
+                      {likeIds.includes(item?._id)
+                        ? <HeartFilled style={{ color: "red" }} />
+                        : <HeartOutlined />}
                     </div>
                   </div>
                 </div>

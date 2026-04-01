@@ -8,6 +8,9 @@ import { LoadingOutlined, HeartOutlined, HeartFilled } from "@ant-design/icons"
 import NoData from "../../../assets/banner/empty.png";
 import { renderpagination } from "../../../utils/pagination.client.utils";
 import SEO from "../../../utils/SEO";
+import { addLike, getListLike } from "../../../services/client/like.service";
+import { success } from "../../../utils/notift";
+import Loading from "../../../utils/loading";
 
 
 function ProductByCategory() {
@@ -20,8 +23,7 @@ function ProductByCategory() {
     const section_hero = settings?.section_hero || [];
     const heroItem = section_hero.find((item) => item.tag === category);
     const loadingUi = useSelector((state) => state.setting.loading);
-    const [liked, setLiked] = useState(false);
-
+    const [likeIds, setLikedIds] = useState([]);
 
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -61,6 +63,21 @@ function ProductByCategory() {
     }, [category, price, discount, limit, page]);
 
     useEffect(() => {
+        const fetchLikes = async () => {
+            try {
+                const res = await getListLike();
+                if (res?.data?.code) {
+                    setLikedIds(res.data.likes)
+                }
+            } catch (error) {
+                console.error("Error fetching likes:", error);
+            }
+        };
+
+        fetchLikes();
+    }, [likeIds]);
+
+    useEffect(() => {
         const fetchCategories = async () => {
             if (!category) return;
             setLoadingCate(true)
@@ -90,17 +107,37 @@ function ProductByCategory() {
         500000000
     ];
 
+    const handleLike = async (e, productId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setLikedIds(prev => [...prev, productId])
+
+        try {
+            if (likeIds.includes(productId)) {
+                const res = await addLike({ productId: productId, type: "clear" });
+                if (res.data.code) {
+                    success(res.data.message)
+
+                }
+            } else {
+                const res = await addLike({ productId: productId, type: "add" });
+                if (res.data.code) {
+                    success(res.data.message)
+                }
+            }
+        } catch (err) {
+            console.error(err.response?.data.message)
+        }
+
+    };
 
     return (
         <>
-            {loadingUi ?
-                <div className="product-by-category" >
-                    <div className="loading">
-                        <span className="spinner "></span>
-                    </div>
-                </div>
-                : (
                     <div className="product-by-category" id="product-by-category">
+                        {/* loading util */}
+                        {loadingUi && 
+                            <Loading/>
+                        }
                         <SEO
                             title={`Veltrix - ${heroItem?.title || category || "Accessories"}`}
                             description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
@@ -245,20 +282,15 @@ function ProductByCategory() {
                                                             </h3>
 
                                                             <div className="product-card__price">
-                                                                {discountPercentage > 0 ? (
                                                                     <>
-                                                                        <span className="price-old">
+                                                                        <span className={`price-old ${discountPercentage > 0 ? "" : "visibility"}`}>
                                                                             {originalPrice.toLocaleString("vi-VN")}đ
                                                                         </span>
                                                                         <span className="price-new">
                                                                             {finalPrice.toLocaleString("vi-VN")}đ
                                                                         </span>
                                                                     </>
-                                                                ) : (
-                                                                    <span className="price-new">
-                                                                        {originalPrice.toLocaleString("vi-VN")}đ
-                                                                    </span>
-                                                                )}
+  
                                                             </div>
 
                                                             <div className="product-card__meta">
@@ -267,13 +299,13 @@ function ProductByCategory() {
                                                                     <span className="reviews">(120 reviews)</span>
                                                                 </div>
 
-                                                                <div className="favorite">
-                                                                    <div className="favorite" onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        setLiked(!liked);
-                                                                    }}>
-                                                                        {liked ? <HeartFilled style={{ color: "red" }} /> : <HeartOutlined />}
-                                                                    </div>
+                                                                <div
+                                                                    className="favorite"
+                                                                    onClick={(e) => handleLike(e, item._id)}
+                                                                >
+                                                                    {likeIds.includes(item?._id)
+                                                                        ? <HeartFilled style={{ color: "red" }} />
+                                                                        : <HeartOutlined />}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -310,7 +342,7 @@ function ProductByCategory() {
                             </div>
                         </div>
                     </div>
-                )}
+                
         </>
     );
 }

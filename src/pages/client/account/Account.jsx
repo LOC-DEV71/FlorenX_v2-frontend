@@ -1,14 +1,19 @@
 import { useSelector } from "react-redux";
 import "./Account.scss";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { update } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
+import Loading from "../../../utils/loading";
 
 function AccountClient() {
     const account = useSelector((state) => state.authClient.user);
+    const loadingUi = useSelector((state) => state.authClient.loading);
     const [user, setUser] = useState({});
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const avatarsPerPage = 32;
 
     useEffect(() => {
         if (account) {
@@ -16,12 +21,32 @@ function AccountClient() {
         }
     }, [account]);
 
-    const avatarSeeds = Array.from({ length: 26 }, (_, i) =>
-        String.fromCharCode(97 + i)
-    );
+    const avatarSeeds = useMemo(() => {
+        const seeds = [];
+        for (let i = 0; i < 26; i++) {
+            for (let j = 0; j < 26; j++) {
+                seeds.push(
+                    String.fromCharCode(97 + i) + String.fromCharCode(97 + j)
+                );
+            }
+        }
+        return seeds;
+    }, []);
+
+    const totalPages = Math.ceil(avatarSeeds.length / avatarsPerPage);
+
+    const currentAvatars = useMemo(() => {
+        const startIndex = (currentPage - 1) * avatarsPerPage;
+        return avatarSeeds.slice(startIndex, startIndex + avatarsPerPage);
+    }, [avatarSeeds, currentPage]);
 
     const getAvatarUrl = (seed) =>
         `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
+
+    const openAvatarModal = () => {
+        setCurrentPage(1);
+        setIsAvatarModalOpen(true);
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -58,25 +83,26 @@ function AccountClient() {
     return (
         <div className="user-profile-page" id="user-profile-page">
             {loading && (
-                <div className="loading-update">
-                    <span className="spinner"></span>
-                </div>
+                <Loading/>
             )}
+            {loadingUi &&
+                <Loading/>
+            }
 
             <div className="user-profile-container">
                 <div className="profile-sidebar-card">
                     <div className="avatar-wrap">
                         <img
-                            src={user.avatar || getAvatarUrl("a")}
+                            src={user.avatar || getAvatarUrl("aa")}
                             alt={user.fullname || "avatar"}
                             className="avatar"
-                            onClick={() => setIsAvatarModalOpen(true)}
+                            onClick={openAvatarModal}
                         />
 
                         <button
                             type="button"
                             className="change-avatar-btn"
-                            onClick={() => setIsAvatarModalOpen(true)}
+                            onClick={openAvatarModal}
                         >
                             Đổi ảnh đại diện
                         </button>
@@ -154,14 +180,22 @@ function AccountClient() {
                                     placeholder="Nhập địa chỉ"
                                 />
                             </div>
-
                         </div>
 
                         <div className="form-actions">
-                            <button type="button" className="btn btn-secondary" disabled={loading} onClick={() => setUser(account)}>
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                disabled={loading}
+                                onClick={() => setUser(account)}
+                            >
                                 Hủy
                             </button>
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={loading}
+                            >
                                 {loading ? "Đang lưu..." : "Lưu thay đổi"}
                             </button>
                         </div>
@@ -190,17 +224,51 @@ function AccountClient() {
                         </div>
 
                         <div className="avatar-options">
-                            {avatarSeeds.map((seed) => (
+                            {currentAvatars.map((seed) => (
                                 <button
                                     key={seed}
                                     type="button"
-                                    className="avatar-option"
+                                    className={`avatar-option ${
+                                        user.avatar === getAvatarUrl(seed) ? "active" : ""
+                                    }`}
                                     onClick={() => handleSelectAvatar(seed)}
                                     title={`Avatar ${seed}`}
                                 >
-                                    <img src={getAvatarUrl(seed)} alt={`avatar-${seed}`} />
+                                    <img
+                                        src={getAvatarUrl(seed)}
+                                        alt={`avatar-${seed}`}
+                                        loading="lazy"
+                                    />
                                 </button>
                             ))}
+                        </div>
+
+                        <div className="avatar-pagination">
+                            <button
+                                type="button"
+                                className="pagination-btn"
+                                disabled={currentPage === 1}
+                                onClick={() =>
+                                    setCurrentPage((prev) => prev - 1)
+                                }
+                            >
+                                ← Trước
+                            </button>
+
+                            <span className="pagination-info">
+                                Trang {currentPage} / {totalPages}
+                            </span>
+
+                            <button
+                                type="button"
+                                className="pagination-btn"
+                                disabled={currentPage === totalPages}
+                                onClick={() =>
+                                    setCurrentPage((prev) => prev + 1)
+                                }
+                            >
+                                Sau →
+                            </button>
                         </div>
                     </div>
                 </div>
