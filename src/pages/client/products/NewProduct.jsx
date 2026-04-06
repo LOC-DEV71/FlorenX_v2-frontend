@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./NewProduct.scss";
 import heroVideo from "../../../assets/banner/product.mp4";
 import { HashLink } from "react-router-hash-link";
+import { Link } from "react-router-dom";
 
 function AutoVideoSection({
   src,
@@ -174,13 +175,13 @@ function NewProduct() {
         <div className="child-hero__overlay" />
 
         <div className="child-hero__actions">
-          <button className="child-hero__action child-hero__action--outline">
+          <HashLink smooth to={"/products/new-product/laptop-gaming/#description-product"} className="child-hero__action child-hero__action--outline">
             Xem ngay
-          </button>
+          </HashLink>
 
-          <button className="child-hero__action child-hero__action--filled">
+          <Link to={"/products/detail/laptop-gaming-veltrix-gear-v10"} className="child-hero__action child-hero__action--filled">
             Mua ngay
-          </button>
+          </Link>
         </div>
 
         <button
@@ -198,6 +199,7 @@ function NewProduct() {
       </section>
 
       <AutoVideoSection
+        id="description-product"
         src="https://assets2.razerzone.com/images/pnx.assets/7c84f6a15d392b71522e621e35d8e842/blade16-2026-nvidia-1920x700.mp4"
         title="Up to NVIDIA® GeForce RTX™ 5090 Laptop GPU"
         desc="Sức mạnh đồ họa thế hệ mới từ NVIDIA mang lại hiệu năng vượt trội cho gaming, sáng tạo nội dung và xử lý AI. RTX 5090 Laptop GPU nâng tầm trải nghiệm với Ray Tracing chân thực, DLSS AI và khả năng xử lý mạnh mẽ trong mọi tác vụ."

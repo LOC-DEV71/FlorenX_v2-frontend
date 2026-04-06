@@ -6,18 +6,26 @@ import {
     GoogleOutlined,
     ArrowLeftOutlined,
 } from "@ant-design/icons";
-import { Input } from "antd";
+import { Input, message } from "antd";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { GoogleLogin } from '@react-oauth/google';
-import { googleLogin } from "../../../services/client/Auth.service";
+import { googleLogin, loginLocal } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
+import Loading from "../../../utils/loading";
 
 function LoginClient() {
     const [showPassword, setShowPassword] = useState(false);
     const logo = useSelector(state => state.setting?.settings?.favicon);
+    const [loading, setLoading] = useState(false)
+    const [loadinggg, setLoadinggg] = useState(false)
+    const [form, setForm] = useState({
+        email: "",
+        password:""
+    });
 
     const handleGoogleSuccess = async (credentialResponse) => {
+        setLoadinggg(true)
         try {
             const res = await googleLogin({
                 token: credentialResponse.credential
@@ -36,11 +44,35 @@ function LoginClient() {
         } catch (err) {
             console.error(err);
             error("Có lỗi xảy ra khi đăng nhập Google");
-        } 
+        } finally {
+            setLoadinggg(false)
+        }
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const res = await loginLocal(form);
+            if(res.data.code){
+                success(res.data?.message || "Đăng nhập thành công")
+                setTimeout(() => {
+                    window.location.href = "/"
+                }, 1000)
+            }
+        } catch (err) {
+            console.error(err.response?.data?.message)
+            error(err.response?.data?.message || "Có lỗi xảy ra")
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <div className="login-client">
+            {(loading || loadinggg) && 
+                <Loading/>
+            }
             <Link to="/" className="login-client__back">
                 <ArrowLeftOutlined />
                 <span>Về trang chủ</span>
@@ -62,7 +94,10 @@ function LoginClient() {
                         <form>
                             <div className="login-client__form-group">
                                 <label>Email</label>
-                                <Input placeholder="Nhập email" />
+                                <Input 
+                                    placeholder="Nhập email" 
+                                    onChange={e => setForm({...form, email: e.target.value})}
+                                />
                             </div>
 
                             <div className="login-client__form-group">
@@ -72,6 +107,7 @@ function LoginClient() {
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Nhập mật khẩu"
+                                        onChange={e => setForm({...form, password: e.target.value})}
                                     />
 
                                     <span
@@ -84,10 +120,10 @@ function LoginClient() {
                             </div>
 
                             <div className="login-client__options">
-                                <span className="login-client__forgot">Quên mật khẩu?</span>
+                                <Link className="login-client__forgot" to={"/forgot-password"}>Quên mật khẩu?</Link>
                             </div>
 
-                            <button type="submit" className="login-client__btn">
+                            <button type="submit" className="login-client__btn" onClick={handleSubmit}>
                                 Đăng nhập
                             </button>
 

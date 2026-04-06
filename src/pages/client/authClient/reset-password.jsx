@@ -9,59 +9,56 @@ import {
 import { Input } from "antd";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { createUser } from "../../../services/client/Auth.service";
+import { resetPassword } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-function RegisterClient() {
+
+function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
+  const location = useLocation();
+  const email = location.state?.email;
   const logo = useSelector(state => state.setting?.settings?.favicon);
   const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
-    fullname: "",
-    email: "",
     password: "",
+    email: email,
     repassword: ""
+    
   });
   const handleChange = (e) => {
-    const {name, value} = e.target;
+    const { name, value } = e.target;
     setForm(prev => (
       {
-      ...prev,
-      [name]: value
-    }))
+        ...prev,
+        [name]: value
+      }))
   }
 
- const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
+  const hanldeSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true)
-
+    setLoading(true);
     try {
-      const res = await createUser(form);
+      const res = await resetPassword(form);
       if (res.data?.code) {
-        success(res.data?.message);
-
-          navigate("/otp", {
-            state: {
-              email: form.email,
-              password: form.password,
-              fullname: form.fullname
-            },
-          });
+        success(res.data?.message)
+        setTimeout(() => {
+          window.location.href = `/`
+        }, 1500)
       }
     } catch (err) {
-      error(err.response?.data?.message || "Có lỗi xảy ra");
+      error(err.response?.data?.message || "Có lỗi xảy ra")
+      console.error(err.response?.data?.message)
     } finally {
       setLoading(false)
     }
-  };
+  }
   return (
     <div className="login-client">
-      {loading && <Loading/>}
+      {loading && <Loading />}
       <Link to="/" className="login-client__back">
         <ArrowLeftOutlined />
         <span>Về trang chủ</span>
@@ -77,19 +74,10 @@ function RegisterClient() {
 
         <div className="login-client__right">
           <div className="login-client__box">
-            <h2>Đăng ký</h2>
-            <p className="login-client__sub">Tạo tài khoản mới</p>
+            <h2>Đổi mật khẩu</h2>
+            <p className="login-client__sub">Nhập mật khẩu mới.</p>
 
             <form>
-              <div className="login-client__form-group">
-                <label>Họ và tên</label>
-                <Input placeholder="Nhập họ và tên" name="fullname" onChange={handleChange}/>
-              </div>
-              <div className="login-client__form-group">
-                <label>Email</label>
-                <Input placeholder="Nhập email" name="email"  onChange={handleChange}/>
-              </div>
-
               <div className="login-client__form-group">
                 <label>Mật khẩu</label>
 
@@ -129,8 +117,11 @@ function RegisterClient() {
                 </div>
               </div>
 
-              <button type="submit" className="login-client__btn" onClick={handleSubmit}>
-                Đăng ký
+              <button
+                className="login-client__btn"
+                onClick={hanldeSubmit}
+              >
+                Xác nhận và đăng nhập
               </button>
 
               <p className="login-client__register">
@@ -144,4 +135,4 @@ function RegisterClient() {
   );
 }
 
-export default RegisterClient;
+export default ResetPassword;

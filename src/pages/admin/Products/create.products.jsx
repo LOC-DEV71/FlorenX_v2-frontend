@@ -55,15 +55,19 @@ function CreateProduct() {
     setSpecs([...specs, { key: "", value: "" }]);
   };
 
+
   const removeSpec = (index) => {
     setSpecs(specs.filter((_, i) => i !== index));
   };
 
+
   const handleChangeSpec = (index, field, value) => {
     const clone = [...specs];
-    clone[index][field] = value;
+    clone[index][field] = value; 
     setSpecs(clone);
   };
+
+  console.log(specs)
 
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files);
@@ -107,10 +111,12 @@ function CreateProduct() {
       const specsObject = {};
 
       specs.forEach(item => {
+        console.log(item)
         if (item.key && item.value) {
           specsObject[item.key] = item.value;
         }
       });
+
 
       formData.append("specs", JSON.stringify(specsObject));
 

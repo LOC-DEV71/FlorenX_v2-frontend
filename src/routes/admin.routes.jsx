@@ -24,6 +24,8 @@ import CustomerSupportChat from "../pages/admin/Chat/index.chat";
 import UpdateNewsCategory from "../pages/admin/NewCategory/updateNewsCategory";
 import TrashPage from "../pages/admin/TrashCan/TrashPage";
 import SettingPage from "../pages/admin/Setting/SettingPage";
+import InventoryImport from "../pages/admin/Products/InventoryImport";
+import InventoryExport from "../pages/admin/Products/InventoryExport";
 
 function AdminRoutes() {
   return (
@@ -38,6 +40,11 @@ function AdminRoutes() {
         <Route index element={<DashBoard />} />
 
         {/* products */}
+         <Route path="products/inventory/import" element={<InventoryImport />} />
+         <Route path="products/inventory/export" element={<InventoryExport />} />
+         <Route path="products/inventory/audit" element={<UpdateProduct />} />
+         <Route path="products/inventory/transfer" element={<UpdateProduct />} />
+
         <Route element={<PrivateRoutePermission permission="view_products" />}>
           <Route path="products" element={<Products />} />
         </Route>

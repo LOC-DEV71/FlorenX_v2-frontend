@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { getCart, updateQuantity } from "../../../services/client/cart.service";
 import "./cart.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getProductByCategory } from "../../../services/client/product.service";
 import { HeartOutlined, HeartFilled, DeleteOutlined } from "@ant-design/icons";
 import { addLike, getListLike } from "../../../services/client/like.service";
-import { success } from "../../../utils/notift";
+import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
-
 
 function Cart() {
   const [loading, setLoading] = useState(false);
@@ -15,7 +14,7 @@ function Cart() {
   const [likeIds, setLikedIds] = useState([]);
   const [updatingIds, setUpdatingIds] = useState([]);
   const [reload, setReload] = useState(false)
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchCart = async () => {
       setLoading(true);
@@ -76,7 +75,7 @@ function Cart() {
       try {
         const res = await getListLike();
         if (res?.data?.code) {
-          setLikedIds(res.data.likes)
+          setLikedIds(res.data.likes || []);
         }
       } catch (error) {
         console.error("Error fetching likes:", error);
@@ -84,29 +83,39 @@ function Cart() {
     };
 
     fetchLikes();
-  }, [likeIds]);
+  }, []);
+
   const handleLike = async (e, productId) => {
     e.preventDefault();
     e.stopPropagation();
-    setLikedIds(prev => [...prev, productId])
+
+    const isLiked = likeIds.includes(productId);
+
+    // update UI trước
+    setLikedIds((prev) =>
+      isLiked
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
 
     try {
-      if (likeIds.includes(productId)) {
-        const res = await addLike({ productId: productId, type: "clear" });
-        if (res.data.code) {
-          success(res.data.message)
+      const res = await addLike({
+        productId,
+        type: isLiked ? "clear" : "add",
+      });
 
-        }
-      } else {
-        const res = await addLike({ productId: productId, type: "add" });
-        if (res.data.code) {
-          success(res.data.message)
-        }
+      if (res?.data?.code) {
+        success(res.data.message);
       }
     } catch (err) {
-      console.error(err.response?.data.message)
-    }
+      setLikedIds((prev) =>
+        isLiked
+          ? [...prev, productId]
+          : prev.filter((id) => id !== productId)
+      );
 
+      console.error(err?.response?.data?.message || err.message);
+    }
   };
 
   const handleQuantity = async (item, type) => {
@@ -135,7 +144,7 @@ function Cart() {
         throw new Error("Update quantity failed");
       }
 
-      if(res?.data?.reload){
+      if (res?.data?.reload) {
         setReload(prev => !prev)
       }
     } catch (error) {
@@ -150,12 +159,23 @@ function Cart() {
     }
   };
 
+  
+  const handleCheckout = async (e) => {
+    e.preventDefault();
+    navigate("/check-out", {
+      state: {
+        data: data,
+        subtotal: subtotal
+      }
+    })
+  }
 
+  console.log(data)
 
   return (
     <div className="cart-page" id="cart-page">
       {loading && (
-        <Loading/>
+        <Loading />
       )}
       <div className="cart-page__inner">
         {loading ? (
@@ -204,21 +224,21 @@ function Cart() {
                       </div>
 
                       <div className="cart-product__qty">
-                        {quantity === 1 ? 
-                        
-                        <button
-                          onClick={() => handleQuantity(item, "decrease")}
-                        > 
-                          <DeleteOutlined />
-                        </button> : 
-                        
-                        <button
-                          onClick={() => handleQuantity(item, "decrease")}
-                          disabled={updatingIds.includes(item._id)}
-                        >
-                          -
-                        </button>}
-                        
+                        {quantity === 1 ?
+
+                          <button
+                            onClick={() => handleQuantity(item, "decrease")}
+                          >
+                            <DeleteOutlined />
+                          </button> :
+
+                          <button
+                            onClick={() => handleQuantity(item, "decrease")}
+                            disabled={updatingIds.includes(item._id)}
+                          >
+                            -
+                          </button>}
+
 
                         <input type="number" value={quantity} disabled />
 
@@ -279,7 +299,7 @@ function Cart() {
                   <strong>{formatPrice(subtotal)}</strong>
                 </div>
 
-                <button className="cart-summary__checkout">
+                <button className="cart-summary__checkout" onClick={handleCheckout}>
                   THANH TOÁN
                 </button>
               </div>
@@ -331,20 +351,15 @@ function Cart() {
                   </h3>
 
                   <div className="product-card__price">
-                    {discountPercentage > 0 ? (
-                      <>
-                        <span className="price-old">
-                          {originalPrice.toLocaleString("vi-VN")}đ
-                        </span>
-                        <span className="price-new">
-                          {finalPrice.toLocaleString("vi-VN")}đ
-                        </span>
-                      </>
-                    ) : (
-                      <span className="price-new">
+                    <>
+                      <span className={`price-old ${discountPercentage > 0 ? "" : "visibility"}`}>
                         {originalPrice.toLocaleString("vi-VN")}đ
                       </span>
-                    )}
+                      <span className="price-new">
+                        {finalPrice.toLocaleString("vi-VN")}đ
+                      </span>
+                    </>
+
                   </div>
 
                   <div className="product-card__meta">

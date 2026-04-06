@@ -12,3 +12,7 @@ export const getProductByCategory = async (data) => {
 export const getProductBySlug = async (slug) => {
   return axiosAdmin.get(`/products/detail/${slug}`);
 }
+
+export const getProductBySale = async (category) =>{
+  return axiosAdmin.get(`/products/sale/${category}`)
+}

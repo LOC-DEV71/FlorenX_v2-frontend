@@ -4,18 +4,17 @@ import { CiWarning } from "react-icons/ci";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CgMathPlus } from "react-icons/cg";
-import { Statistic } from "antd";
+import { Statistic, Skeleton } from "antd";
 import CountUp from "react-countup";
 import { SearchOutlined } from "@ant-design/icons";
+import { MdDeleteOutline, MdKeyboardArrowDown } from "react-icons/md";
 import SEO from "../../../utils/SEO";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getProducts, changeMulti } from "../../../services/admin/product.admin.service";
-import { MdDeleteOutline } from "react-icons/md";
-import { renderpagination } from "../../../utils/pagination";
-import { Skeleton } from "antd";
 import { error, success, confirm } from "../../../utils/notift";
 import { getListCategory } from "../../../services/admin/product.category.admin";
 import { renderCategoryOptions } from "../../../utils/buildTree";
+import { renderpagination } from "../../../utils/pagination";
 
 const formatter = (value) => (
     <CountUp end={value} duration={2} separator="," />
@@ -36,6 +35,9 @@ function Products() {
     const [countLowStock, setCountLowStock] = useState("");
     const [category, setCategory] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [openInventoryMenu, setOpenInventoryMenu] = useState(false);
+
+    const inventoryMenuRef = useRef(null);
 
     const page = Number(searchParams.get("page")) || 1;
     const limit = Number(searchParams.get("limit")) || 5;
@@ -54,8 +56,8 @@ function Products() {
                 setProductsActive(res.data.productsActive);
                 setCountOutStock(res.data.countOutStock);
                 setCountLowStock(res.data.countLowStock);
-            } catch (error) {
-                console.log(error.response?.data.message);
+            } catch (err) {
+                console.log(err.response?.data?.message);
             } finally {
                 setLoading(false);
             }
@@ -64,8 +66,47 @@ function Products() {
         fetchApi();
     }, [page, limit, sort, reload, sortByCategory]);
 
+    useEffect(() => {
+        const fetchApi = async () => {
+            try {
+                const res = await getListCategory();
+                if (res.data.code) {
+                    setCategory(res.data.categories);
+                }
+            } catch (err) {
+                error(err.response?.data?.message);
+            }
+        };
+
+        fetchApi();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                inventoryMenuRef.current &&
+                !inventoryMenuRef.current.contains(event.target)
+            ) {
+                setOpenInventoryMenu(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const handleChangeMulti = async () => {
         try {
+            if (!typeChange) {
+                error("Vui lòng chọn hành động");
+                return;
+            }
+
+            if (typeChange !== "position" && selectId.length === 0) {
+                error("Vui lòng chọn ít nhất một sản phẩm");
+                return;
+            }
+
             if (typeChange === "delete") {
                 const ok = await confirm(
                     "Xoá sản phẩm?",
@@ -77,14 +118,19 @@ function Products() {
                 const res = await changeMulti({ selectId, typeChange });
                 if (res.data.code) {
                     success(res.data.message);
+                } else {
+                    error(res.data.message);
                 }
-            }
-
-            if (typeChange === "position") {
+            } else if (typeChange === "position") {
                 const positions = Object.keys(changePosition).map((id) => ({
                     id,
                     position: changePosition[id]
                 }));
+
+                if (positions.length === 0) {
+                    error("Vui lòng nhập vị trí cần thay đổi");
+                    return;
+                }
 
                 const res = await changeMulti({
                     typeChange,
@@ -114,23 +160,9 @@ function Products() {
             setTypeChange("");
             setReload((prev) => !prev);
         } catch (err) {
-            error(err.response?.data.message);
+            error(err.response?.data?.message || "Có lỗi xảy ra");
         }
     };
-
-    useEffect(() => {
-        try {
-            const fetchApi = async () => {
-                const res = await getListCategory();
-                if (res.data.code) {
-                    setCategory(res.data.categories);
-                }
-            };
-            fetchApi();
-        } catch (err) {
-            error(err.response?.data?.message);
-        }
-    }, []);
 
     const handleDeleteOne = async (id) => {
         try {
@@ -156,6 +188,38 @@ function Products() {
         } catch (err) {
             error(err.response?.data?.message || "Có lỗi xảy ra");
         }
+    };
+
+    const handleSelectAll = (checked) => {
+        if (checked) {
+            setSelectId(data.map((item) => item._id));
+        } else {
+            setSelectId([]);
+        }
+    };
+
+    const handleCategoryChange = (value) => {
+        const nextParams = {
+            page: 1,
+            limit
+        };
+
+        if (sort) nextParams.sort = sort;
+        if (value) nextParams.sortByCategory = value;
+
+        setSearchParams(nextParams);
+    };
+
+    const handleSortChange = (value) => {
+        const nextParams = {
+            page: 1,
+            limit
+        };
+
+        if (value) nextParams.sort = value;
+        if (sortByCategory) nextParams.sortByCategory = sortByCategory;
+
+        setSearchParams(nextParams);
     };
 
     return (
@@ -201,73 +265,111 @@ function Products() {
                 </div>
             </div>
 
-            <div className="admin-product-filters">
-                <div className="admin-search">
-                    <SearchOutlined />
-                    <input placeholder="Tìm tên sản phẩm hoặc slug..." />
+            <div className="admin-toolbar">
+                <div className="admin-toolbar__filters">
+                    <div className="admin-search">
+                        <SearchOutlined />
+                        <input placeholder="Tìm tên sản phẩm hoặc slug..." />
+                    </div>
+
+                    <select
+                        onChange={(e) => handleCategoryChange(e.target.value)}
+                        value={sortByCategory}
+                    >
+                        <option value="">Danh mục: Tất cả</option>
+                        {renderCategoryOptions(category)}
+                    </select>
+
+                    <select
+                        value={sort}
+                        onChange={(e) => handleSortChange(e.target.value)}
+                    >
+                        <option value="">-- Sắp xếp theo --</option>
+                        <option value="position-asc">Sắp xếp theo vị trí thấp đến cao</option>
+                        <option value="position-desc">Sắp xếp theo vị trí cao đến thấp</option>
+                        <option value="price-asc">Sắp xếp theo giá thấp đến cao</option>
+                        <option value="price-desc">Sắp xếp theo giá cao đến thấp</option>
+                        <option value="title-asc">Sắp xếp theo tên A-Z</option>
+                        <option value="title-desc">Sắp xếp theo tên Z-A</option>
+                        <option value="featured-yes">Sản phẩm nổi bậc</option>
+                        <option value="featured-no">Sản phẩm không nổi bậc</option>
+                    </select>
+
+                    <select
+                        onChange={(e) => setTypeChange(e.target.value)}
+                        value={typeChange}
+                    >
+                        <option value="">-- Chọn hành động --</option>
+                        <option value="active">Chuyển thành hoạt động</option>
+                        <option value="inactive">Chuyển thành không hoạt động</option>
+                        <option value="position">Thay đổi vị trí sản phẩm</option>
+                        <option value="delete">Xóa nhiều sản phẩm</option>
+                    </select>
                 </div>
 
-                <select
-                    onChange={(e) =>
-                        setSearchParams({
-                            page: 1,
-                            limit,
-                            sort: e.target.value,
-                            sortByCategory: e.target.value
-                        })
-                    }
-                    value={sortByCategory}
-                >
-                    <option>Danh mục: Tất cả</option>
-                    {renderCategoryOptions(category)}
-                </select>
+                <div className="admin-toolbar__actions">
+                    <button
+                        className="admin-reset"
+                        onClick={() => navigate("/admin/products")}
+                    >
+                        <MdDeleteOutline /> Xóa lọc
+                    </button>
 
-                <select
-                    value={sort}
-                    onChange={(e) =>
-                        setSearchParams({
-                            page: 1,
-                            limit,
-                            sort: e.target.value
-                        })
-                    }
-                >
-                    <option value="">-- Sắp xếp theo --</option>
-                    <option value="position-asc">Sắp xếp theo vị trí thấp đến cao</option>
-                    <option value="position-desc">Sắp xếp theo vị trí cao đến thấp</option>
-                    <option value="price-asc">Sắp xếp theo giá thấp đến cao</option>
-                    <option value="price-desc">Sắp xếp theo giá cao đến thấp</option>
-                    <option value="title-asc">Sắp xếp theo tên A-Z</option>
-                    <option value="title-desc">Sắp xếp theo tên Z-A</option>
-                    <option value="featured-yes">Sản phẩm nổi bậc</option>
-                    <option value="featured-no">Sản phẩm không nổi bậc</option>
-                </select>
+                    <button className="admin-activity" onClick={handleChangeMulti}>
+                        Áp dụng
+                    </button>
 
-                <button
-                    className="admin-reset"
-                    onClick={() => navigate("/admin/products")}
-                >
-                    <MdDeleteOutline /> Xóa lọc
-                </button>
+                    <Link className="admin-create" to="/admin/products/create">
+                        <CgMathPlus /> Tạo mới
+                    </Link>
 
-                <select
-                    onChange={(e) => setTypeChange(e.target.value)}
-                    value={typeChange}
-                >
-                    <option value="">-- Chọn hành động --</option>
-                    <option value="active">Chuyển thành hoạt động</option>
-                    <option value="inactive">Chuyển thành không hoạt động</option>
-                    <option value="position">Thay đổi vị trí sản phẩm</option>
-                    <option value="delete">Xóa nhiều sản phẩm</option>
-                </select>
+                    <div className="admin-inventory-menu" ref={inventoryMenuRef}>
+                        <button
+                            type="button"
+                            className={`admin-inventory-trigger ${openInventoryMenu ? "is-open" : ""}`}
+                            onClick={() => setOpenInventoryMenu((prev) => !prev)}
+                        >
+                            Nghiệp vụ kho
+                            <MdKeyboardArrowDown />
+                        </button>
 
-                <button className="admin-activity" onClick={handleChangeMulti}>
-                    Áp dụng
-                </button>
+                        {openInventoryMenu && (
+                            <div className="admin-inventory-dropdown">
+                                <Link
+                                    to="/admin/products/inventory/import"
+                                    className="inventory-item inventory-item--import"
+                                    onClick={() => setOpenInventoryMenu(false)}
+                                >
+                                    Nhập kho
+                                </Link>
 
-                <Link className="admin-create" to="/admin/products/create">
-                    <CgMathPlus /> Tạo mới
-                </Link>
+                                <Link
+                                    to="/admin/products/inventory/export"
+                                    className="inventory-item inventory-item--export"
+                                    onClick={() => setOpenInventoryMenu(false)}
+                                >
+                                    Xuất kho
+                                </Link>
+
+                                <Link
+                                    to="/admin/products/inventory/transfer"
+                                    className="inventory-item inventory-item--transfer"
+                                    onClick={() => setOpenInventoryMenu(false)}
+                                >
+                                    Chuyển kho
+                                </Link>
+
+                                <Link
+                                    to="/admin/products/inventory/audit"
+                                    className="inventory-item inventory-item--audit"
+                                    onClick={() => setOpenInventoryMenu(false)}
+                                >
+                                    Kiểm kê
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <div className="admin-table-wrapper">
@@ -276,14 +378,8 @@ function Products() {
                         <div>
                             <input
                                 type="checkbox"
-                                checked={data.length && data.length === selectId.length}
-                                onChange={(e) => {
-                                    if (e.target.checked) {
-                                        setSelectId(data.map((i) => i._id));
-                                    } else {
-                                        setSelectId([]);
-                                    }
-                                }}
+                                checked={data.length > 0 && data.length === selectId.length}
+                                onChange={(e) => handleSelectAll(e.target.checked)}
                             />
                         </div>
                         <div className="admin-col-product">Sản phẩm</div>

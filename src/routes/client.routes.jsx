@@ -10,6 +10,12 @@ import NewProduct from "../pages/client/products/NewProduct";
 import AccountClient from "../pages/client/account/Account";
 import Cart from "../pages/client/cart/cart";
 import FavoritesPage from "../pages/client/FavoritesPage/FavoritesPage";
+import SalePage from "../pages/client/sale/sale";
+import Otp from "../pages/client/authClient/otp.client";
+import ForgotPassword from "../pages/client/authClient/Forgot-password";
+import ForgotOtp from "../pages/client/authClient/ForgotOtp";
+import ResetPassword from "../pages/client/authClient/reset-password";
+import Checkout from "../pages/client/cart/checkout";
 
 function ClientRoutes(){
     return(
@@ -26,9 +32,18 @@ function ClientRoutes(){
 
                 <Route path="/login" element={<LoginClient/>}/>
                 <Route path="/register" element={<RegisterClient/>}/>
+                <Route path="/otp" element={<Otp/>}/>
+                <Route path="/forgot-password" element={<ForgotPassword/>}/>
+                <Route path="/forgot-otp" element={<ForgotOtp/>}/>
+                <Route path="/reset-password" element={<ResetPassword/>}/>
                 <Route path="/account" element={<AccountClient/>}/>
+
+
+
                 <Route path="/gio-hang" element={<Cart/>}/>
+                <Route path="check-out" element={<Checkout/>}/>
                 <Route path="/yeu-thich" element={<FavoritesPage/>}/>
+                <Route path="/sale" element={<SalePage/>}/>
             </Route>
         </Routes>
     )

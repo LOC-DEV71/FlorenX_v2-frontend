@@ -93,7 +93,7 @@ function AccountClient() {
                 <div className="profile-sidebar-card">
                     <div className="avatar-wrap">
                         <img
-                            src={user.avatar || getAvatarUrl("aa")}
+                            src={user.avatar || getAvatarUrl(user.email)}
                             alt={user.fullname || "avatar"}
                             className="avatar"
                             onClick={openAvatarModal}

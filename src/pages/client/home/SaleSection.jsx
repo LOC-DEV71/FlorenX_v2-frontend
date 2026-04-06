@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import Countdown from "react-countdown";
 import "./SaleSection.scss";
 import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 
 function SaleSection() {
   const settings = useSelector((state) => state.setting);
@@ -66,14 +67,13 @@ function SaleSection() {
                 )}
 
                 {sale.redirectLink && (
-                  <Link
-                    href={sale.redirectLink}
+                  <HashLink
+                    smooth
+                    to={`${sale.redirectLink}/#sale-page`}
                     className="sale-btn"
-                    target="_blank"
-                    rel="noreferrer"
                   >
                     Đến xem
-                  </Link>
+                  </HashLink>
                 )}
               </div>
             </div>

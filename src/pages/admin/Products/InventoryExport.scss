@@ -1,0 +1,26 @@
+@import "./InventoryImport.scss";
+
+.stock-number {
+    font-weight: 700;
+    color: #111827;
+}
+
+.stock-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+
+    &--ok {
+        background: #ecfdf5;
+        color: #15803d;
+    }
+
+    &--danger {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+}
