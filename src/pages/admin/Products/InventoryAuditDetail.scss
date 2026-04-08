@@ -1,0 +1,401 @@
+.inventory-audit-detail-page {
+    &__top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px 18px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+    }
+
+    &__title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: #111827;
+    }
+
+    &__desc {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+}
+
+.inventory-audit-detail-btn {
+    min-height: 42px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    background: #3273ff;
+    color: #fff;
+    text-decoration: none;
+
+    &:hover {
+        background: #1d5fe9;
+    }
+
+    &:active {
+        background: #004ae9;
+    }
+
+    &--light {
+        background: #f3f4f6;
+        color: #111827;
+        border: 1px solid #e5e7eb;
+
+        &:hover {
+            background: #e5e7eb;
+        }
+
+        &:active {
+            background: #dbe1e8;
+        }
+    }
+}
+
+.inventory-audit-detail-loading {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+}
+
+.inventory-audit-paper {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.04);
+    overflow: hidden;
+
+    &__header {
+        padding: 24px 24px 18px;
+        border-bottom: 1px solid #eceff3;
+    }
+
+    &__heading {
+        font-size: 42px;
+        line-height: 1.1;
+        font-weight: 800;
+        color: #111827;
+        margin: 0 0 18px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    &__meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    &__meta-col {
+        p {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #111827;
+            line-height: 1.5;
+        }
+
+        strong {
+            font-weight: 700;
+        }
+    }
+
+    &__table-wrap {
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    &__table {
+        min-width: 980px;
+    }
+
+    &__thead {
+        display: grid;
+        grid-template-columns: 72px minmax(360px, 1.8fr) 1fr 1fr 1fr 1fr;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+
+        > div {
+            padding: 16px 14px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #111827;
+            text-align: center;
+            border-right: 1px solid #e5e7eb;
+
+            &:last-child {
+                border-right: none;
+            }
+        }
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 72px minmax(360px, 1.8fr) 1fr 1fr 1fr 1fr;
+        border-bottom: 1px solid #edf0f3;
+        min-height: 88px;
+
+        > div {
+            border-right: 1px solid #edf0f3;
+
+            &:last-child {
+                border-right: none;
+            }
+        }
+
+        &:hover {
+            background: #fafcff;
+        }
+    }
+
+    &__stt,
+    &__qty,
+    &__status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+        font-size: 15px;
+        color: #111827;
+    }
+
+    &__qty {
+        font-weight: 600;
+
+        &.is-diff {
+            color: #dc2626;
+        }
+    }
+
+    &__product {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        min-width: 0;
+    }
+
+    &__thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        flex-shrink: 0;
+        background: #fff;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &__product-info {
+        min-width: 0;
+
+        h4 {
+            margin: 0 0 4px;
+            font-size: 16px;
+            line-height: 1.4;
+            font-weight: 700;
+            color: #111827;
+            word-break: break-word;
+        }
+
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #6b7280;
+            word-break: break-word;
+        }
+    }
+
+    &__empty {
+        padding: 32px 20px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    &__summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        padding: 20px 24px;
+        border-top: 1px solid #eceff3;
+        background: #fcfcfd;
+    }
+
+    &__signatures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        padding: 28px 24px 34px;
+        border-top: 1px solid #eceff3;
+    }
+}
+
+.inventory-audit-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+
+    &--success {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    &--warning {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    &--danger {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+}
+
+.inventory-audit-summary-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    span {
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    strong {
+        font-size: 28px;
+        line-height: 1;
+        color: #111827;
+        font-weight: 800;
+    }
+}
+
+.inventory-audit-sign-box {
+    text-align: center;
+
+    &__label {
+        margin: 0 0 18px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    &__space {
+        height: 90px;
+    }
+
+    &__name {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #111827;
+    }
+}
+
+@media (max-width: 992px) {
+    .inventory-audit-detail-page {
+        &__top {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__actions {
+            width: 100%;
+        }
+    }
+
+    .inventory-audit-detail-btn {
+        flex: 1;
+    }
+
+    .inventory-audit-paper {
+        &__heading {
+            font-size: 34px;
+        }
+
+        &__meta {
+            grid-template-columns: 1fr;
+        }
+
+        &__summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        &__signatures {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .inventory-audit-detail-page {
+        &__title {
+            font-size: 20px;
+        }
+    }
+
+    .inventory-audit-paper {
+        &__header {
+            padding: 18px;
+        }
+
+        &__heading {
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+
+        &__summary {
+            grid-template-columns: 1fr;
+            padding: 18px;
+        }
+
+        &__signatures {
+            padding: 20px 18px 28px;
+        }
+    }
+
+    .inventory-audit-summary-card {
+        strong {
+            font-size: 24px;
+        }
+    }
+}

@@ -26,6 +26,9 @@ import TrashPage from "../pages/admin/TrashCan/TrashPage";
 import SettingPage from "../pages/admin/Setting/SettingPage";
 import InventoryImport from "../pages/admin/Products/InventoryImport";
 import InventoryExport from "../pages/admin/Products/InventoryExport";
+import InventoryAudit from "../pages/admin/Products/InventoryAudit";
+import InventoryAuditList from "../pages/admin/Products/InventoryAuditList";
+import InventoryAuditDetail from "../pages/admin/Products/InventoryAuditDetail";
 
 function AdminRoutes() {
   return (
@@ -42,8 +45,11 @@ function AdminRoutes() {
         {/* products */}
          <Route path="products/inventory/import" element={<InventoryImport />} />
          <Route path="products/inventory/export" element={<InventoryExport />} />
-         <Route path="products/inventory/audit" element={<UpdateProduct />} />
          <Route path="products/inventory/transfer" element={<UpdateProduct />} />
+         <Route path="products/inventory/audit/create" element={<InventoryAudit />} />
+         <Route path="products/inventory/audit/list" element={<InventoryAuditList />} />
+         <Route path="products/inventory/audit/detail/:code" element={<InventoryAuditDetail />} />
+         
 
         <Route element={<PrivateRoutePermission permission="view_products" />}>
           <Route path="products" element={<Products />} />

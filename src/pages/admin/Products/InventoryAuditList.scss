@@ -1,0 +1,239 @@
+.inventory-audit-list-page {
+    min-width: 1000px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    &__top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px 18px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+    }
+
+    &__title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #111827;
+    }
+
+    &__desc {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+    }
+    &__row {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1.2fr 1fr 140px;
+        padding: 14px;
+        align-items: center;
+        border-bottom: 1px solid #f3f3f3;
+        transition: background 0.2s;
+        gap: 10px;
+
+        &:hover {
+            background: #f9fafb;
+        }
+    }
+
+    &__row--loading {
+        .inventory-audit-skeleton {
+            display: inline-block;
+        }
+    }
+
+    &__loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 220px;
+        width: 100%;
+        padding: 24px;
+    }
+}
+
+.inventory-audit-create-btn {
+    min-height: 42px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    background: #3273ff;
+    color: #fff;
+    text-decoration: none;
+
+    &:hover {
+        background: #1d5fe9;
+    }
+
+    &:active {
+        background: #004ae9;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset,
+            rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+    }
+}
+
+.inventory-audit-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.inventory-audit-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.inventory-audit-table-wrapper::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+}
+
+.inventory-audit-table {
+    min-width: 1000px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    overflow: hidden;
+
+    &__header {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1.2fr 1fr 140px;
+        padding: 14px;
+        font-weight: 600;
+        background: #fafafa;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        gap: 10px;
+        color: #111827;
+        align-items: center;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1.2fr 1fr 140px;
+        padding: 14px;
+        align-items: center;
+        border-bottom: 1px solid #f3f3f3;
+        transition: background 0.2s;
+        gap: 10px;
+
+        &:hover {
+            background: #f9fafb;
+        }
+    }
+
+    &__row--loading {
+        .inventory-audit-skeleton {
+            display: inline-block;
+        }
+    }
+}
+
+.inventory-audit-code {
+    font-weight: 600;
+    color: #111827;
+}
+
+.inventory-audit-date,
+.inventory-audit-warehouse,
+.inventory-audit-user {
+    color: #374151;
+    font-size: 14px;
+}
+
+.inventory-audit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.inventory-audit-view {
+    border: none;
+    background: #3273ff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #1d5fe9;
+    }
+
+    &:active {
+        background: #004ae9;
+    }
+}
+
+.inventory-audit-empty {
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    background: #fff;
+}
+
+.inventory-audit-skeleton {
+    width: 100%;
+    height: 18px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: inventoryAuditShimmer 1.2s infinite;
+
+    &--btn {
+        height: 34px;
+        width: 90px;
+        display: inline-block;
+    }
+}
+
+@keyframes inventoryAuditShimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (max-width: 992px) {
+    .inventory-audit-list-page {
+        &__top {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    .inventory-audit-create-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .inventory-audit-list-page {
+        &__title {
+            font-size: 20px;
+        }
+    }
+}

@@ -13,6 +13,20 @@ export const getProducts = (data) => {
   return axiosAdmin.get(`/products?${params.toString()}`);
 };
 
+export const getListProduct = (data) => {
+  const params = new URLSearchParams();
+  if(data.page) params.append("page", data.page)
+  if(data.limit) params.append("limit", data.limit)
+  if(data.sort) params.append("sort", data.sort)
+  if(data.sortByCategory) params.append("sortByCategory", data.sortByCategory)
+  if(data.selectedWarehouse) params.append("selectedWarehouse", data.selectedWarehouse)
+  return axiosAdmin.get(`/products/get-list?${params.toString()}`);
+};
+
+export const getListProductNoQuery = () => {
+  return axiosAdmin.get(`/products/get-list-no-query`);
+};
+
 export const changeMulti = (data) => {
   return axiosAdmin.post(`/products/change-multi`, data);
 }

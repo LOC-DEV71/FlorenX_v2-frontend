@@ -360,7 +360,7 @@ function Products() {
                                 </Link>
 
                                 <Link
-                                    to="/admin/products/inventory/audit"
+                                    to="/admin/products/inventory/audit/list"
                                     className="inventory-item inventory-item--audit"
                                     onClick={() => setOpenInventoryMenu(false)}
                                 >

@@ -1,5 +1,14 @@
 import "./pagination.scss";
 
+const buildParams = ({ page, limit, sort, sortByCategory }) => {
+    const params = { page, limit };
+
+    if (sort) params.sort = sort;
+    if (sortByCategory) params.sortByCategory = sortByCategory;
+
+    return params;
+};
+
 const renderPages = (pagination, setSearchParams, limit, sort, sortByCategory) => {
     const MAX_PAGE = 6;
 
@@ -21,7 +30,9 @@ const renderPages = (pagination, setSearchParams, limit, sort, sortByCategory) =
                 key={i}
                 disabled={i === currentPage}
                 onClick={() =>
-                    setSearchParams({ page: i, limit, sort, sortByCategory })
+                    setSearchParams(
+                        buildParams({ page: i, limit, sort, sortByCategory })
+                    )
                 }
             >
                 {i}
@@ -41,18 +52,22 @@ export const renderpagination = (
 ) => {
     if (!pagination) return null;
 
+    const { currentPage, totalPage } = pagination;
+
     return (
         <div className="pagination-admin">
             <div className="pagination-admin_left">
-                {pagination.currentPage > 1 && (
+                {currentPage > 1 && (
                     <button
                         onClick={() =>
-                            setSearchParams({
-                                page: 1,
-                                limit,
-                                sort,
-                                sortByCategory,
-                            })
+                            setSearchParams(
+                                buildParams({
+                                    page: 1,
+                                    limit,
+                                    sort,
+                                    sortByCategory,
+                                })
+                            )
                         }
                     >
                         Trang đầu
@@ -60,14 +75,16 @@ export const renderpagination = (
                 )}
 
                 <button
-                    disabled={pagination.currentPage === 1}
+                    disabled={currentPage === 1}
                     onClick={() =>
-                        setSearchParams({
-                            page: pagination.currentPage - 1,
-                            limit,
-                            sort,
-                            sortByCategory,
-                        })
+                        setSearchParams(
+                            buildParams({
+                                page: currentPage - 1,
+                                limit,
+                                sort,
+                                sortByCategory,
+                            })
+                        )
                     }
                 >
                     ‹ Trước
@@ -81,16 +98,17 @@ export const renderpagination = (
                     sortByCategory
                 )}
 
-                {pagination.currentPage < pagination.totalPage && (
+                {currentPage < totalPage && (
                     <button
-                        disabled={pagination.currentPage === pagination.totalPage}
                         onClick={() =>
-                            setSearchParams({
-                                page: pagination.currentPage + 1,
-                                limit,
-                                sort,
-                                sortByCategory,
-                            })
+                            setSearchParams(
+                                buildParams({
+                                    page: currentPage + 1,
+                                    limit,
+                                    sort,
+                                    sortByCategory,
+                                })
+                            )
                         }
                     >
                         Sau ›
@@ -98,14 +116,16 @@ export const renderpagination = (
                 )}
 
                 <button
-                    disabled={pagination.currentPage === pagination.totalPage}
+                    disabled={currentPage === totalPage}
                     onClick={() =>
-                        setSearchParams({
-                            page: pagination.totalPage,
-                            limit,
-                            sort,
-                            sortByCategory,
-                        })
+                        setSearchParams(
+                            buildParams({
+                                page: totalPage,
+                                limit,
+                                sort,
+                                sortByCategory,
+                            })
+                        )
                     }
                 >
                     Trang cuối
@@ -116,12 +136,14 @@ export const renderpagination = (
                 className="pagination-admin_right"
                 value={limit}
                 onChange={(e) =>
-                    setSearchParams({
-                        page: 1,
-                        limit: Number(e.target.value),
-                        sort,
-                        sortByCategory,
-                    })
+                    setSearchParams(
+                        buildParams({
+                            page: 1,
+                            limit: Number(e.target.value),
+                            sort,
+                            sortByCategory,
+                        })
+                    )
                 }
             >
                 <option value={5}>5 / trang</option>
