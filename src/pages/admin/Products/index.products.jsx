@@ -336,7 +336,7 @@ function Products() {
                         {openInventoryMenu && (
                             <div className="admin-inventory-dropdown">
                                 <Link
-                                    to="/admin/products/inventory/import"
+                                    to="/admin/products/inventory/import/list"
                                     className="inventory-item inventory-item--import"
                                     onClick={() => setOpenInventoryMenu(false)}
                                 >
