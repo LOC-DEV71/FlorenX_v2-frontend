@@ -8,6 +8,7 @@ import { inventoryImport } from "../../../services/admin/InventoryTransaction.se
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 import {generateInventoryRefId} from "../../../utils/generateInventoryRefId"; 
+import { MdOutlineKeyboardBackspace } from "react-icons/md";
 
 
 function InventoryImportCreate() {
@@ -171,6 +172,9 @@ function InventoryImportCreate() {
                     <h2>Nhập kho</h2>
                     <p>Tạo phiếu nhập và cập nhật tồn kho sản phẩm</p>
                 </div>
+                <Link to={"/admin/products/inventory/import/list"}>
+                   <MdOutlineKeyboardBackspace/> Quay lại
+                </Link>
             </div>
 
             <div className="inventory-import-layout">

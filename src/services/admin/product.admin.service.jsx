@@ -27,6 +27,12 @@ export const getListProductNoQuery = () => {
   return axiosAdmin.get(`/products/get-list-no-query`);
 };
 
+export const getListExport = (warehouse_id) => {
+  return axiosAdmin.get(`/products/get-list-export`, {
+    params: { warehouse_id }
+  });
+};
+
 export const changeMulti = (data) => {
   return axiosAdmin.post(`/products/change-multi`, data);
 }

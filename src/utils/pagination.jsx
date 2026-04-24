@@ -1,15 +1,19 @@
 import "./pagination.scss";
 
-const buildParams = ({ page, limit, sort, sortByCategory }) => {
+const buildParams = ({ page, limit, sort, sortByCategory, warehouse, import_price, search }) => {
     const params = { page, limit };
 
     if (sort) params.sort = sort;
+    if (warehouse) params.warehouse = warehouse;
+    if (import_price) params.import_price = import_price;
     if (sortByCategory) params.sortByCategory = sortByCategory;
+    if (search) params.search = search;
+    
 
     return params;
 };
 
-const renderPages = (pagination, setSearchParams, limit, sort, sortByCategory) => {
+const renderPages = (pagination, setSearchParams, limit, sort, sortByCategory, warehouse, import_price, search) => {
     const MAX_PAGE = 6;
 
     if (!pagination) return null;
@@ -31,7 +35,7 @@ const renderPages = (pagination, setSearchParams, limit, sort, sortByCategory) =
                 disabled={i === currentPage}
                 onClick={() =>
                     setSearchParams(
-                        buildParams({ page: i, limit, sort, sortByCategory })
+                        buildParams({ page: i, limit, sort, sortByCategory, warehouse, import_price, search })
                     )
                 }
             >
@@ -48,7 +52,10 @@ export const renderpagination = (
     setSearchParams,
     limit,
     sort,
-    sortByCategory
+    sortByCategory,
+    warehouse,
+    import_price,
+    search
 ) => {
     if (!pagination) return null;
 
@@ -66,6 +73,9 @@ export const renderpagination = (
                                     limit,
                                     sort,
                                     sortByCategory,
+                                    warehouse,
+                                    import_price,
+                                    search
                                 })
                             )
                         }
@@ -83,6 +93,9 @@ export const renderpagination = (
                                 limit,
                                 sort,
                                 sortByCategory,
+                                warehouse,
+                                import_price,
+                                search
                             })
                         )
                     }
@@ -95,7 +108,10 @@ export const renderpagination = (
                     setSearchParams,
                     limit,
                     sort,
-                    sortByCategory
+                    sortByCategory,
+                    warehouse,
+                    import_price,
+                    search
                 )}
 
                 {currentPage < totalPage && (
@@ -107,6 +123,9 @@ export const renderpagination = (
                                     limit,
                                     sort,
                                     sortByCategory,
+                                    warehouse,
+                                    import_price,
+                                    search
                                 })
                             )
                         }
@@ -124,6 +143,9 @@ export const renderpagination = (
                                 limit,
                                 sort,
                                 sortByCategory,
+                                warehouse,
+                                import_price,
+                                search
                             })
                         )
                     }
@@ -142,6 +164,9 @@ export const renderpagination = (
                             limit: Number(e.target.value),
                             sort,
                             sortByCategory,
+                            warehouse,
+                            import_price,
+                            search
                         })
                     )
                 }

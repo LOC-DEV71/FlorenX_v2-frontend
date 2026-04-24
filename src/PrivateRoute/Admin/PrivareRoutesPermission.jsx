@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
-
+import {error} from "../../utils/notift";
 function PrivateRoutePermission({ permission }) {
   const { isLogin, loading, role } = useSelector((state) => state.auth);
 
@@ -15,6 +15,7 @@ function PrivateRoutePermission({ permission }) {
   const hasPermission = permissions.includes(permission);
 
   if (!hasPermission) {
+    error("Bạn không có quyền truy cập!");
     return <Navigate to="/admin" replace />;
   }
 

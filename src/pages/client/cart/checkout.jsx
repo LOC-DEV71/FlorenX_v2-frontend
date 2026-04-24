@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import "./Checkout.scss";
@@ -7,11 +7,13 @@ import {
   createVnpayPayment,
   createRepayPayment
 } from "../../../services/client/checkOut";
-import vnpay from "../../../assets/banner/vnpay.png";
+import { useSelector } from "react-redux";
+
 function Checkout() {
   const location = useLocation();
   const products = location.state?.data || [];
   const totalProduct = location.state?.subtotal || 0;
+  const account = useSelector((state) => state.authClient.user);
 
   const [form, setForm] = useState({
     name: "",
@@ -20,9 +22,28 @@ function Checkout() {
     note: ""
   });
 
+  const [useAccountInfo, setUseAccountInfo] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (useAccountInfo && account) {
+      setForm((prev) => ({
+        ...prev,
+        name: account.fullname || "",
+        phone: account.phone || "",
+        address: account.address || ""
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        name: "",
+        phone: "",
+        address: ""
+      }));
+    }
+  }, [useAccountInfo, account]);
 
   const isFormValid =
     form.name.trim() !== "" &&
@@ -31,6 +52,7 @@ function Checkout() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: value
@@ -198,6 +220,30 @@ function Checkout() {
                 onChange={handleChange}
               />
             </div>
+
+            <div className="checkout__account-box">
+              <label className="checkout__account-check" htmlFor="change">
+                <input
+                  type="checkbox"
+                  id="change"
+                  checked={useAccountInfo}
+                  onChange={(e) => setUseAccountInfo(e.target.checked)}
+                />
+                <span>Dùng thông tin tài khoản</span>
+              </label>
+
+              <div className="checkout__account-info">
+                <p>
+                  <strong>Họ tên:</strong> {account?.fullname || "Chưa có dữ liệu"}
+                </p>
+                <p>
+                  <strong>SĐT:</strong> {account?.phone || "Chưa có dữ liệu"}
+                </p>
+                <p>
+                  <strong>Địa chỉ:</strong> {account?.address || "Chưa có dữ liệu"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -245,7 +291,7 @@ function Checkout() {
                 checked={paymentMethod === "VNPAY"}
                 onChange={(e) => setPaymentMethod(e.target.value)}
               />
-              <span>  Thanh toán VNPAY</span>
+              <span>Thanh toán VNPAY</span>
             </label>
 
             <label

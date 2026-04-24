@@ -25,11 +25,12 @@ import UpdateNewsCategory from "../pages/admin/NewCategory/updateNewsCategory";
 import TrashPage from "../pages/admin/TrashCan/TrashPage";
 import SettingPage from "../pages/admin/Setting/SettingPage";
 import InventoryImportCreate from "../pages/admin/Products/InventoryImportCreate";
-import InventoryExport from "../pages/admin/Products/InventoryExport";
 import InventoryAudit from "../pages/admin/Products/InventoryAudit";
 import InventoryAuditList from "../pages/admin/Products/InventoryAuditList";
 import InventoryAuditDetail from "../pages/admin/Products/InventoryAuditDetail";
 import InventoryImportList from "../pages/admin/Products/InventoryImport";
+import InventoryExportCreate from "../pages/admin/Products/InventoryExportCreate";
+import InventoryExportList from "../pages/admin/Products/InventoryExport";
 
 function AdminRoutes() {
   return (
@@ -43,18 +44,36 @@ function AdminRoutes() {
       >
         <Route index element={<DashBoard />} />
 
+        {/* nhập kho */}
+        <Route element={<PrivateRoutePermission permission="import_warehouse" />}>
+          <Route path="products/inventory/import/create" element={<InventoryImportCreate />} />
+        </Route>
+        <Route element={<PrivateRoutePermission permission="import_warehouse" />}>
+          <Route path="products/inventory/import/list" element={<InventoryImportList />} />
+        </Route>
+         
+         {/* xuất kho */}
+        <Route element={<PrivateRoutePermission permission="export_warehouse" />}>
+         <Route path="products/inventory/export/Create" element={<InventoryExportCreate />} />
+        </Route>
+        <Route element={<PrivateRoutePermission permission="export_warehouse" />}>
+         <Route path="products/inventory/export/list" element={<InventoryExportList />} />
+        </Route>
+        
+         {/* <Route path="products/inventory/transfer" element={<UpdateProduct />} /> */}
+         
+         {/* kiểm kê kho */}
+         <Route element={<PrivateRoutePermission permission="inventory_audit" />}>
+          <Route path="products/inventory/audit/create" element={<InventoryAudit />} />
+         </Route>
+         <Route element={<PrivateRoutePermission permission="inventory_audit" />}>
+          <Route path="products/inventory/audit/list" element={<InventoryAuditList />} />
+         </Route>
+         <Route element={<PrivateRoutePermission permission="inventory_audit" />}>
+          <Route path="products/inventory/audit/detail/:code" element={<InventoryAuditDetail />} />
+         </Route> 
+
         {/* products */}
-         <Route path="products/inventory/import/create" element={<InventoryImportCreate />} />
-         <Route path="products/inventory/import/list" element={<InventoryImportList />} />
-
-         <Route path="products/inventory/export" element={<InventoryExport />} />
-         <Route path="products/inventory/transfer" element={<UpdateProduct />} />
-         
-         <Route path="products/inventory/audit/create" element={<InventoryAudit />} />
-         <Route path="products/inventory/audit/list" element={<InventoryAuditList />} />
-         <Route path="products/inventory/audit/detail/:code" element={<InventoryAuditDetail />} />
-         
-
         <Route element={<PrivateRoutePermission permission="view_products" />}>
           <Route path="products" element={<Products />} />
         </Route>

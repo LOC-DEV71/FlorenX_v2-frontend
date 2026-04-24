@@ -19,7 +19,6 @@ function UpdateProduct() {
         description: "",
         price: "",
         discountPercentage: "",
-        stock: "",
         status: "active",
         position: "",
         brand: "",
@@ -69,7 +68,6 @@ function UpdateProduct() {
                         description: product.description || "",
                         price: product.price || "",
                         discountPercentage: product.discountPercentage || "",
-                        stock: product.stock || "",
                         status: product.status || "active",
                         position: product.position || "",
                         brand: product.brand || "",
@@ -302,20 +300,6 @@ function UpdateProduct() {
 
                             </div>
 
-                            <div className="form-group">
-
-                                <label>Số lượng</label>
-
-                                <input
-                                    type="number"
-                                    value={form.stock}
-                                    onChange={(e) =>
-                                        setForm({ ...form, stock: e.target.value })
-                                    }
-                                />
-
-                            </div>
-
                         </div>
 
                         <div className="form-group">
@@ -380,7 +364,7 @@ function UpdateProduct() {
 
                     {/* STATUS */}
 
-                    <div className="card visibility">
+                    <div className="card">
 
                         <h3>Trạng thái</h3>
 
@@ -406,7 +390,7 @@ function UpdateProduct() {
 
                     {/* FEATURED */}
 
-                    <div className="card visibility">
+                    <div className="card">
 
                         <h3>Sản phẩm nổi bật</h3>
 

@@ -344,7 +344,7 @@ function Products() {
                                 </Link>
 
                                 <Link
-                                    to="/admin/products/inventory/export"
+                                    to="/admin/products/inventory/export/list"
                                     className="inventory-item inventory-item--export"
                                     onClick={() => setOpenInventoryMenu(false)}
                                 >

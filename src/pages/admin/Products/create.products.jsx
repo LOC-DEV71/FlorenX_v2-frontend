@@ -17,7 +17,6 @@ function CreateProduct() {
     description: "",
     price: "",
     discountPercentage: "",
-    stock: "",
     status: "active",
     position: "",
     brand: "",
@@ -130,7 +129,6 @@ function CreateProduct() {
           description: "",
           price: "",
           discountPercentage: "",
-          stock: "",
           status: "active",
           position: "",
           brand: "",
@@ -236,17 +234,6 @@ function CreateProduct() {
                 />
               </div>
 
-              <div className="form-group">
-                <label>Số lượng</label>
-                <input
-                  type="number"
-                  value={form.stock}
-                  onChange={(e) =>
-                    setForm({ ...form, stock: e.target.value })
-                  }
-                />
-              </div>
-
             </div>
 
             <div className="form-group">
@@ -305,7 +292,7 @@ function CreateProduct() {
 
             </div>
 
-            <div className="card visibility">
+            <div className="card">
 
               <h3>Sản phẩm nổi bậc</h3>
 
@@ -338,7 +325,7 @@ function CreateProduct() {
 
           </div>
 
-          <div className="card visibility">
+          <div className="card">
 
             <h3>Trạng thái</h3>
 

@@ -81,6 +81,57 @@
     }
   }
 
+  &__account-box {
+    padding: 16px;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    background: #0f172a;
+  }
+
+  &__account-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+
+    input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: #1677ff;
+      cursor: pointer;
+    }
+
+    span {
+      user-select: none;
+    }
+  }
+
+  &__account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    strong {
+      color: #f8fafc;
+    }
+  }
+
   &__summary {
     padding: 16px;
     border: 1px solid #334155;
