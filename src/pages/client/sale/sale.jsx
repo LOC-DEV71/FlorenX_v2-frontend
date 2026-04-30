@@ -8,6 +8,7 @@ import SEO from "../../../utils/SEO";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { addLike, getListLike } from "../../../services/client/like.service";
 import { HashLink } from "react-router-hash-link";
+import { success } from "../../../utils/notift";
 
 const categoryConfigs = [
     { key: "laptop", title: "Laptop" },
@@ -43,10 +44,17 @@ function Sale() {
 
         try {
             if (likeIds.includes(productId)) {
-                await addLike({ productId, type: "clear" });
+                const res = await addLike({ productId, type: "clear" });
+                if(res.data.code){
+                    success(res.data.message || "Đã xóa khỏi danh sách yêu thích")
+                }
                 setLikedIds(prev => prev.filter(id => id !== productId));
+               
             } else {
-                await addLike({ productId, type: "add" });
+                const res = await addLike({ productId, type: "add" });
+                if(res.data.code){
+                    success(res.data.message || "Đã thêm vào danh sách yêu thích")
+                }
                 setLikedIds(prev => [...prev, productId]);
             }
         } catch (err) {

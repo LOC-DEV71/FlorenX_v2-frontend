@@ -7,6 +7,7 @@ import { HeartOutlined, HeartFilled, DeleteOutlined } from "@ant-design/icons";
 import { addLike, getListLike } from "../../../services/client/like.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
+import SEO from "../../../utils/SEO";
 
 function Cart() {
   const [loading, setLoading] = useState(false);
@@ -177,6 +178,7 @@ function Cart() {
       {loading && (
         <Loading />
       )}
+      <SEO title={"Giỏ hàng"}/>
       <div className="cart-page__inner">
         {loading ? (
           <div className="cart-page__state">Đang tải giỏ hàng...</div>

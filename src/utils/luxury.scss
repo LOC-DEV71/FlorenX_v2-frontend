@@ -1,0 +1,116 @@
+// --- Palette màu Quiet Luxury ---
+$bronze-bg: linear-gradient(135deg, #3d2b1f 0%, #1a110a 100%);
+$silver-bg: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+$gold-bg: linear-gradient(135deg, #b88a44 0%, #6e4d1a 100%);
+$diamond-bg: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 100%);
+
+.luxury-card-container {
+  position: relative;
+  width: 380px;
+  height: 220px;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  cursor: pointer;
+
+  // Màu sắc theo hạng
+  &.bronze { background: $bronze-bg; color: #d4bda9; }
+  &.silver { background: $silver-bg; color: #1f2937; }
+  &.gold { background: $gold-bg; color: #f3e0b5; }
+  &.diamond { 
+    background: $diamond-bg; color: #075985;
+    .tier-label, .membership-text { opacity: 0.8; color: #0c4a6e; }
+  }
+
+  &:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.reflection-layer {
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 400%;
+  height: 400%;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0) 55%,
+    transparent 100%
+  );
+  filter: blur(60px);
+}
+
+.layer-1 { animation: light-sweep 8s ease-in-out infinite; }
+.layer-2 { 
+  animation: light-sweep 8s ease-in-out infinite; 
+  animation-delay: 4s; 
+  opacity: 0.5; 
+}
+
+@keyframes light-sweep {
+  0% { transform: translate(-10%, -10%) rotate(0deg); }
+  50% { transform: translate(10%, 10%) rotate(3deg); }
+  100% { transform: translate(-10%, -10%) rotate(0deg); }
+}
+
+.card-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .tier-label { font-size: 11px; font-weight: 900; letter-spacing: 2.5px; }
+  .tier-icon { font-size: 28px; opacity: 0.9; &.diamond-icon { color: #fff; filter: drop-shadow(0 0 12px white); } }
+}
+
+.card-body {
+  margin-top: 20px;
+  .membership-text { 
+    font-size: 10px; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    opacity: 0.6;
+    margin-bottom: 2px;
+  }
+  .user-name { 
+    font-size: 22px; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  .serial-number { font-family: 'Courier New', monospace; font-size: 14px; opacity: 0.7; }
+  .card-chip {
+    width: 42px; height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    &::after { content: ''; position: absolute; top: 50%; width: 100%; height: 1px; background: rgba(255,255,255, 0.1); }
+  }
+}

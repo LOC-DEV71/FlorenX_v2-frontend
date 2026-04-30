@@ -13,6 +13,7 @@ import { resetPassword } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 import { useLocation } from "react-router-dom";
+import SEO from "../../../utils/SEO";
 
 
 function ResetPassword() {
@@ -59,6 +60,7 @@ function ResetPassword() {
   return (
     <div className="login-client">
       {loading && <Loading />}
+       <SEO title={"Đổi mật khẩu"}/>
       <Link to="/" className="login-client__back">
         <ArrowLeftOutlined />
         <span>Về trang chủ</span>

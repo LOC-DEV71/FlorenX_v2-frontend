@@ -13,6 +13,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, loginLocal } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
+import SEO from "../../../utils/SEO";
 
 function LoginClient() {
     const [showPassword, setShowPassword] = useState(false);
@@ -73,6 +74,7 @@ function LoginClient() {
             {(loading || loadinggg) && 
                 <Loading/>
             }
+            <SEO title={"Đăng nhập"}/>
             <Link to="/" className="login-client__back">
                 <ArrowLeftOutlined />
                 <span>Về trang chủ</span>

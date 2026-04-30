@@ -10,6 +10,7 @@ import {
 import NoData from "../../../assets/banner/empty.png";
 import { success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
+import SEO from "../../../utils/SEO";
 
 function FavoritePage() {
   const [data, setData] = useState([]);
@@ -76,6 +77,7 @@ function FavoritePage() {
       {loading && (
         <Loading />
       )}
+      <SEO title={"Sản phẩm yêu thích"}/>
 
       <div className="container">
         <div className="favorite-page__header">

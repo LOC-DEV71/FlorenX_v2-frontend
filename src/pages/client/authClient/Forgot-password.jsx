@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { forgotPassword } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
+import SEO from "../../../utils/SEO";
 
 function ForgotPassword() {
   const logo = useSelector((state) => state.setting?.settings?.favicon);
@@ -51,6 +52,7 @@ function ForgotPassword() {
   return (
     <div className="login-client">
       {loading && <Loading />}
+      <SEO title={"Quên mật khẩu"}/>
 
       <Link to="/" className="login-client__back">
         <ArrowLeftOutlined />

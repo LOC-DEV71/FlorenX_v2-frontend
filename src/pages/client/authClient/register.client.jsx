@@ -13,6 +13,7 @@ import { createUser } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 import { useNavigate } from "react-router-dom";
+import SEO from "../../../utils/SEO";
 
 function RegisterClient() {
   const [showPassword, setShowPassword] = useState(false);
@@ -62,6 +63,7 @@ function RegisterClient() {
   return (
     <div className="login-client">
       {loading && <Loading/>}
+      <SEO title={"Đăng ký tài khoản"} />
       <Link to="/" className="login-client__back">
         <ArrowLeftOutlined />
         <span>Về trang chủ</span>

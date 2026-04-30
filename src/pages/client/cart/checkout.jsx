@@ -1,415 +1,329 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import "./Checkout.scss";
-import {
-  checkOut,
-  createVnpayPayment,
-  createRepayPayment
-} from "../../../services/client/checkOut";
 import { useSelector } from "react-redux";
+import { error, success } from "../../../utils/notift";
+import { getVoucher } from "../../../services/client/voucher.service";
+import { formatCustom } from "../../../utils/formatCustomDate";
+import { capturePaypalOrder, createPaypalOrder, OrderSubmit } from "../../../services/client/checkout.service";
+import Loading from "../../../utils/loading";
 
 function Checkout() {
   const location = useLocation();
+  const naviagte = useNavigate();
   const products = location.state?.data || [];
-  const totalProduct = location.state?.subtotal || 0;
   const account = useSelector((state) => state.authClient.user);
+  const [loading, setLoading] = useState(false)
+
+  const totalPrice = products.reduce(
+    (total, item) =>
+      total + (item.price - item.price * item.discountPercentage / 100)*item.quantity,
+    0
+  );
+
+  const productSnapshots = products?.map(item => ({
+    productId: item._id,
+    title: item.title,
+    thumbnail: item.thumbnail,
+    price: item.price,
+    discountPercentage: item.discountPercentage,
+    quantity: item.quantity,
+    finalPrice: item.price - (item.price * item.discountPercentage / 100)
+  }));
 
   const [form, setForm] = useState({
-    name: "",
-    phone: "",
+    fullname: "",
     address: "",
-    note: ""
+    phone: "",
+    email: "",
+    voucher: "",
+    typeVoucher: "",
+    valueVoucher: "",
+    maxVoucher: "",
+    minOrderValue: "",
+    pay: "cod",
+    products: productSnapshots 
   });
 
-  const [useAccountInfo, setUseAccountInfo] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("COD");
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [vouchers, setVouchers] = useState([]);
+
+  // useEffect(() => {
+  //   setForm(prev => ({
+  //     ...prev,
+  //     products: productSnapshots
+  //   }));
+  // }, [products]);
+
+  const memberDiscount = (() => {
+    if (!account || !account.member) return 0;
+    const memberTier = account.member.toLowerCase();
+    let tierConfig = null;
+
+    switch (memberTier) {
+      case "diamond":
+        tierConfig = { rate: 0.15, max: 5000000, minOrder: 10000000 };
+        break;
+      case "gold":
+        tierConfig = { rate: 0.08, max: 3000000, minOrder: 10000000 };
+        break;
+      case "silver":
+        tierConfig = { rate: 0.06, max: 2000000, minOrder: 10000000 };
+        break;
+      case "bronze":
+        tierConfig = { rate: 0.05, max: 1000000, minOrder: 10000000 };
+        break;
+      default:
+        return 0;
+    }
+
+    if (totalPrice < tierConfig.minOrder) return 0;
+    const discountAmount = totalPrice * tierConfig.rate;
+    return Math.min(discountAmount, tierConfig.max);
+  })();
+
 
   useEffect(() => {
-    if (useAccountInfo && account) {
-      setForm((prev) => ({
-        ...prev,
-        name: account.fullname || "",
-        phone: account.phone || "",
-        address: account.address || ""
-      }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        name: "",
-        phone: "",
-        address: ""
-      }));
-    }
-  }, [useAccountInfo, account]);
-
-  const isFormValid =
-    form.name.trim() !== "" &&
-    form.phone.trim() !== "" &&
-    form.address.trim() !== "";
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const buildPayload = (method, extra = {}) => {
-    return {
-      customerName: form.name,
-      phone: form.phone,
-      address: form.address,
-      note: form.note,
-      products,
-      total: totalProduct,
-      paymentMethod: method,
-      ...extra
+    const fetchApi = async () => {
+      const res = await getVoucher();
+      if (res?.data?.code) {
+        setVouchers(res.data.vouchers);
+      }
     };
-  };
+    fetchApi();
+  }, []);
 
-  const handleCOD = async () => {
-    if (!isFormValid || loading) return;
+  const discountVoucher = (() => {
+    if (!form.voucher) return 0;
+    if (totalPrice < form.minOrderValue) return 0;
 
-    try {
-      setLoading(true);
-
-      const payload = buildPayload("COD", {
-        paymentStatus: "UNPAID"
-      });
-
-      const res = await checkOut(payload);
-      console.log("COD success:", res);
-
-      setSuccessMessage("Đặt hàng COD thành công");
-    } catch (error) {
-      console.error("COD failed:", error);
-      alert("Đặt hàng COD thất bại");
-    } finally {
-      setLoading(false);
+    if (form.typeVoucher === "percentage") {
+      const percentDiscount = totalPrice * form.valueVoucher / 100;
+      return Math.min(percentDiscount, form.maxVoucher || Infinity);
     }
+    return form.valueVoucher;
+  })();
+
+  const finalTotal = Math.max(totalPrice - discountVoucher - memberDiscount, 0);
+
+  const checkInfo = () => {
+    if (!form.fullname.trim() || !form.email.trim() || !form.phone.trim() || !form.address.trim()) {
+      error("Vui lòng nhập đầy đủ thông tin người nhận");
+      return false;
+    }
+    return true;
   };
 
-  const handleVNPay = async () => {
-    if (!isFormValid || loading) return;
-
+  const handleSubmit = async () => {
+    if (!checkInfo()) return;
+    setLoading(true)
     try {
-      setLoading(true);
-
-      const payload = buildPayload("VNPAY", {
-        paymentStatus: "PENDING"
+      const res = await OrderSubmit({
+        ...form,
+        totalPrice: finalTotal
       });
 
-      const res = await createVnpayPayment(payload);
-      console.log("VNPAY response:", res);
 
-      const paymentUrl = res?.data?.paymentUrl || res?.paymentUrl;
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      } else {
-        alert("Không lấy được link thanh toán VNPAY");
+      if (res?.data?.code) {
+        success(res?.data?.message || "Đặt hàng thành công");
+        naviagte(`/order-success/${res?.data?.orderCode}`);
       }
-    } catch (error) {
-      console.error("VNPAY failed:", error);
-      alert("Khởi tạo thanh toán VNPAY thất bại");
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      error(err.response?.data?.message || "Đặt hàng thất bại");
+    } finally{
+      setLoading(false)
     }
   };
 
-  const handleRepay = async () => {
-    if (!isFormValid || loading) return;
-
-    try {
-      setLoading(true);
-
-      const payload = buildPayload("REPAY", {
-        paymentStatus: "PENDING"
-      });
-
-      const res = await createRepayPayment(payload);
-      console.log("REPAY response:", res);
-
-      const paymentUrl = res?.data?.paymentUrl || res?.paymentUrl;
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      } else {
-        alert("Không lấy được link thanh toán lại");
-      }
-    } catch (error) {
-      console.error("REPAY failed:", error);
-      alert("Khởi tạo thanh toán lại thất bại");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePaypalSuccess = async (orderID, details) => {
-    try {
-      setLoading(true);
-
-      const payload = buildPayload("PAYPAL", {
-        paymentStatus: "PAID",
-        paypalOrderId: orderID,
-        paypalDetails: details
-      });
-
-      const res = await checkOut(payload);
-      console.log("PAYPAL success:", res);
-
-      setSuccessMessage("Thanh toán PayPal và đặt hàng thành công");
-    } catch (error) {
-      console.error("PAYPAL checkout failed:", error);
-      alert("Thanh toán PayPal thành công nhưng gửi đơn hàng thất bại");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="checkout">
-      <div className="checkout__container">
-        <div className="checkout__left">
-          <h2 className="checkout__title">Thông tin nhận hàng</h2>
+      {loading && <Loading/>}
+      <div className="checkout__wrapper">
+        <h1 className="checkout__title">THANH TOÁN</h1>
 
-          <div className="checkout__form">
-            <div className="checkout__group">
-              <label>Họ và tên</label>
-              <input
-                type="text"
-                name="name"
-                placeholder="Nhập họ và tên"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="checkout__group">
-              <label>Số điện thoại</label>
-              <input
-                type="text"
-                name="phone"
-                placeholder="Nhập số điện thoại"
-                value={form.phone}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="checkout__group">
-              <label>Địa chỉ</label>
-              <input
-                type="text"
-                name="address"
-                placeholder="Nhập địa chỉ"
-                value={form.address}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="checkout__group">
-              <label>Ghi chú</label>
-              <textarea
-                name="note"
-                rows="4"
-                placeholder="Nhập ghi chú"
-                value={form.note}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="checkout__account-box">
-              <label className="checkout__account-check" htmlFor="change">
-                <input
-                  type="checkbox"
-                  id="change"
-                  checked={useAccountInfo}
-                  onChange={(e) => setUseAccountInfo(e.target.checked)}
-                />
-                <span>Dùng thông tin tài khoản</span>
-              </label>
-
-              <div className="checkout__account-info">
-                <p>
-                  <strong>Họ tên:</strong> {account?.fullname || "Chưa có dữ liệu"}
-                </p>
-                <p>
-                  <strong>SĐT:</strong> {account?.phone || "Chưa có dữ liệu"}
-                </p>
-                <p>
-                  <strong>Địa chỉ:</strong> {account?.address || "Chưa có dữ liệu"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="checkout__right">
-          <h2 className="checkout__title">Thanh toán</h2>
+        <div className="checkout__container">
 
           <div className="checkout__summary">
-            <div className="checkout__row">
-              <span>Số sản phẩm</span>
-              <span>{products.length}</span>
+            <h2>Tóm tắt đơn hàng</h2>
+
+            {products.map(item => (
+              <div className="item" key={item._id}>
+                <img src={item.thumbnail} alt={item.title} />
+                <div className="info">
+                  <div className="price">
+                    {(item.price - item.price * item.discountPercentage / 100).toLocaleString("vi-VN")} VNĐ
+                  </div>
+                  <div>
+                    <p>{item.title}</p>
+                    <div className="qty"><span> x {item.quantity}</span></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="discount">
+              <h3>Chọn mã giảm giá</h3>
+
+              <div>
+                {vouchers.map(item => (
+                  <div
+                    className={`item ${form.voucher === item?.code && "active"}`}
+                    key={item?._id}
+                    onClick={() => {
+                      setForm(prev => ({
+                        ...prev,
+                        voucher: prev.voucher === item?.code ? "" : item?.code,
+                        typeVoucher: prev.voucher === item?.code ? "" : item.discountType,
+                        valueVoucher: prev.voucher === item?.code ? "" : item.discountValue,
+                        maxVoucher: prev.voucher === item?.code ? "" : item.maxDiscount,
+                        minOrderValue: prev.voucher === item?.code ? "" : item.minOrderValue
+                      }));
+                    }}
+                  >
+                    <div className="left">
+                      <div className="code">{item?.code}</div>
+                      <div className="desc">{item?.description}</div>
+                      <div className="date">
+                        Từ {formatCustom(item?.startDate)} - {formatCustom(item?.endDate)}
+                      </div>
+                    </div>
+                    <div className="right">
+                      {form.voucher === item?.code ? "Đã áp dụng" : "Áp dụng"}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="checkout__row">
-              <span>Tổng tiền</span>
-              <span>{totalProduct.toLocaleString("vi-VN")} đ</span>
+
+            <div className="calc">
+              <div>
+                <span>Tạm tính</span>
+                <span>{totalPrice.toLocaleString("vi-VN")} VNĐ</span>
+              </div>
+              <div>
+                <span>Giảm giá Voucher</span>
+                <span className="red">- {discountVoucher.toLocaleString("vi-VN")} VNĐ</span>
+              </div>
+              <div>
+                <span>Ưu đãi thành viên ({account?.member || "N/A"})</span>
+                <span className="red">- {memberDiscount.toLocaleString("vi-VN")} VNĐ</span>
+              </div>
+              <div>
+                <span>Phí vận chuyển</span>
+                <span className="delivery">Miễn Phí</span>
+              </div>
+            </div>
+
+            <div className="total">
+              <span>Tổng cộng</span>
+              <span>{finalTotal.toLocaleString("vi-VN")} VNĐ</span>
             </div>
           </div>
 
-          <div className="checkout__payment">
-            <h3 className="checkout__subtitle">Chọn phương thức thanh toán</h3>
+          {/* ===== FORM GIỮ NGUYÊN ===== */}
+          <div className="checkout__form">
+            <h2>Thông tin giao hàng</h2>
 
-            <label
-              className={`checkout__method ${
-                paymentMethod === "COD" ? "active" : ""
-              }`}
-            >
+            <input
+              placeholder="Họ và tên"
+              value={form.fullname}
+              onChange={e => setForm({ ...form, fullname: e.target.value })}
+            />
+
+            <div className="row">
               <input
-                type="radio"
-                name="paymentMethod"
-                value="COD"
-                checked={paymentMethod === "COD"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
+                placeholder="Địa chỉ Email"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
               />
-              <span>Thanh toán khi nhận hàng (COD)</span>
-            </label>
-
-            <label
-              className={`checkout__method ${
-                paymentMethod === "VNPAY" ? "active" : ""
-              }`}
-            >
               <input
-                type="radio"
-                name="paymentMethod"
-                value="VNPAY"
-                checked={paymentMethod === "VNPAY"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
+                placeholder="Số điện thoại"
+                value={form.phone}
+                onChange={e => setForm({ ...form, phone: e.target.value })}
               />
-              <span>Thanh toán VNPAY</span>
-            </label>
+            </div>
 
-            <label
-              className={`checkout__method ${
-                paymentMethod === "PAYPAL" ? "active" : ""
-              }`}
-            >
+            <input
+              placeholder="Địa chỉ nhận hàng"
+              value={form.address}
+              onChange={e => setForm({ ...form, address: e.target.value })}
+            />
+
+            <textarea placeholder="Lời nhắn cho shipper..." />
+
+            <div className="checkbox-checkout">
               <input
-                type="radio"
-                name="paymentMethod"
-                value="PAYPAL"
-                checked={paymentMethod === "PAYPAL"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
+                type="checkbox"
+                id="account"
+                onChange={e => {
+                  if (e.target.checked && account) {
+                    setForm({
+                      ...form,
+                      fullname: account.fullname || "",
+                      address: account.address || "",
+                      phone: account.phone || "",
+                      email: account.email || ""
+                    });
+                  }
+                }}
               />
-              <span>Thanh toán PayPal</span>
-            </label>
+              <label htmlFor="account">
+                {account ? `${account.fullname} - ${account.address} - ${account.email} - ${account.phone}` : "Chưa có thông tin tài khoản"}
+              </label>
+            </div>
 
-            <label
-              className={`checkout__method ${
-                paymentMethod === "REPAY" ? "active" : ""
-              }`}
-            >
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="REPAY"
-                checked={paymentMethod === "REPAY"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              />
-              <span>Thanh toán lại</span>
-            </label>
-          </div>
+            <h2>Phương thức thanh toán</h2>
 
-          {!isFormValid && (
-            <p className="checkout__warning">
-              Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ trước khi thanh toán.
-            </p>
-          )}
-
-          {successMessage && (
-            <div className="checkout__success">{successMessage}</div>
-          )}
-
-          <div className="checkout__action">
-            {paymentMethod === "COD" && (
-              <button
-                className="checkout__button"
-                disabled={!isFormValid || loading}
-                onClick={handleCOD}
+            <div className="payment-method">
+              <label
+                className={`method ${form.pay === "cod" ? "active" : ""}`}
+                onClick={() => setForm({ ...form, pay: "cod" })}
               >
-                {loading ? "Đang xử lý..." : "Đặt hàng COD"}
-              </button>
-            )}
+                <input type="radio" checked={form.pay === "cod"} readOnly />
+                Tiền mặt (COD)
+              </label>
 
-            {paymentMethod === "VNPAY" && (
-              <button
-                className="checkout__button checkout__button--vnpay"
-                disabled={!isFormValid || loading}
-                onClick={handleVNPay}
+              <label
+                className={`method ${form.pay === "paypal" ? "active" : ""}`}
+                onClick={() => setForm({ ...form, pay: "paypal" })}
               >
-                {loading ? "Đang xử lý..." : "Thanh toán với VNPAY"}
-              </button>
-            )}
+                <input type="radio" checked={form.pay === "paypal"} readOnly />
+                PayPal
+              </label>
 
-            {paymentMethod === "REPAY" && (
-              <button
-                className="checkout__button checkout__button--repay"
-                disabled={!isFormValid || loading}
-                onClick={handleRepay}
-              >
-                {loading ? "Đang xử lý..." : "Thanh toán lại"}
-              </button>
-            )}
-
-            {paymentMethod === "PAYPAL" && (
-              <div
-                className={
-                  !isFormValid || loading
-                    ? "checkout__paypal checkout__paypal--disabled"
-                    : "checkout__paypal"
-                }
-              >
+              {form.pay === "paypal" && (
                 <PayPalScriptProvider
                   options={{
-                    "client-id":
-                      "AVLmCQeDTY4V61Oz3EDPhSaDLkIAMEy8ldzQHa7Q5BingPpqAntPqRoI40NY-8TKbxlJrkaZad9nNb1t",
-                    currency: "USD"
+                    "client-id": "AVLmCQeDTY4V61Oz3EDPhSaDLkIAMEy8ldzQHa7Q5BingPpqAntPqRoI40NY-8TKbxlJrkaZad9nNb1t",
+                    currency: "USD",
+                    intent: "capture"
                   }}
                 >
                   <PayPalButtons
                     style={{ layout: "vertical" }}
-                    disabled={!isFormValid || loading}
-                    forceReRender={[totalProduct, isFormValid]}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        purchase_units: [
-                          {
-                            amount: {
-                              value: (totalProduct / 24000).toFixed(2)
-                            }
-                          }
-                        ]
-                      });
+                    createOrder={async () => {
+                      const res = await createPaypalOrder(
+                        (Number(finalTotal) / 24000).toFixed(2)
+                      );
+                      return res.data.orderID;
                     }}
-                    onApprove={(data, actions) => {
-                      return actions.order.capture().then(async (details) => {
-                        await handlePaypalSuccess(data.orderID, details);
-                      });
-                    }}
-                    onError={(err) => {
-                      console.error("PayPal error:", err);
-                      alert("Có lỗi khi thanh toán PayPal");
+                    onApprove={async (data) => {
+                      const res = await capturePaypalOrder(data.orderID);
+                      if (res.data.status === "COMPLETED") await handleSubmit();
                     }}
                   />
                 </PayPalScriptProvider>
-              </div>
+              )}
+            </div>
+
+            {form.pay === "cod" && (
+              <button className="submit" onClick={handleSubmit}>
+                ĐẶT HÀNG NGAY - {finalTotal.toLocaleString("vi-VN")} VNĐ
+              </button>
             )}
           </div>
+
         </div>
       </div>
     </div>

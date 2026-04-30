@@ -1,0 +1,996 @@
+@use 'sass:color';
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+$bg-deep: #080c10;
+$bg-surface: #0e1318;
+$bg-card: #131920;
+$bg-card-hover: #192028;
+$border-subtle: rgba(255, 255, 255, 0.06);
+$border-glow: rgba(0, 200, 150, 0.3);
+$accent: #00c896;
+$accent-dim: #009e77;
+$accent-glow: rgba(0, 200, 150, 0.15);
+$accent-glow-strong: rgba(0, 200, 150, 0.25);
+$text-primary: #f0f4f8;
+$text-secondary: #8a99aa;
+$text-muted: #4a5a6a;
+$electric-blue: #1e90ff;
+$electric-blue-glow: rgba(30, 144, 255, 0.15);
+$warning: #f59e0b;
+$danger: #ef4444;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.order-success-page {
+  min-height: 100vh;
+  background-color: $bg-deep;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(0, 200, 150, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(30, 144, 255, 0.05) 0%, transparent 50%);
+  font-family: 'DM Sans', sans-serif;
+  color: $text-primary;
+  padding: 0 1rem 4rem;
+  overflow-x: hidden;
+}
+
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 200, 150, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 200, 150, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-container {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid $border-subtle;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, $accent, $electric-blue);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 18px;
+        height: 18px;
+        fill: #080c10;
+      }
+    }
+
+    .brand-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: $text-primary;
+      text-transform: uppercase;
+
+      span {
+        color: $accent;
+      }
+    }
+  }
+
+  .nav-step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $text-muted;
+    letter-spacing: 0.05em;
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: $text-muted;
+
+        &.done {
+          background: $accent;
+        }
+      }
+
+      &.active {
+        color: $accent;
+      }
+    }
+
+    .divider {
+      width: 20px;
+      height: 1px;
+      background: $border-subtle;
+    }
+  }
+}
+
+
+.success-hero {
+  text-align: center;
+  padding: 4rem 0 2.5rem;
+
+  .checkmark-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+
+    .ring-outer {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 2px solid $border-glow;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: ringPulse 2.5s ease-in-out infinite;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 200, 150, 0.1);
+        animation: ringPulseOuter 2.5s ease-in-out infinite 0.3s;
+      }
+    }
+
+    .ring-inner {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: $accent-glow;
+      border: 1.5px solid $accent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .check-icon {
+        font-size: 28px;
+        color: $accent;
+        animation: fadeInUp 0.4s ease forwards 0.15s;
+        opacity: 0;
+      }
+    }
+  }
+
+  .success-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $text-primary;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+
+    .highlight {
+      color: $accent;
+    }
+  }
+
+  .success-subtitle {
+    font-size: 1rem;
+    font-weight: 300;
+    color: $text-secondary;
+    max-width: 440px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.7;
+  }
+
+  .order-id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: $bg-card;
+    border: 1px solid $border-subtle;
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    color: $text-secondary;
+
+    .label {
+      font-weight: 400;
+    }
+
+    .value {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      color: $accent;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      color: $text-muted;
+      display: flex;
+      transition: color 0.2s;
+
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover {
+        color: $accent;
+      }
+    }
+  }
+}
+
+
+.order-timeline {
+  margin: 0.5rem 0 2.5rem;
+  background: $bg-card;
+  border: 1px solid $border-subtle;
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+
+  .timeline-header {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: $text-muted;
+    margin-bottom: 1.5rem;
+  }
+
+  .timeline-track {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+
+    &::-webkit-scrollbar { height: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: $border-subtle; border-radius: 4px; }
+  }
+
+  .timeline-step {
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 17px;
+      left: calc(50% + 18px);
+      right: calc(-50% + 18px);
+      height: 2px;
+      background: $border-subtle;
+      z-index: 0;
+    }
+
+    &.done:not(:last-child)::after {
+      background: linear-gradient(90deg, $accent, $accent-dim);
+    }
+
+    &.active:not(:last-child)::after {
+      background: linear-gradient(90deg, $accent-dim, $border-subtle);
+    }
+
+    .step-node {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 10px;
+      border: 2px solid $border-subtle;
+      background: $bg-surface;
+      transition: all 0.3s;
+
+      font-size: 15px;
+      color: $text-muted;
+    }
+
+    &.done .step-node {
+      background: $accent-glow;
+      border-color: $accent;
+      color: $accent;
+    }
+
+    &.active .step-node {
+      background: $accent-glow;
+      border-color: $accent;
+      color: $accent;
+      box-shadow: 0 0 0 4px rgba(0, 200, 150, 0.12);
+      animation: stepPulse 1.8s ease-in-out infinite;
+    }
+
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      text-align: center;
+      color: $text-muted;
+      line-height: 1.3;
+
+      .step-name {
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .step-time {
+        font-size: 0.65rem;
+        color: $text-muted;
+        opacity: 0.6;
+      }
+    }
+
+    &.done .step-label .step-name { color: $text-secondary; }
+    &.active .step-label .step-name { color: $accent; font-weight: 600; }
+  }
+}
+
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  margin: 0 auto;
+  gap: 1.25rem;
+  
+  align-items: start;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.card {
+  background: $bg-card;
+  border: 1px solid $border-subtle;
+  border-radius: 16px;
+  overflow: hidden;
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid $border-subtle;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: $text-muted;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .title-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: $accent;
+      }
+    }
+
+    .card-action {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: $accent;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+
+      &:hover { opacity: 1; }
+    }
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
+
+.order-items-card {
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid $border-subtle;
+
+    &:last-child { border-bottom: none; }
+
+    .item-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      background: $bg-surface;
+      border: 1px solid $border-subtle;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+
+      .item-emoji {
+        font-size: 1.6rem;
+        line-height: 1;
+      }
+
+      .item-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 18px;
+        height: 18px;
+        background: $accent;
+        border-radius: 50%;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: $bg-deep;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+
+      .item-name {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: $text-primary;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item-meta {
+        font-size: 0.75rem;
+        color: $text-muted;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .variant-tag {
+          background: $bg-surface;
+          border: 1px solid $border-subtle;
+          border-radius: 4px;
+          padding: 1px 6px;
+          font-size: 0.68rem;
+          color: $text-secondary;
+        }
+      }
+    }
+
+    .item-price {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: $text-primary;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+  }
+}
+
+
+.order-summary-card {
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.55rem 0;
+    font-size: 0.875rem;
+    border-bottom: 1px solid $border-subtle;
+
+    &:last-of-type { border-bottom: none; }
+
+    .row-label {
+      color: $text-secondary;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .row-value {
+      color: $text-primary;
+      font-weight: 500;
+
+      &.discount {
+        color: $accent;
+      }
+
+      &.free {
+        color: $accent;
+        font-weight: 600;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+      }
+    }
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 200, 150, 0.2);
+
+    .total-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: $text-muted;
+    }
+
+    .total-value {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: $text-primary;
+
+      .currency {
+        font-size: 1rem;
+        font-weight: 500;
+        color: $text-secondary;
+        margin-right: 2px;
+      }
+    }
+  }
+
+  .payment-method {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem;
+    background: $bg-surface;
+    border-radius: 10px;
+    border: 1px solid $border-subtle;
+
+    .payment-icon {
+      width: 32px;
+      height: 20px;
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 0.03em;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .payment-info {
+      flex: 1;
+
+      .payment-label {
+        font-size: 0.72rem;
+        color: $text-muted;
+      }
+
+      .payment-value {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: $text-secondary;
+        font-family: monospace;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    .payment-status {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: $accent;
+      background: $accent-glow;
+      border: 1px solid $border-glow;
+      border-radius: 100px;
+      padding: 3px 8px;
+    }
+  }
+}
+
+
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+
+.delivery-card {
+  .delivery-info {
+    .info-row {
+      display: flex;
+      gap: 10px;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid $border-subtle;
+
+      &:last-child { border-bottom: none; }
+
+      .info-icon {
+        width: 20px;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 2px;
+        flex-shrink: 0;
+        font-size: 14px;
+        color: red;
+
+      }
+
+      .info-content {
+        flex: 1;
+
+        .info-label {
+          font-size: 0.7rem;
+          color: $text-muted;
+          margin-bottom: 2px;
+          font-weight: 500;
+          letter-spacing: 0.04em;
+        }
+
+        .info-value {
+          font-size: 0.82rem;
+          color: $text-primary;
+          font-weight: 400;
+          line-height: 1.5;
+        }
+      }
+    }
+
+    .estimated-arrival {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: $accent-glow;
+      border: 1px solid $border-glow;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .arrival-icon {
+        width: 38px;
+        height: 38px;
+        background: rgba(0, 200, 150, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 18px;
+        color: $accent;
+      }
+
+      .arrival-text {
+        .arrival-label {
+          font-size: 0.68rem;
+          color: rgba(0, 200, 150, 0.7);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: 500;
+        }
+
+        .arrival-date {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 1rem;
+          font-weight: 700;
+          color: $accent;
+          letter-spacing: 0.02em;
+        }
+      }
+    }
+  }
+}
+
+.actions-card {
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+    width: 100%;
+
+    svg, .anticon {
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    &.btn-primary {
+      background: $accent;
+      color: $bg-deep;
+      font-weight: 600;
+
+      &:hover {
+        background: color.adjust($accent, $lightness: 6%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 24px rgba(0, 200, 150, 0.3);
+      }
+
+      &:active { transform: translateY(0); }
+    }
+
+    &.btn-secondary {
+      background: $bg-surface;
+      color: $text-secondary;
+      border: 1px solid $border-subtle;
+
+      &:hover {
+        background: $bg-card-hover;
+        color: $text-primary;
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+    }
+
+    &.btn-ghost {
+      background: transparent;
+      color: $text-muted;
+      border: 1px solid transparent;
+
+      &:hover {
+        color: $text-secondary;
+        border-color: $border-subtle;
+      }
+    }
+  }
+}
+
+
+.help-strip {
+  margin-top: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: $bg-card;
+  border: 1px solid $border-subtle;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .help-text {
+    font-size: 0.82rem;
+    color: $text-secondary;
+
+    strong {
+      color: $text-primary;
+      font-weight: 500;
+    }
+  }
+
+  .help-actions {
+    display: flex;
+    gap: 10px;
+
+    .help-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 1px solid $border-subtle;
+      background: $bg-surface;
+      color: $text-secondary;
+      cursor: pointer;
+
+      svg, .anticon {
+        font-size: 13px;
+        color: currentColor;
+      }
+
+      &:hover {
+        color: $text-primary;
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      &.chat-btn {
+        background: $electric-blue-glow;
+        border-color: rgba(30, 144, 255, 0.25);
+        color: color.adjust($electric-blue, $lightness: 15%);
+
+        &:hover {
+          background: rgba(30, 144, 255, 0.2);
+        }
+      }
+    }
+  }
+}
+
+
+.promo-banner {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.06), rgba(0, 200, 150, 0.06));
+  border: 1px solid $border-subtle;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .promo-bolt {
+    font-size: 1.8rem;
+    color: $accent;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .promo-content {
+    flex: 1;
+
+    .promo-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: 4px;
+    }
+
+    .promo-desc {
+      font-size: 0.78rem;
+      color: $text-secondary;
+      font-weight: 300;
+    }
+  }
+
+  .promo-code-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: $bg-card;
+    border: 1px dashed $border-glow;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover { background: $bg-card-hover; }
+
+    .code-value {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: $accent;
+    }
+
+    svg, .anticon {
+      font-size: 13px;
+      color: $text-muted;
+    }
+  }
+}
+
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.items-body {
+  padding: 0 1.5rem !important;
+}
+
+.actions-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 1.25rem 1.5rem !important;
+}
+
+.copied-flash {
+  font-size: 0.7rem;
+  color: $accent;
+  animation: fadeInUp 0.2s ease;
+}
+
+// ─── Animations ────────────────────────────────────────────────────────────
+
+@keyframes ringPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 200, 150, 0.25); }
+  50% { box-shadow: 0 0 0 10px rgba(0, 200, 150, 0); }
+}
+
+@keyframes ringPulseOuter {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes checkDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(0, 200, 150, 0.12); }
+  50% { box-shadow: 0 0 0 8px rgba(0, 200, 150, 0.05); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s ease forwards;
+
+  &:nth-child(2) { animation-delay: 0.08s; }
+  &:nth-child(3) { animation-delay: 0.16s; }
+  &:nth-child(4) { animation-delay: 0.24s; }
+}

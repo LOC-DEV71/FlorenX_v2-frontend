@@ -4,12 +4,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import { update } from "../../../services/client/Auth.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
+import LuxuryBox from "../../../utils/luxury";
+import SEO from "../../../utils/SEO";
 
 function AccountClient() {
     const account = useSelector((state) => state.authClient.user);
     const loadingUi = useSelector((state) => state.authClient.loading);
     const [user, setUser] = useState({});
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    
+    // --- State mới cho Modal hạng mức ---
+    const [isTierModalOpen, setIsTierModalOpen] = useState(false);
+    
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -80,14 +86,30 @@ function AccountClient() {
         }
     };
 
+    // --- Dữ liệu cấu hình hạng mức mới ---
+    const tierBenefits = [
+        { 
+            id: "bronze", name: "Đồng", discount: "5%", max: "1 triệu", 
+            minOrder: "10 triệu", condition: "Dưới 5 triệu", class: "bronze" 
+        },
+        { 
+            id: "silver", name: "Bạc", discount: "6%", max: "2 triệu", 
+            minOrder: "10 triệu", condition: "Trên 30 triệu", class: "silver" 
+        },
+        { 
+            id: "gold", name: "Vàng", discount: "8%", max: "3 triệu", 
+            minOrder: "10 triệu", condition: "Trên 50 triệu", class: "gold" 
+        },
+        { 
+            id: "diamond", name: "Kim cương", discount: "15%", max: "5 triệu", 
+            minOrder: "10 triệu", condition: "Trên 100 triệu", class: "diamond" 
+        },
+    ];
+
     return (
         <div className="user-profile-page" id="user-profile-page">
-            {loading && (
-                <Loading/>
-            )}
-            {loadingUi &&
-                <Loading/>
-            }
+            {(loading || loadingUi) && <Loading />}
+            <SEO title={"Thông tin người dùng"} />
 
             <div className="user-profile-container">
                 <div className="profile-sidebar-card">
@@ -111,15 +133,9 @@ function AccountClient() {
                     <h2 className="user-name">{user.fullname}</h2>
                     <p className="user-email">{user.email}</p>
 
-                    <div className="user-meta">
-                        <div className="meta-box">
-                            <span className="label">Hạng</span>
-                            <strong>VIP Gold</strong>
-                        </div>
-                        <div className="meta-box">
-                            <span className="label">Đơn hàng</span>
-                            <strong>12</strong>
-                        </div>
+                    {/* CLICK VÀO ĐÂY ĐỂ MỞ MODAL HẠNG MỨC */}
+                    <div className="tier-clickable-zone" onClick={() => setIsTierModalOpen(true)}>
+                        <LuxuryBox type={user.member} username={user.fullname}/>
                     </div>
                 </div>
 
@@ -203,72 +219,71 @@ function AccountClient() {
                 </div>
             </div>
 
+            {/* MODAL CHỌN AVATAR */}
             {isAvatarModalOpen && (
-                <div
-                    className="avatar-modal-overlay"
-                    onClick={() => setIsAvatarModalOpen(false)}
-                >
-                    <div
-                        className="avatar-modal"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                <div className="avatar-modal-overlay" onClick={() => setIsAvatarModalOpen(false)}>
+                    <div className="avatar-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="avatar-modal-header">
                             <h3>Chọn ảnh đại diện</h3>
-                            <button
-                                type="button"
-                                className="close-btn"
-                                onClick={() => setIsAvatarModalOpen(false)}
-                            >
-                                ×
-                            </button>
+                            <button type="button" className="close-btn" onClick={() => setIsAvatarModalOpen(false)}>×</button>
                         </div>
-
                         <div className="avatar-options">
                             {currentAvatars.map((seed) => (
                                 <button
                                     key={seed}
                                     type="button"
-                                    className={`avatar-option ${
-                                        user.avatar === getAvatarUrl(seed) ? "active" : ""
-                                    }`}
+                                    className={`avatar-option ${user.avatar === getAvatarUrl(seed) ? "active" : ""}`}
                                     onClick={() => handleSelectAvatar(seed)}
                                     title={`Avatar ${seed}`}
                                 >
-                                    <img
-                                        src={getAvatarUrl(seed)}
-                                        alt={`avatar-${seed}`}
-                                        loading="lazy"
-                                    />
+                                    <img src={getAvatarUrl(seed)} alt={`avatar-${seed}`} loading="lazy" />
                                 </button>
                             ))}
                         </div>
-
                         <div className="avatar-pagination">
-                            <button
-                                type="button"
-                                className="pagination-btn"
-                                disabled={currentPage === 1}
-                                onClick={() =>
-                                    setCurrentPage((prev) => prev - 1)
-                                }
-                            >
-                                ← Trước
-                            </button>
+                            <button type="button" className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage((prev) => prev - 1)}>Trước</button>
+                            <span className="pagination-info">Trang {currentPage} / {totalPages}</span>
+                            <button type="button" className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage((prev) => prev + 1)}>Sau</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                            <span className="pagination-info">
-                                Trang {currentPage} / {totalPages}
-                            </span>
-
-                            <button
-                                type="button"
-                                className="pagination-btn"
-                                disabled={currentPage === totalPages}
-                                onClick={() =>
-                                    setCurrentPage((prev) => prev + 1)
-                                }
-                            >
-                                Sau →
-                            </button>
+            {/* MODAL THÔNG TIN ĐẶC QUYỀN HẠNG MỨC */}
+            {isTierModalOpen && (
+                <div className="avatar-modal-overlay" onClick={() => setIsTierModalOpen(false)}>
+                    <div className="avatar-modal tier-info-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="avatar-modal-header">
+                            <h3>Đặc quyền & Hạng thành viên</h3>
+                            <button type="button" className="close-btn" onClick={() => setIsTierModalOpen(false)}>×</button>
+                        </div>
+                        <div className="tier-table-container">
+                            <table className="tier-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hạng</th>
+                                        <th>Ưu đãi</th>
+                                        <th>Tối đa</th>
+                                        <th>Đơn tối thiểu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tierBenefits.map((item) => (
+                                        <tr key={item.id} className={user.member === item.id ? "active-tier" : ""}>
+                                            <td className={`tier-name ${item.class}`}>
+                                                <strong>{item.name}</strong>
+                                                <small>({item.condition})</small>
+                                            </td>
+                                            <td className="benefit-highlight">{item.discount}</td>
+                                            <td>{item.max}</td>
+                                            <td>{item.minOrder}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <div className="tier-footer-note">
+                                <p>* Ưu đãi được áp dụng dựa trên chi tiêu tích lũy của tài khoản.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
