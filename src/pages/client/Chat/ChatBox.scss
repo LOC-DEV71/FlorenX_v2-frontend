@@ -1,0 +1,54 @@
+.typing-indicator {
+    height: 25px; 
+    margin: 5px 0;
+    font-size: 0.85rem;
+    color: #65676b; 
+    font-style: italic;
+    margin: 0 auto;
+
+    .typing-content {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        .user-name {
+            font-size: 14px;
+        }
+
+        .dots {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 2px;
+
+            span {
+                width: 4px;
+                height: 4px;
+                background-color: #90949c;
+                border-radius: 50%;
+                display: inline-block;
+                animation: typingBounce 1.4s infinite ease-in-out both;
+
+                &:nth-child(1) {
+                    animation-delay: 0s;
+                }
+                &:nth-child(2) {
+                    animation-delay: 0.2s;
+                }
+                &:nth-child(3) {
+                    animation-delay: 0.4s;
+                }
+            }
+        }
+    }
+}
+
+@keyframes typingBounce {
+    0%, 80%, 100% { 
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+    40% { 
+        transform: translateY(-4px);
+        opacity: 1;
+    }
+}

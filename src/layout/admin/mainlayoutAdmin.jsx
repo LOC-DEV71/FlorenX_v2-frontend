@@ -73,7 +73,7 @@ const MainLayoutAdmin = () => {
         {
           key: "4",
           icon: <MdShoppingCart />,
-          label: <Link to="/admin">Đơn hàng</Link>,
+          label: <Link to="/admin/orders">Đơn hàng</Link>,
         }
       ] : []
     )

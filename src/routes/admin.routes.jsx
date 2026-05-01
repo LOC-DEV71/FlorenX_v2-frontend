@@ -31,6 +31,7 @@ import InventoryAuditDetail from "../pages/admin/Products/InventoryAuditDetail";
 import InventoryImportList from "../pages/admin/Products/InventoryImport";
 import InventoryExportCreate from "../pages/admin/Products/InventoryExportCreate";
 import InventoryExportList from "../pages/admin/Products/InventoryExport";
+import Orders from "../pages/admin/Order/Order.index";
 
 function AdminRoutes() {
   return (
@@ -159,6 +160,9 @@ function AdminRoutes() {
           <Route path="new-categories/update/:slug" element={<UpdateNewsCategory />} />
         </Route>
 
+
+        {/* Order */}
+        <Route path="orders" element={<Orders />} />
 
         {/* cskh */}
         <Route path="chat" element={<CustomerSupportChat />} />

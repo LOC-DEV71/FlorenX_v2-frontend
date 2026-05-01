@@ -12,7 +12,6 @@ import { addLike, getListLike } from "../../../services/client/like.service";
 import { success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 
-
 function ProductByCategory() {
     const { category } = useParams();
     const [data, setData] = useState([]);
@@ -25,9 +24,7 @@ function ProductByCategory() {
     const loadingUi = useSelector((state) => state.setting.loading);
     const [likeIds, setLikedIds] = useState([]);
 
-
     const [searchParams, setSearchParams] = useSearchParams();
-
     const navigate = useNavigate();
 
     const price = Number(searchParams.get("price")) || 0;
@@ -36,15 +33,11 @@ function ProductByCategory() {
     const page = searchParams.get("page") || 1;
 
     const [loading, setLoading] = useState(false);
-
-
-
     const [loadingCate, setLoadingCate] = useState(false);
 
     useEffect(() => {
         const fetchProducts = async () => {
             if (!category) return;
-
             setLoading(true);
             try {
                 const res = await getProductByCategory({ category, price, discount, limit, page });
@@ -58,7 +51,6 @@ function ProductByCategory() {
                 setLoading(false);
             }
         };
-
         fetchProducts();
     }, [category, price, discount, limit, page]);
 
@@ -73,7 +65,6 @@ function ProductByCategory() {
                 console.error("Error fetching likes:", error);
             }
         };
-
         fetchLikes();
     }, [likeIds]);
 
@@ -95,29 +86,20 @@ function ProductByCategory() {
                 setLoadingCate(false)
             }
         };
-
         fetchCategories();
     }, [category]);
 
-
-    const priceOptions = [
-        5000000,
-        15000000,
-        50000000,
-        500000000
-    ];
+    const priceOptions = [5000000, 15000000, 50000000, 500000000];
 
     const handleLike = async (e, productId) => {
         e.preventDefault();
         e.stopPropagation();
         setLikedIds(prev => [...prev, productId])
-
         try {
             if (likeIds.includes(productId)) {
                 const res = await addLike({ productId: productId, type: "clear" });
                 if (res.data.code) {
                     success(res.data.message)
-
                 }
             } else {
                 const res = await addLike({ productId: productId, type: "add" });
@@ -128,221 +110,183 @@ function ProductByCategory() {
         } catch (err) {
             console.error(err.response?.data.message)
         }
-
     };
 
     return (
         <>
-                    <div className="product-by-category" id="product-by-category">
-                        {/* loading util */}
-                        {loadingUi && 
-                            <Loading/>
-                        }
-                        <SEO
-                            title={`Veltrix - ${heroItem?.title || category || "Accessories"}`}
-                            description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
-                        />
-                        <div className="container">
-                            <div className="breadcrumb">
-                                <span>Home</span>
-                                <span>/</span>
-                                <span>Shop</span>
-                                <span>/</span>
-                                <span className="active">{category}</span>
+            <div className="pbc-layout" id="pbc-layout-anchor">
+                {loadingUi && <Loading />}
+                <SEO
+                    title={`Veltrix - ${heroItem?.title || category || "Accessories"}`}
+                    description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
+                />
+                <div className="pbc-container">
+                    <div className="pbc-breadcrumb">
+                        <span>Home</span>
+                        <span>/</span>
+                        <span>Shop</span>
+                        <span>/</span>
+                        <span className="pbc-breadcrumb--active">{category}</span>
+                    </div>
+
+                    <div className="pbc-hero">
+                        <div className="pbc-hero__content">
+                            <h1 className="pbc-hero__title">
+                                {heroItem?.title || category || "Accessories"}
+                            </h1>
+                            <p className="pbc-hero__desc">
+                                {heroItem?.description ||
+                                    "Những vật dụng thiết yếu được tuyển chọn kỹ lưỡng cho lối sống hiện đại. Những món đồ được chế tác tỉ mỉ nhằm nâng tầm cuộc sống thường nhật của bạn."}
+                            </p>
+                        </div>
+
+                        <div className="pbc-hero__image">
+                            <img
+                                src={heroItem?.image || "https://res.cloudinary.com/dfzgowb54/image/upload/v1774624745/tdawupquph724kqgsjjp.jpg"}
+                                alt={heroItem?.title || category}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pbc-tabs">
+                        {loadingCate
+                            ? <div className="pbc-tabs__loading">Đang tải <LoadingOutlined /></div>
+                            : categoryList.map((item) => (
+                                <Link
+                                    key={item._id || item.slug}
+                                    to={`/products/${item.slug}`}
+                                    className={`pbc-tabs__link ${item.slug === category ? "pbc-tabs__link--active" : ""}`}
+                                >
+                                    {item.title}
+                                </Link>
+                            ))}
+                    </div>
+
+                    <div className="pbc-main-layout">
+                        <aside className="pbc-filters">
+                            <div className="pbc-filters__header">
+                                <h3>Lọc sản phẩm</h3>
+                                <span>Bộ sưu tập tương lai</span>
                             </div>
 
-                            <div className="hero">
-                                <div className="hero__content">
-                                    <h1 className="hero__title">
-                                        {heroItem?.title || category || "Accessories"}
-                                    </h1>
-                                    <p className="hero__desc">
-                                        {heroItem?.description ||
-                                            "Những vật dụng thiết yếu được tuyển chọn kỹ lưỡng cho lối sống hiện đại. Những món đồ được chế tác tỉ mỉ nhằm nâng tầm cuộc sống thường nhật của bạn."}
-                                    </p>
-                                </div>
-
-                                <div className="hero__image">
-                                    <img
-                                        src={
-                                            heroItem?.image ||
-                                            "https://res.cloudinary.com/dfzgowb54/image/upload/v1774624745/tdawupquph724kqgsjjp.jpg"
-                                        }
-                                        alt={heroItem?.title || category}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="category-tabs">
-                                {loadingCate
-                                    ? <div>
-                                        Đang tải <LoadingOutlined />
-                                    </div>
-                                    : categoryList.map((item) => (
-                                        <Link
-                                            key={item._id || item.slug}
-                                            to={`/products/${item.slug}`}
-                                            className={item.slug === category ? "active" : ""}
-                                        >
-                                            {item.title}
-                                        </Link>
+                            <div className="pbc-filter-group">
+                                <div className="pbc-filter-options">
+                                    <div className="pbc-filter-group__title">Theo giá</div>
+                                    {priceOptions.map((value) => (
+                                        <label key={value} className="pbc-filter-label">
+                                            <input
+                                                type="radio"
+                                                name="price"
+                                                checked={price === value}
+                                                onChange={() => {
+                                                    setSearchParams((prev) => {
+                                                        const params = new URLSearchParams(prev);
+                                                        params.set("price", value.toString());
+                                                        return params;
+                                                    });
+                                                }}
+                                            />
+                                            Dưới {value.toLocaleString("vi-VN")}đ
+                                        </label>
                                     ))}
+                                </div>
+                            </div>
+                            <div className="pbc-filter-group">
+                                <div className="pbc-filter-group__title">Brand</div>
+                            </div>
+                            <div className="pbc-filter-group">
+                                <div className="pbc-filter-group__title">Rating</div>
                             </div>
 
-                            <div className="content-layout">
-                                <aside className="filters" id="product-by-category">
-                                    <div className="filters__header">
-                                        <h3>Lọc sản phẩm</h3>
-                                        <span>Bộ sưu tập tương lai</span>
-                                    </div>
+                            <button className="pbc-filters__clear-btn" onClick={() => navigate(`/products/${category}`)}>Clear All</button>
+                        </aside>
 
-                                    <div className="filter-group">
-                                        <div className="filter-options">
-                                            <div className="filter-group__title">Theo giá</div>
-                                            {priceOptions.map((value) => (
-                                                <label key={value}>
-                                                    <input
-                                                        type="radio"
-                                                        name="price"
-                                                        checked={price === value}
-                                                        onChange={() => {
-                                                            setSearchParams((prev) => {
-                                                                const params = new URLSearchParams(prev);
-                                                                params.set("price", value.toString());
-                                                                return params;
-                                                            });
-                                                        }}
+                        <div className="pbc-products-section">
+                            {loading ? (
+                                <div className="pbc-loading-grid">
+                                    Đang tải sản phẩm <span className="pbc-spinner"></span>
+                                </div>
+                            ) : data?.length === 0 ? (
+                                <div className="pbc-no-data">
+                                    <div className="pbc-no-data__inner">
+                                        <img src={NoData} alt="nodata" />
+                                        <span>No Data</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="pbc-grid">
+                                    {data.map((item, index) => {
+                                        const originalPrice = Number(item?.price) || 0;
+                                        const discountPercentage = Number(item?.discountPercentage) || 0;
+                                        const finalPrice = discountPercentage > 0
+                                            ? originalPrice - (originalPrice * discountPercentage) / 100
+                                            : originalPrice;
+
+                                        return (
+                                            <Link
+                                                to={`/products/detail/${item.slug || item._id}`}
+                                                className="pbc-card"
+                                                key={item._id || index}
+                                            >
+                                                <div className="pbc-card__thumb">
+                                                    {discountPercentage > 0 && (
+                                                        <span className="pbc-card__badge-sale">-{discountPercentage}%</span>
+                                                    )}
+                                                    {item.featured && (
+                                                        <span className="pbc-card__badge-featured">Nổi bật</span>
+                                                    )}
+                                                    <img
+                                                        src={item?.thumbnail || item?.image || "https://via.placeholder.com/400x500?text=Product"}
+                                                        alt={item?.title || item?.name}
                                                     />
-                                                    Dưới {value.toLocaleString("vi-VN")}đ
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="filter-group">
-                                        <div className="filter-group__title">Brand</div>
-                                    </div>
-                                    <div className="filter-group">
-                                        <div className="filter-group__title">Rating</div>
-                                    </div>
+                                                </div>
 
-                                    <button className="clear-btn" onClick={() => navigate(`/products/${category}`)}>Clear All</button>
-                                </aside>
-
-                                <div className="products-section" >
-                                    {loading ? (
-                                        <div className="product-grid-loading">
-                                            Đang tải sản phẩm <span className="spinner"></span>
-                                        </div>
-                                    ) : data?.length === 0 ? (
-                                        <div className="no-product">
-                                            <div className="img">
-                                                <img src={NoData} alt="nodata" />
-                                                <span>No Data</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="product-grid">
-                                            {data.map((item, index) => {
-                                                const originalPrice = Number(item?.price) || 0;
-                                                const discountPercentage = Number(item?.discountPercentage) || 0;
-                                                const finalPrice =
-                                                    discountPercentage > 0
-                                                        ? originalPrice - (originalPrice * discountPercentage) / 100
-                                                        : originalPrice;
-
-                                                return (
-                                                    <Link
-                                                        to={`/products/detail/${item.slug || item._id}`}
-                                                        className="product-card"
-                                                        key={item._id || index}
-                                                    >
-                                                        <div className="product-card__thumb">
-                                                            {discountPercentage > 0 && (
-                                                                <span className="badge-sale">
-                                                                    -{discountPercentage}%
-                                                                </span>
-                                                            )}
-                                                            {item.featured && (
-                                                                <span className="featured-badge">Nổi bật</span>
-                                                            )}
-
-                                                            <img
-                                                                src={
-                                                                    item?.thumbnail ||
-                                                                    item?.image ||
-                                                                    "https://via.placeholder.com/400x500?text=Product"
-                                                                }
-                                                                alt={item?.title || item?.name || "Product image"}
-                                                            />
+                                                <div className="pbc-card__info">
+                                                    <h3 className="pbc-card__title">{item?.title || item?.name}</h3>
+                                                    <div className="pbc-card__price">
+                                                        <span className={`pbc-card__price-old ${discountPercentage > 0 ? "" : "pbc-card__price--hidden"}`}>
+                                                            {originalPrice.toLocaleString("vi-VN")}đ
+                                                        </span>
+                                                        <span className="pbc-card__price-new">
+                                                            {finalPrice.toLocaleString("vi-VN")}đ
+                                                        </span>
+                                                    </div>
+                                                    <div className="pbc-card__meta">
+                                                        <div className="pbc-card__rating">
+                                                            <span className="pbc-card__star">★ 4.8</span>
+                                                            <span className="pbc-card__count">(120 reviews)</span>
                                                         </div>
-
-                                                        <div className="product-card__info">
-                                                            <h3 className="product-card__title">
-                                                                {item?.title || item?.name || "Product name"}
-                                                            </h3>
-
-                                                            <div className="product-card__price">
-                                                                    <>
-                                                                        <span className={`price-old ${discountPercentage > 0 ? "" : "visibility"}`}>
-                                                                            {originalPrice.toLocaleString("vi-VN")}đ
-                                                                        </span>
-                                                                        <span className="price-new">
-                                                                            {finalPrice.toLocaleString("vi-VN")}đ
-                                                                        </span>
-                                                                    </>
-  
-                                                            </div>
-
-                                                            <div className="product-card__meta">
-                                                                <div className="left">
-                                                                    <span className="rating">★ 4.8</span>
-                                                                    <span className="reviews">(120 reviews)</span>
-                                                                </div>
-
-                                                                <div
-                                                                    className="favorite"
-                                                                    onClick={(e) => handleLike(e, item._id)}
-                                                                >
-                                                                    {likeIds.includes(item?._id)
-                                                                        ? <HeartFilled style={{ color: "red" }} />
-                                                                        : <HeartOutlined />}
-                                                                </div>
-                                                            </div>
+                                                        <div className="pbc-card__favorite" onClick={(e) => handleLike(e, item._id)}>
+                                                            {likeIds.includes(item?._id)
+                                                                ? <HeartFilled style={{ color: "red" }} />
+                                                                : <HeartOutlined />}
                                                         </div>
-                                                    </Link>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            )}
 
-                                    <div className="load-more-wrap">
-                                        {renderpagination(pagination, setSearchParams, limit, price)}
-                                    </div>
+                            <div className="pbc-pagination-wrap">
+                                {renderpagination(pagination, setSearchParams, limit, price)}
+                            </div>
 
-                                    <div className="banner">
-                                        <div className="banner__overlay">
-                                            <span className="banner__tag">GIẢM GIÁ THEO PHẦN TRĂM</span>
-                                            <h2>Sản phẩm giảm giá sâu</h2>
-                                            <p>
-                                                Khám phá những sản phẩm công nghệ cao cấp với mức
-                                                giá ưu đãi chưa từng có. Hiệu năng mạnh mẽ, thiết kế hiện đại
-                                                dành cho trải nghiệm đỉnh cao.
-                                            </p>
-                                            <button
-                                                onClick={() =>
-                                                    setSearchParams({
-                                                        discount: "true"
-                                                    })
-                                                }
-                                                to={"#product-by-category"}
-                                            >KHÁM PHÁ BỘ SƯU TẬP</button>
-                                        </div>
-                                    </div>
+                            <div className="pbc-banner">
+                                <div className="pbc-banner__overlay">
+                                    <span className="pbc-banner__tag">GIẢM GIÁ THEO PHẦN TRĂM</span>
+                                    <h2>Sản phẩm giảm giá sâu</h2>
+                                    <p>Khám phá những sản phẩm công nghệ cao cấp với mức giá ưu đãi chưa từng có.</p>
+                                    <button onClick={() => setSearchParams({ discount: "true" })}>
+                                        KHÁM PHÁ BỘ SƯU TẬP
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                
+                </div>
+            </div>
         </>
     );
 }
