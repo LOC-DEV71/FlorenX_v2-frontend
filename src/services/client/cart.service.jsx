@@ -1,15 +1,15 @@
-import axiosAdmin from "../../utils/axios.client";
+import axiosClient from "../../utils/axios.client";
 
 
 export const addToCart = (data) => {
-    return axiosAdmin.post("/cart/add-to-cart", data)
+    return axiosClient.post("/cart/add-to-cart", data)
 }
 
 
 export const getCart = () => {
-    return axiosAdmin.get("/cart", )
+    return axiosClient.get("/cart", )
 }
 
 export const updateQuantity = (data) => {
-    return axiosAdmin.post("/cart/update-quantity", data)
+    return axiosClient.post("/cart/update-quantity", data)
 }

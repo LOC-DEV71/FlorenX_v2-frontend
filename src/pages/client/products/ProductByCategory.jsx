@@ -114,7 +114,7 @@ function ProductByCategory() {
 
     return (
         <>
-            <div className="pbc-layout" id="pbc-layout-anchor">
+            <div className="pbc-layout" id="product-by-category">
                 {loadingUi && <Loading />}
                 <SEO
                     title={`Veltrix - ${heroItem?.title || category || "Accessories"}`}

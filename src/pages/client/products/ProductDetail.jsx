@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./ProductDeatil.scss";
-import { getProductBySlug } from "../../../services/client/product.service";
+import { commentProduct, getProductBySlug } from "../../../services/client/product.service";
 import { Link, useParams } from "react-router-dom";
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
@@ -9,6 +9,10 @@ import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 import { addLike, getListLike } from "../../../services/client/like.service";
 import Loading from "../../../utils/loading";
 import NoData from "../../../assets/banner/empty.png";
+import { StarFilled, StarOutlined } from "@ant-design/icons";
+import { useSocket } from "../../../Socket/useSocket";
+import { useSelector } from "react-redux";
+
 
 function ProductDeatil() {
   const { slug } = useParams();
@@ -19,6 +23,29 @@ function ProductDeatil() {
   const [products, setProducts] = useState([]);
   const [overview, setOverview] = useState(true);
   const [likeIds, setLikedIds] = useState([]);
+  const user = useSelector(state => state.authClient.user)
+  const [comment, setComment] = useState({
+    rating: null,
+    user_name: "",
+    comment: "",
+    product_id: "",
+    title: "",
+    user_id: "",
+    updated: true
+  })
+  const [preview, setPreview] = useState([]);
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (user?._id) {
+      setComment(prev => ({
+        ...prev,
+        user_id: user._id,
+        user_name: user?.fullname || ""
+      }));
+    }
+  }, [user]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -38,6 +65,7 @@ function ProductDeatil() {
           setData(product);
           setProducts(products);
           setThumbnail(product?.thumbnail || product?.images?.[0] || "");
+          setComment(prev => ({...prev, product_id: product?._id ? product?._id : "" }))
         }
       } catch (err) {
         console.error(err?.response?.data?.message || err.message);
@@ -151,11 +179,52 @@ function ProductDeatil() {
   };
 
 
+
+  const hanldeComment = async () => {
+    try {
+      const res = await commentProduct(comment);
+      if(res.data?.code){
+        socket.emit("product_preview", comment)
+        success(res.data?.message || "Đánh giá thành công")
+        console.log("Checkout socket ID:", socket.id)
+      }
+    } catch (err) {
+      error("Đánh giá thất bại")
+      console.log(err.response?.data?.message)
+    }
+  }
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handlePreview = (data) => {
+      setPreview(prev => [data, ...prev]);
+    };
+
+    socket.on("server_return_product_preview", handlePreview);
+
+    return () => {
+      socket.off("server_return_product_preview", handlePreview);
+    };
+  }, [socket]);
+
+
+
   if (loading) {
     return (
       <Loading />
     );
   }
+
+
+  const preview_user = preview.find(
+    item => item.user_id === user?._id
+  );
+
+  const preview_people = preview.filter(
+    item => item.user_id !== user?._id
+  );
+
 
   return (
     <div className="product-page">
@@ -339,84 +408,128 @@ function ProductDeatil() {
               </div>
 
               <div className="review-list">
-                <div className="review-card featured">
-                  <div className="review-card__top">
-                    <div className="review-user">
-                      <div className="review-avatar">L</div>
-                      <div>
-                        <strong>Lộc Lâm</strong>
-                        <span>Đã mua hàng</span>
+                {preview_user &&
+                  (
+                    <div className="review-card featured">
+                      <div className="review-card__top">
+                        <div className="review-user">
+                          <div className="review-avatar">L</div>
+                          <div>
+                            <strong>{preview_user.user_name}</strong>
+                            <span>Đánh giá của bạn</span>
+                            {preview_user?.update && <span> - Đã chỉnh sửa</span>}
+                          </div>
+                        </div>
+                        <div className="review-stars">
+                          <div className="rating-select">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                style={{
+                                  fontSize: "11px",
+                                  color: star <= preview_user.rating ? "#fadb14" : "#d9d9d9",
+                                  marginRight: "4px"
+                                }}
+                              >
+                                {star <= preview_user.rating ? <StarFilled /> : <StarOutlined />}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <h4>{preview_user.title}</h4>
+                      <p>
+                       {preview_user.comment}
+                      </p>
+
+                      <div className="review-tags">
+                        <span>Hiệu năng tốt</span>
+                        <span>Đóng gói kỹ</span>
+                        <span>Đáng tiền</span>
                       </div>
                     </div>
-                    <div className="review-stars">★★★★★</div>
-                  </div>
-
-                  <h4>Hiệu năng vượt mong đợi</h4>
-                  <p>
-                    Máy chạy rất mượt, chiến game ngon, nhiệt độ ổn định. Thiết kế đẹp,
-                    LED nhìn cực nổi bật vào buổi tối. Shop tư vấn cũng rất nhiệt tình.
-                  </p>
-
-                  <div className="review-tags">
-                    <span>Hiệu năng tốt</span>
-                    <span>Đóng gói kỹ</span>
-                    <span>Đáng tiền</span>
-                  </div>
-                </div>
+                  )
+                }
 
                 <div className="review-grid">
-                  <div className="review-card">
-                    <div className="review-card__top">
-                      <div className="review-user">
-                        <div className="review-avatar alt">A</div>
-                        <div>
-                          <strong>Nguyễn An</strong>
-                          <span>2 ngày trước</span>
+                  {preview_people && 
+                    preview_people.map(item => (
+                      <div className="review-card">
+                        <div className="review-card__top">
+                          <div className="review-user">
+                            <div className="review-avatar alt">A</div>
+                            <div>
+                              <strong>{item.user_name}</strong>
+                              <span>2 ngày trước</span>
+                            </div>
+                          </div>
+                          <div className="review-stars">
+                            <div className="rating-select">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <span
+                                  key={star}
+                                  style={{
+                                    fontSize: "11px",
+                                    color: star <= item.rating ? "#fadb14" : "#d9d9d9",
+                                    marginRight: "4px"
+                                  }}
+                                >
+                                  {star <= item.rating ? <StarFilled /> : <StarOutlined />}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         </div>
+
+                        <p>
+                          {item.comment}
+                        </p>
                       </div>
-                      <div className="review-stars">★★★★☆</div>
-                    </div>
-
-                    <p>
-                      Giá hợp lý, build đẹp, chạy các tác vụ đồ họa tốt. Giao hàng chậm hơn
-                      dự kiến một chút nhưng tổng thể vẫn rất hài lòng.
-                    </p>
-                  </div>
-
-                  <div className="review-card">
-                    <div className="review-card__top">
-                      <div className="review-user">
-                        <div className="review-avatar pink">H</div>
-                        <div>
-                          <strong>Hải Nam</strong>
-                          <span>1 tuần trước</span>
-                        </div>
-                      </div>
-                      <div className="review-stars">★★★★★</div>
-                    </div>
-
-                    <p>
-                      Phần ngoại hình quá đẹp, case chắc chắn, hiệu năng ổn định. Chơi AAA
-                      setting cao vẫn mượt, rất đáng tiền trong tầm giá.
-                    </p>
-                  </div>
+                    ))
+                  }
                 </div>
               </div>
 
               <div className="review-form">
                 <div className="review-form__head">
                   <h3>Chia sẻ cảm nhận của bạn</h3>
-                  <div className="review-form__stars">☆ ☆ ☆ ☆ ☆</div>
+                  <div className="review-form__stars">
+                    <div className="rating-select">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          onClick={() => {
+                            setComment(prev => ({...prev, rating: star === comment.rating ? null : star}))
+                          }}
+                          style={{
+                            cursor: "pointer",
+                            fontSize: "20px",
+                            color: star <= comment.rating ? "#fadb14" : "#d9d9d9",
+                            marginRight: "4px"
+                          }}
+                        >
+                          {star <= comment.rating ? <StarFilled /> : <StarOutlined />}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="review-form__group">
-                  <input type="text" placeholder="Tên của bạn" />
-                  <input type="text" placeholder="Tiêu đề đánh giá" />
+                  <input
+                    type="text"
+                    placeholder="Tên của bạn"
+                    value={comment.user_name}
+                    readOnly
+                    name="user_name"
+                  />
+                  <input type="text" placeholder="Tiêu đề đánh giá"  onChange={e => setComment(prev => ({...prev, title: e.target.value}))} value={comment.title}/>
                 </div>
 
-                <textarea placeholder="Hãy chia sẻ trải nghiệm thực tế sau khi sử dụng sản phẩm..." />
+                <textarea placeholder="Hãy chia sẻ trải nghiệm thực tế sau khi sử dụng sản phẩm..." onChange={e => setComment(prev => ({...prev, comment: e.target.value}))} value={comment.comment}/>
 
-                <button type="button" className="btn btn--primary">
+                <button type="button" className="btn btn--primary" onClick={hanldeComment}>
                   Gửi đánh giá
                 </button>
               </div>

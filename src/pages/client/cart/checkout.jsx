@@ -8,6 +8,7 @@ import { getVoucher } from "../../../services/client/voucher.service";
 import { formatCustom } from "../../../utils/formatCustomDate";
 import { capturePaypalOrder, createPaypalOrder, OrderSubmit } from "../../../services/client/checkout.service";
 import Loading from "../../../utils/loading";
+import { useSocket } from "../../../Socket/useSocket";
 
 function Checkout() {
   const location = useLocation();
@@ -15,6 +16,8 @@ function Checkout() {
   const products = location.state?.data || [];
   const account = useSelector((state) => state.authClient.user);
   const [loading, setLoading] = useState(false)
+  const [orderReturn, setOrderReturn] = useState([]);
+  const socket = useSocket();
 
   const totalPrice = products.reduce(
     (total, item) =>
@@ -29,7 +32,8 @@ function Checkout() {
     price: item.price,
     discountPercentage: item.discountPercentage,
     quantity: item.quantity,
-    finalPrice: item.price - (item.price * item.discountPercentage / 100)
+    finalPrice: item.price - (item.price * item.discountPercentage / 100),
+    slug: item.slug
   }));
 
   const [form, setForm] = useState({
@@ -125,8 +129,13 @@ function Checkout() {
 
 
       if (res?.data?.code) {
+        const order = res.data.orderReturn;
+        socket.emit("newOrder", {
+          order
+        });
+        console.log("Checkout socket ID:", socket.id)
         success(res?.data?.message || "Đặt hàng thành công");
-        naviagte(`/order-success/${res?.data?.orderCode}`);
+        naviagte(`/order-success/${res?.data?.orderReturn?.code}`);
       }
     } catch (err) {
       error(err.response?.data?.message || "Đặt hàng thất bại");

@@ -1,129 +1,109 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./OrderList.scss";
-
-const mockOrders = [
-  {
-    id: "ORD-20240001",
-    date: "28/04/2026",
-    status: "delivered",
-    items: [
-      { name: "Áo thun nam basic", qty: 2, price: 199000 },
-      { name: "Quần jogger xám", qty: 1, price: 349000 },
-    ],
-    total: 747000,
-    thumbnail: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop",
-  },
-  {
-    id: "ORD-20240002",
-    date: "25/04/2026",
-    status: "shipping",
-    items: [{ name: "Giày sneaker trắng", qty: 1, price: 890000 }],
-    total: 890000,
-    thumbnail: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=80&h=80&fit=crop",
-  },
-  {
-    id: "ORD-20240003",
-    date: "20/04/2026",
-    status: "processing",
-    items: [
-      { name: "Túi da đeo chéo", qty: 1, price: 650000 },
-      { name: "Ví da mini", qty: 1, price: 280000 },
-    ],
-    total: 930000,
-    thumbnail: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=80&h=80&fit=crop",
-  },
-  {
-    id: "ORD-20240004",
-    date: "15/04/2026",
-    status: "cancelled",
-    items: [{ name: "Kính mát unisex", qty: 1, price: 420000 }],
-    total: 420000,
-    thumbnail: "https://images.unsplash.com/photo-1577803645773-f96470509666?w=80&h=80&fit=crop",
-  },
-  {
-    id: "ORD-20240005",
-    date: "10/04/2026",
-    status: "delivered",
-    items: [
-      { name: "Mũ bucket xanh navy", qty: 1, price: 180000 },
-      { name: "Áo hoodie oversize", qty: 1, price: 520000 },
-    ],
-    total: 700000,
-    thumbnail: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=80&h=80&fit=crop",
-  },
-];
+import { getList } from "../../../services/client/order.service";
+import { error } from "../../../utils/notift";
+import { Link } from "react-router-dom";
 
 const STATUS_CONFIG = {
-  delivered:  { label: "Đã giao",    color: "green"  },
-  shipping:   { label: "Đang giao",  color: "blue"   },
-  processing: { label: "Đang xử lý", color: "orange" },
-  cancelled:  { label: "Đã huỷ",    color: "red"    },
+  pending: { label: "Chờ xác nhận", color: "orange" },
+  confirmed: { label: "Đã xác nhận", color: "blue" },
+  shipped: { label: "Đang giao", color: "info" },
+  done: { label: "Hoàn thành", color: "green" },
+  cancel: { label: "Đã huỷ", color: "red" },
 };
 
 const TABS = [
-  { key: "all",        label: "Tất cả"     },
-  { key: "processing", label: "Đang xử lý" },
-  { key: "shipping",   label: "Đang giao"  },
-  { key: "delivered",  label: "Đã giao"    },
-  { key: "cancelled",  label: "Đã huỷ"    },
+  { key: "all", label: "Tất cả" },
+  { key: "pending", label: "Chờ xác nhận" },
+  { key: "confirmed", label: "Đã xác nhận" },
+  { key: "shipped", label: "Đang giao" },
+  { key: "done", label: "Hoàn thành" },
+  { key: "cancel", label: "Đã huỷ" },
 ];
 
 function formatPrice(n) {
-  return n.toLocaleString("vi-VN") + "₫";
+  return Number(n || 0).toLocaleString("vi-VN") + "₫";
 }
 
+function formatDate(iso) {
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, "0")}/${String(
+    d.getMonth() + 1
+  ).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+const PAY_LABEL = { cod: "COD", paypal: "PayPal" };
+
 function StatusBadge({ status }) {
-  const cfg = STATUS_CONFIG[status];
+  const cfg = STATUS_CONFIG[status] || {
+    label: status,
+    color: "info",
+  };
+
   return (
-    <span className={`badge badge--${cfg.color}`}>
-      {cfg.label}
-    </span>
+    <span className={`vx-badge vx-badge--${cfg.color}`}>{cfg.label}</span>
   );
 }
 
-function OrderCard({ order, onViewDetail }) {
+function OrderCard({ order, onViewDetail, onReview }) {
+  const thumb = order.products?.[0]?.thumbnail;
+
   return (
-    <div className="card">
-      <div className="card__header">
-        <div className="card__id">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          {order.id}
+    <div className="vx-card">
+      <div className="vx-card__head">
+        <div className="vx-card__id">
+          <div className="vx-card__id-dot" />
+          {order.code}
         </div>
-        <div className="card__meta">
-          <span className="card__date">{order.date}</span>
+
+        <div className="vx-card__meta">
+          <span className="vx-card__date">{formatDate(order.createdAt)}</span>
           <StatusBadge status={order.status} />
         </div>
       </div>
 
-      <div className="card__body">
-        <img src={order.thumbnail} alt="product" className="card__thumb" />
-        <div className="items-list">
-          {order.items.map((item, i) => (
-            <div key={i} className="item-row">
-              <span className="item-row__name">{item.name}</span>
-              <span className="item-row__qty">x{item.qty}</span>
-              <span className="item-row__price">{formatPrice(item.price)}</span>
+      <div className="vx-card__body">
+        <img src={thumb} alt="product" className="vx-card__thumb" />
+
+        <div className="vx-items">
+          {order.products?.map((p, i) => (
+            <div key={i} className="vx-item">
+              <span className="vx-item__name">{p.title}</span>
+              <span className="vx-item__qty">x{p.quantity}</span>
+              <span className="vx-item__price">{formatPrice(p.finalPrice)}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="card__footer">
-        <div className="card__total">
-          <span>Tổng cộng:</span>
-          <strong>{formatPrice(order.total)}</strong>
+      <div className="vx-card__foot">
+        <div className="vx-card__total">
+          <span>Thanh toán</span>
+          <strong>{formatPrice(order.finalPrice)}</strong>
         </div>
-        <div className="card__actions">
-          {order.status === "delivered" && (
-            <button className="btn btn--ghost">Mua lại</button>
+
+        <div className="vx-card__actions">
+          {order.status === "done" && (
+            <button className="vx-btn vx-btn--ghost">Mua lại</button>
           )}
-          {order.status === "processing" && (
-            <button className="btn btn--danger">Huỷ đơn</button>
+
+          {order.status === "done" && (
+            <button
+              className="vx-btn vx-btn--ghost"
+              onClick={() => onReview(order)}
+            >
+              Đánh giá sản phẩm
+            </button>
           )}
-          <button className="btn btn--primary" onClick={() => onViewDetail(order)}>
+
+          {order.status === "pending" && (
+            <button className="vx-btn vx-btn--danger">Huỷ đơn</button>
+          )}
+
+          <button
+            className="vx-btn vx-btn--primary"
+            onClick={() => onViewDetail(order)}
+          >
             Chi tiết
           </button>
         </div>
@@ -134,35 +114,160 @@ function OrderCard({ order, onViewDetail }) {
 
 function DetailModal({ order, onClose }) {
   if (!order) return null;
+
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal__header">
-          <h3>Chi tiết đơn hàng</h3>
-          <button className="modal__close" onClick={onClose}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+    <div className="vx-overlay" onClick={onClose}>
+      <div className="vx-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="vx-modal__head">
+          <span className="vx-modal__title">Chi tiết đơn hàng</span>
+          <button className="vx-modal__close" onClick={onClose}>
+            ✕
           </button>
         </div>
-        <div className="modal__body">
-          <div className="detail-row"><span>Mã đơn hàng</span><strong>{order.id}</strong></div>
-          <div className="detail-row"><span>Ngày đặt</span><strong>{order.date}</strong></div>
-          <div className="detail-row"><span>Trạng thái</span><StatusBadge status={order.status} /></div>
-          <div className="divider" />
-          <p className="section-label">Sản phẩm</p>
-          {order.items.map((item, i) => (
-            <div key={i} className="modal-item">
-              <span>{item.name}</span>
-              <span>x{item.qty}</span>
-              <span>{formatPrice(item.price * item.qty)}</span>
-            </div>
+
+        <div className="vx-modal__body">
+          <p className="vx-section-label">Thông tin đơn</p>
+
+          <div className="vx-detail-row">
+            <span>Mã đơn hàng</span>
+            <strong>{order.code}</strong>
+          </div>
+
+          <div className="vx-detail-row">
+            <span>Ngày đặt</span>
+            <strong>{formatDate(order.createdAt)}</strong>
+          </div>
+
+          <div className="vx-detail-row">
+            <span>Trạng thái</span>
+            <StatusBadge status={order.status} />
+          </div>
+
+          <div className="vx-detail-row">
+            <span>Thanh toán</span>
+            <strong>{PAY_LABEL[order.pay]}</strong>
+          </div>
+
+          <div className="vx-divider" />
+
+          <p className="vx-section-label">Sản phẩm</p>
+
+          {order.products?.map((p, i) => (
+            <Link
+              key={i}
+              className="vx-product-card"
+              to={`/products/detail/${p.slug}`}
+            >
+              <img
+                src={p.thumbnail}
+                alt={p.title}
+                className="vx-product-card__thumb"
+              />
+              <div className="vx-product-card__info">
+                <span className="vx-product-card__title">{p.title}</span>
+              </div>
+              <div className="vx-product-card__price">
+                <span className="vx-product-card__price-final">
+                  {formatPrice(p.finalPrice * p.quantity)}
+                </span>
+              </div>
+            </Link>
           ))}
-          <div className="divider" />
-          <div className="detail-row detail-row--total">
-            <span>Tổng cộng</span>
-            <strong className="total-amt">{formatPrice(order.total)}</strong>
+
+          <div className="vx-divider" />
+
+          <div className="vx-detail-row vx-detail-row--total">
+            <span>Thanh toán</span>
+            <strong>{formatPrice(order.finalPrice)}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReviewModal({
+  open,
+  product,
+  form,
+  onChange,
+  onClose,
+  onSubmit,
+}) {
+  if (!open || !product) return null;
+  return (
+    <div className="vx-overlay" onClick={onClose}>
+      <div
+        className="vx-modal vx-review-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="vx-modal__head">
+          <span className="vx-modal__title">Đánh giá sản phẩm</span>
+          <button className="vx-modal__close" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        <div className="vx-modal__body">
+          <div className="vx-review-product">
+            <img
+              src={product.thumbnail}
+              alt={product.title}
+              className="vx-review-product__thumb"
+            />
+            <div className="vx-review-product__info">
+              <div className="vx-review-product__title">{product.title}</div>
+            </div>
+          </div>
+
+          <div className="vx-divider" />
+
+          <div className="vx-form-group">
+            <label className="vx-form-label">Tên của bạn</label>
+            <input
+              type="text"
+              className="vx-form-input"
+              placeholder="Nhập tên của bạn"
+              value={form.user_name}
+              onChange={(e) =>
+                onChange({ ...form, user_name: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="vx-form-group">
+            <label className="vx-form-label">Tiêu đề</label>
+            <input
+              type="text"
+              className="vx-form-input"
+              placeholder="Nhập tiêu đề đánh giá..."
+              value={form.title}
+              onChange={(e) =>
+                onChange({ ...form, title: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="vx-form-group">
+            <label className="vx-form-label">Nội dung</label>
+            <textarea
+              className="vx-form-textarea"
+              rows={5}
+              placeholder="Chia sẻ cảm nhận của bạn..."
+              value={form.comment}
+              onChange={(e) =>
+                onChange({ ...form, comment: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="vx-review-actions">
+            <button className="vx-btn vx-btn--ghost" onClick={onClose}>
+              Huỷ
+            </button>
+            <button className="vx-btn vx-btn--primary" onClick={onSubmit}>
+              Gửi đánh giá
+            </button>
           </div>
         </div>
       </div>
@@ -174,52 +279,122 @@ function OrderList() {
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [mockOrders, setMckOrders] = useState([]);
+
+  const [reviewModal, setReviewModal] = useState({
+    open: false,
+    product: null,
+  });
+
+  const [reviewForm, setReviewForm] = useState({
+    product_ids: [],
+    user_name: "",
+    title: "",
+    comment: "",
+  });
+
+  const handleOpenReview = (order) => {
+    setReviewModal({
+      open: true,
+      product: order.products?.[0] || null,
+    });
+
+    setReviewForm({
+      product_ids: order.products?.map(
+        (item) => item._id || item.id || item.product_id
+      ) || [],
+      user_name: "",
+      title: "",
+      comment: "",
+    });
+  };
+
+  const handleCloseReview = () => {
+    setReviewModal({
+      open: false,
+      product: null,
+    });
+
+    setReviewForm({
+      product_ids: [],
+      user_name: "",
+      title: "",
+      comment: "",
+    });
+  };
+
+  const handleSubmitReview = async () => {
+    const payload = {
+      product_ids: reviewForm.product_ids,
+      user_name: reviewForm.user_name,
+      title: reviewForm.title,
+      comment: reviewForm.comment,
+    };
+
+    console.log("Review payload:", payload);
+
+    // await createReview(payload);
+
+    handleCloseReview();
+  };
 
   const filtered = mockOrders.filter((o) => {
     const matchTab = activeTab === "all" || o.status === activeTab;
+    const keyword = search.toLowerCase();
+
     const matchSearch =
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.items.some((i) => i.name.toLowerCase().includes(search.toLowerCase()));
+      o.code?.toLowerCase().includes(keyword) ||
+      o.products?.some((p) =>
+        p.title?.toLowerCase().includes(keyword)
+      );
+
     return matchTab && matchSearch;
   });
 
+  useEffect(() => {
+    const fetchApi = async () => {
+      try {
+        const res = await getList();
+        if (res?.data?.code) {
+          setMckOrders(res?.data?.orders || []);
+        }
+      } catch (err) {
+        console.log(err.response?.data?.message);
+        error(err.response?.data?.message);
+      }
+    };
+
+    fetchApi();
+  }, []);
+
+
   return (
-    <div className="order-page">
-      <header className="topbar">
-        <div className="topbar__left">
-          <div className="avatar">HT</div>
-          <div>
-            <p className="topbar__username">Hoàng Tuấn</p>
-            <p className="topbar__subtitle">Tài khoản của tôi</p>
-          </div>
-        </div>
-      </header>
-
-      <main className="main">
-        <div className="page-title">
-          <h2>Đơn hàng của tôi</h2>
-          <span className="count">{filtered.length} đơn</span>
+    <div className="vx-page">
+      <main className="vx-main">
+        <div className="vx-page-header">
+          <h2 className="vx-page-title">
+            Đơn hàng <span>của tôi</span>
+          </h2>
+          <span className="vx-count-pill">
+            {filtered.length} đơn hàng
+          </span>
         </div>
 
-        <div className="search-wrap">
-          <svg className="search-wrap__icon" width="16" height="16"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
+        <div className="vx-search">
           <input
-            className="search-wrap__input"
             placeholder="Tìm kiếm theo mã đơn hoặc tên sản phẩm..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <div className="tabs">
+        <div className="vx-tabs">
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              className={`tab ${activeTab === tab.key ? "tab--active" : ""}`}
+              className={`vx-tab ${
+                activeTab === tab.key ? "vx-tab--active" : ""
+              }`}
               onClick={() => setActiveTab(tab.key)}
             >
               {tab.label}
@@ -227,26 +402,37 @@ function OrderList() {
           ))}
         </div>
 
-        <div className="order-list">
+        <div className="vx-list">
           {filtered.length === 0 ? (
-            <div className="empty">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.5">
-                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <path d="M16 10a4 4 0 01-8 0"/>
-              </svg>
+            <div className="vx-empty">
               <p>Không có đơn hàng nào</p>
             </div>
           ) : (
             filtered.map((order) => (
-              <OrderCard key={order.id} order={order} onViewDetail={setSelectedOrder} />
+              <OrderCard
+                key={order.id || order._id}
+                order={order}
+                onViewDetail={setSelectedOrder}
+                onReview={handleOpenReview}
+              />
             ))
           )}
         </div>
       </main>
 
-      <DetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      <DetailModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+      />
+
+      <ReviewModal
+        open={reviewModal.open}
+        product={reviewModal.product}
+        form={reviewForm}
+        onChange={setReviewForm}
+        onClose={handleCloseReview}
+        onSubmit={handleSubmitReview}
+      />
     </div>
   );
 }

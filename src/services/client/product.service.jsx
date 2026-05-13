@@ -1,4 +1,4 @@
-import axiosAdmin from "../../utils/axios.client"
+import axiosClient from "../../utils/axios.client"
 
 export const getProductByCategory = async (data) => {
   const params = new URLSearchParams();
@@ -6,13 +6,17 @@ export const getProductByCategory = async (data) => {
   if(data.discount) params.append("discount", data.discount)
   if(data.page) params.append("page", data.page)
   if(data.limit) params.append("limit", data.limit)
-  return axiosAdmin.get(`/products/${data.category}?${params}`);
+  return axiosClient.get(`/products/${data.category}?${params}`);
 }
 
 export const getProductBySlug = async (slug) => {
-  return axiosAdmin.get(`/products/detail/${slug}`);
+  return axiosClient.get(`/products/detail/${slug}`);
 }
 
 export const getProductBySale = async (category) =>{
-  return axiosAdmin.get(`/products/sale/${category}`)
+  return axiosClient.get(`/products/sale/${category}`)
+}
+
+export const commentProduct = async (comment) => {
+  return axiosClient.post("/products/comment", comment)
 }

@@ -274,74 +274,85 @@ function CustomerSupportChat() {
 
         {/* Main Chat */}
         <div className="panel">
-          <div className="chat-header">
-            <div className="chat-user-info">
-              <div className="chat-av-lg">
-                <img src={user?.avatar} alt="" />
-                <span className="sdot online" />
-              </div>
-              <div>
-                <div className="chat-user-name">{user?.fullname ? user?.fullname : ""}</div>
-                <div className="chat-user-sub">Khách hàng thân thiết &nbsp;·&nbsp; Đơn gần nhất #VLX1024</div>
-              </div>
-            </div>
-            <div className="chat-actions">
-              <button className="icon-btn"><PhoneOutlined /></button>
-              <button className="icon-btn"><PaperClipOutlined /></button>
-              <button className="icon-btn"><MoreOutlined /></button>
-            </div>
-          </div>
-
-          <div className="chat-body" ref={chatBodyRef}>
-            <div className="date-div"><span>Hôm nay</span></div>
-            {messages.map((msg) => (
-              <div key={msg.createdAt || msg.timestamp} className={`bubble-row${msg.sender === "admin" ? " admin" : ""}`}>
-                <div className={`bubble ${msg.sender}`}>
-                  <p>{msg.text}</p>
-                  <span>{formatCustom(msg.createdAt || msg.timestamp)}</span>
+          {!activeConv ? (
+            <div className="chat-empty"></div>
+          ) : (
+            <>
+              <div className="chat-header">
+                <div className="chat-user-info">
+                  <div className="chat-av-lg">
+                    <img src={user?.avatar} alt="" />
+                    <span className="sdot online" />
+                  </div>
+                  <div>
+                    <div className="chat-user-name">{user?.fullname ? user?.fullname : ""}</div>
+                    <div className="chat-user-sub">Khách hàng thân thiết &nbsp;·&nbsp; Đơn gần nhất #VLX1024</div>
+                  </div>
+                </div>
+                <div className="chat-actions">
+                  <button className="icon-btn"><PhoneOutlined /></button>
+                  <button className="icon-btn"><PaperClipOutlined /></button>
+                  <button className="icon-btn"><MoreOutlined /></button>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="typing-indicator">
-            {typing?.typing && typing?.sender !== "admin" ? (
-                <div className="typing-content">
+
+              <div className="chat-body" ref={chatBodyRef}>
+                <div className="date-div"><span>Hôm nay</span></div>
+                {messages.map((msg) => (
+                  <div key={msg.createdAt || msg.timestamp} className={`bubble-row${msg.sender === "admin" ? " admin" : ""}`}>
+                    <div className={`bubble ${msg.sender}`}>
+                      <p>{msg.text}</p>
+                      <span>{formatCustom(msg.createdAt || msg.timestamp)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="typing-indicator">
+                {typing?.typing && typing?.sender !== "admin" ? (
+                  <div className="typing-content">
                     <span className="user-name">Người dùng</span> đang nhập
                     <div className="dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                      <span></span>
+                      <span></span>
+                      <span></span>
                     </div>
+                  </div>
+                ) : ""}
+              </div>
+
+              <div className="chat-footer">
+                <div className="quick-actions">
+                  {quickReplies.map((q) => (
+                    <button key={q.label} className="qa-btn" onClick={() => setInputText(q.label)}>
+                      {q.label}
+                    </button>
+                  ))}
                 </div>
-            ) : ""}
-        </div>
-          <div className="chat-footer">
-            <div className="quick-actions">
-              {quickReplies.map((q) => (
-                <button key={q.label} className="qa-btn" onClick={() => setInputText(q.label)}>
-                  {q.label}
-                </button>
-              ))}
-            </div>
-            <div className="compose">
-              <button className="compose-add"><PlusOutlined /></button>
-              <textarea
-                ref={textareaRef}
-                placeholder="Nhập nội dung phản hồi cho khách hàng..."
-                rows={1}
-                value={inputText}
-                onChange={handleInput}
-                onKeyDown={handleKeyDown}
-              />
-              <button className="send-btn" onClick={handleSend}>
-                Gửi <SendOutlined style={{ fontSize: 12, marginLeft: 4 }} />
-              </button>
-            </div>
-          </div>
+                <div className="compose">
+                  <button className="compose-add"><PlusOutlined /></button>
+                  <textarea
+                    ref={textareaRef}
+                    placeholder="Nhập nội dung phản hồi cho khách hàng..."
+                    rows={1}
+                    value={inputText}
+                    onChange={handleInput}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <button className="send-btn" onClick={handleSend}>
+                    Gửi <SendOutlined style={{ fontSize: 12, marginLeft: 4 }} />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Detail Panel */}
-        <div className="panel">
+        {!activeConv ? (
+          <div className="panel"></div>
+        ) : (
+          <div className="panel">
           <div className="chat-detail">
             <div className="detail-card">
               <h4>Thông tin khách hàng</h4>
@@ -380,6 +391,7 @@ function CustomerSupportChat() {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

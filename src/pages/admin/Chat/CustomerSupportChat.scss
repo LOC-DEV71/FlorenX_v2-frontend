@@ -30,6 +30,11 @@ $amber:  #d97706;
 $rose:   #f43f5e;
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.chat-empty {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
 
 .csp {
   font-family: $font-main;

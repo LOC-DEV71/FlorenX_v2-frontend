@@ -24,6 +24,9 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import { IoSettings } from "react-icons/io5";
 import "./MainLayoutAdmin.scss";
 import Avatar from "../../assets/banner/avatar-none.jpg";
+import { useSocket } from "../../Socket/useSocket";
+import { useEffect } from "react";
+import { success } from "../../utils/notift";
 
 
 
@@ -148,6 +151,15 @@ const MainLayoutAdmin = () => {
   };
 
   const siderWidth = collapsed ? 80 : 200;
+  const socket = useSocket();
+
+  useEffect(() => {
+    console.log("Admin socket ID:", socket.id) 
+    socket.on("server_return_order", (data) => {
+      success("Bạn có đơn hàng mới")
+    })
+      return () => socket.off("server_return_order")
+  }, [])
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f5f5f5" }}>

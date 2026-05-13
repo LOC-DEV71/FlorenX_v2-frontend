@@ -1,7 +1,7 @@
-import axiosAdmin from "../../utils/axios.client";
+import axiosClient from "../../utils/axios.client";
 
 export const googleLogin = async (data) => {
-  const response = await axiosAdmin.post(
+  const response = await axiosClient.post(
     `/auth/login/google`,
     data,
     {
@@ -12,38 +12,38 @@ export const googleLogin = async (data) => {
 };
 
 export const getMe = () => {
-  return axiosAdmin.get("/auth/get-me");
+  return axiosClient.get("/auth/get-me");
 };
 
 
 export const loginLocal = async (form) => {
-  return axiosAdmin.post("/auth/login/local", form);
+  return axiosClient.post("/auth/login/local", form);
 }
 
 export const logout = async () => {
-  return axiosAdmin.post("/auth/logout");
+  return axiosClient.post("/auth/logout");
 }
 
 export const update = async (data) => {
-  return axiosAdmin.post("/auth/update", data);
+  return axiosClient.post("/auth/update", data);
 }
 
 export const createUser = async (data) => {
-  return axiosAdmin.post("/auth/create", data);
+  return axiosClient.post("/auth/create", data);
 }
 
 export const confirmOtp = async (data) => {
-  return axiosAdmin.post("/auth/cofirm-otp", data);
+  return axiosClient.post("/auth/cofirm-otp", data);
 }
 
 export const forgotPassword = async (data) => {
-  return axiosAdmin.post("/auth/forgot-password", data);
+  return axiosClient.post("/auth/forgot-password", data);
 }
 
 export const forgotPasswordOtp = async (data) => {
-  return axiosAdmin.post("/auth/forgot-password-otp", data);
+  return axiosClient.post("/auth/forgot-password-otp", data);
 }
 
 export const resetPassword = async (data) => {
-  return axiosAdmin.post("/auth/reset-password", data)
+  return axiosClient.post("/auth/reset-password", data)
 }

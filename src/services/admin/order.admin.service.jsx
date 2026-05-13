@@ -7,6 +7,7 @@ export const listOrder = (data) => {
     if (data.limit) params.append("limit", data.limit);
     if (data.sort) params.append("sort", data.sort);
     if (data.search) params.append("search", data.search);
+    if (data.sortStatus) params.append("sortStatus", data.sortStatus);
 
     return axiosAdmin.get(`/orders/get-list?${params.toString()}`);
 };

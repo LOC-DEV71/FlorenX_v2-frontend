@@ -5,9 +5,11 @@
 .orders-page {
 
   .admin-product-stats {
-
+    .status-active{
+        border: 2px solid green;
+    }
     .admin-stat-card {
-
+        cursor: pointer;
       p {
         display: flex;
         align-items: center;
@@ -26,12 +28,15 @@
         color: #1890ff;
       }
 
-      &.admin-stat-shipping svg {
+      &.admin-stat-shipped svg {
         color: #722ed1;
       }
 
       &.admin-stat-done svg {
         color: #52c41a;
+      }
+      &.admin-stat-cancel svg {
+        color: red;
       }
 
     }
@@ -74,6 +79,16 @@
     }
 }
 
+.new-order {
+    animation: highlight 2s ease-out;
+    background: #fffbe6;
+}
+
+@keyframes highlight {
+    0% { background: #ffd666; }
+    100% { background: #fffbe6; }
+}
+
 .ellipsis {
     white-space: nowrap;
     overflow: hidden;
@@ -92,6 +107,14 @@
 .status.shipped {
     background: #e6f7ed;
     color: #22a06b;
+}
+.status.done {
+    background: #e6f7ed;
+    color: red;
+}
+.status.confirmed {
+    background: #e6f7ed;
+    color: rgb(0, 85, 255);
 }
 
 .status.pending {

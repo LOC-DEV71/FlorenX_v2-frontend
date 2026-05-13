@@ -1,4 +1,4 @@
-import { Statistic } from "antd";
+import { Statistic, Skeleton } from "antd";
 import "./Order.index.scss";
 import { useEffect, useState, useCallback } from "react";
 import {
@@ -8,7 +8,7 @@ import {
 } from "react-icons/bs";
 import { MdDoneAll, MdDeleteOutline } from "react-icons/md";
 import SEO from "../../../utils/SEO";
-import { Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SearchOutlined } from "@ant-design/icons";
 import {
     listOrder,
@@ -16,8 +16,7 @@ import {
 } from "../../../services/admin/order.admin.service";
 import { formatCustom } from "../../../utils/formatCustomDate";
 import { renderpagination } from "../../../utils/pagination";
-
-
+import { useSocket } from "../../../Socket/useSocket";
 
 function Orders() {
     const [orders, setOrders] = useState([]);
@@ -27,6 +26,10 @@ function Orders() {
     const [pagination, setPagination] = useState({});
     const [action, setAction] = useState("");
     const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(false); 
+    const [sortStatus, setSortStatus] = useState("")
+    const [newOrderIds, setNewOrderIds] = useState("")
+    const socket = useSocket();
 
     const [stats, setStats] = useState({
         pending: 0,
@@ -39,6 +42,15 @@ function Orders() {
     const limit = Number(searchParams.get("limit")) || 5;
     const sort = searchParams.get("sort") || "";
     const keyword = searchParams.get("search") || "";
+
+    useEffect(() => {
+        console.log("Admin socket ID:", socket.id) 
+        socket.on("server_return_order", (data) => {
+            setOrders(prev => [data.order, ...prev]);
+            setNewOrderIds(prev => [...prev, data.order._id])
+        })
+        return () => socket.off("server_return_order")
+    }, [])
 
     useEffect(() => {
         setSearch(keyword);
@@ -54,7 +66,9 @@ function Orders() {
 
     const fetchApi = useCallback(async () => {
         try {
-            const res = await listOrder({ page, limit, sort, search: keyword });
+            setLoading(true); 
+
+            const res = await listOrder({ page, limit, sort, search: keyword, sortStatus });
 
             if (res?.data?.code) {
                 const ordersData = res.data.orders || [];
@@ -71,8 +85,10 @@ function Orders() {
             }
         } catch (error) {
             console.log(error.response?.data?.message);
+        } finally {
+            setLoading(false); 
         }
-    }, [page, limit, sort, keyword]);
+    }, [page, limit, sort, keyword, sortStatus]);
 
     useEffect(() => {
         fetchApi();
@@ -95,6 +111,17 @@ function Orders() {
         }
     };
 
+    const handleFilterStatus = (value) => {
+        setSortStatus(value);
+        setSearchParams({
+            page: 1,
+            limit,
+            sort,
+            sortByCategory: value,
+            search
+        });
+    };
+
     const statusMap = {
         pending: "Chưa xác nhận",
         confirmed: "Đã xác nhận",
@@ -103,6 +130,7 @@ function Orders() {
         cancel: "Đã huỷ"
     };
 
+    const navigate = useNavigate();
 
     return (
         <div className="orders-page">
@@ -112,31 +140,42 @@ function Orders() {
                 Quản lý đơn hàng
             </h2>
 
-            {/* STATS */}
             <div className="admin-product-stats">
-                <div className="admin-stat-card admin-stat-pending">
+                <div
+                    className={`admin-stat-card admin-stat-pending ${sortStatus === "pending" ? "status-active" : ""}`}
+                    onClick={() => handleFilterStatus("pending")}
+                >
                     <p><BsClockHistory /> Chưa xác nhận</p>
-                    <Statistic value={stats.pending} />
+                    {loading ? <Skeleton.Input active size="small" /> : <Statistic value={stats.pending} />}
                 </div>
-                <div className="admin-stat-card admin-stat-confirmed">
+
+                <div
+                    className={`admin-stat-card admin-stat-confirmed ${sortStatus === "confirmed" ? "status-active" : ""}`}
+                    onClick={() => handleFilterStatus("confirmed")}
+                >
                     <p><BsCheck2Circle /> Đã xác nhận</p>
-                    <Statistic value={stats.confirmed} />
+                    {loading ? <Skeleton.Input active size="small" /> : <Statistic value={stats.confirmed} />}
                 </div>
-                <div className="admin-stat-card admin-stat-shipping">
+
+                <div
+                    className={`admin-stat-card admin-stat-shipped ${sortStatus === "shipped" ? "status-active" : ""}`}
+                    onClick={() => handleFilterStatus("shipped")}
+                >
                     <p><BsTruck /> Đang giao</p>
-                    <Statistic value={stats.shipped} />
+                    {loading ? <Skeleton.Input active size="small" /> : <Statistic value={stats.shipped} />}
                 </div>
-                <div className="admin-stat-card admin-stat-done">
+
+                <div
+                    className={`admin-stat-card admin-stat-done ${sortStatus === "done" ? "status-active" : ""}`}
+                    onClick={() => handleFilterStatus("done")}
+                >
                     <p><MdDoneAll /> Hoàn thành</p>
-                    <Statistic value={stats.done} />
+                    {loading ? <Skeleton.Input active size="small" /> : <Statistic value={stats.done} />}
                 </div>
             </div>
 
-            {/* TOOLBAR */}
             <div className="admin-toolbar">
                 <div className="admin-toolbar__filters">
-
-                    {/* SEARCH */}
                     <div className="admin-search">
                         <SearchOutlined />
                         <input
@@ -147,7 +186,6 @@ function Orders() {
                         />
                     </div>
 
-                    {/* SORT */}
                     <select
                         value={sort}
                         onChange={(e) =>
@@ -164,13 +202,14 @@ function Orders() {
                         <option value="price-desc">Giá ↓</option>
                     </select>
 
-                    {/* ACTION */}
                     <select
                         value={action}
                         onChange={(e) => setAction(e.target.value)}
                     >
                         <option value="">-- Hành động --</option>
-                        <option value="confirm">Xác nhận</option>
+                        <option value="confirmed">Xác nhận</option>
+                        <option value="shipped">Vận chuyển</option>
+                        <option value="done">Hoàn thành</option>
                         <option value="cancel">Hủy đơn</option>
                     </select>
                 </div>
@@ -181,7 +220,7 @@ function Orders() {
                         onClick={() => {
                             setChecked([]);
                             setSearch("");
-                            setSearchParams({});
+                            window.location.href = ("/admin/orders/")
                         }}
                     >
                         <MdDeleteOutline /> Xóa lọc
@@ -196,7 +235,6 @@ function Orders() {
                 </div>
             </div>
 
-            {/* TABLE */}
             <div className="orders-table">
                 <div className="orders-header">
                     <div>
@@ -221,38 +259,49 @@ function Orders() {
                     <div>Trạng thái</div>
                 </div>
 
-                {orders.map((o) => (
-                    <div
-                        key={o._id}
-                        className="orders-row"
-                        onClick={() => setSelected(o)}
-                    >
-                        <div onClick={(e) => e.stopPropagation()}>
-                            <input
-                                type="checkbox"
-                                checked={checked.includes(o._id)}
-                                onChange={() => toggleCheck(o._id)}
-                            />
+                {loading
+                    ? Array(limit).fill(0).map((_, i) => (
+                        <div className="orders-row" key={i}>
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
+                            <Skeleton.Input active size="small" />
                         </div>
-                        <div>{o.code}</div>
-                        <div>{o.fullname}</div>
-                        <div>{o.phone}</div>
-                        <div className="ellipsis">{o.address}</div>
-                        <div>{o.finalPrice?.toLocaleString("vi-VN")} VNĐ</div>
-                        <div>{formatCustom(o.createdAt)}</div>
-                        <div>
-                            <span className={`status ${o.status}`}>
-                                {statusMap[o.status]}
-                            </span>
+                    ))
+                    : orders.map((o) => (
+                        <div
+                            key={o._id}
+                            className={`orders-row ${newOrderIds.includes(o._id) ? "new-order" : ""}`}
+                            onClick={() => setSelected(o)}
+                        >
+                            <div onClick={(e) => e.stopPropagation()}>
+                                <input
+                                    type="checkbox"
+                                    checked={checked.includes(o._id)}
+                                    onChange={() => toggleCheck(o._id)}
+                                />
+                            </div>
+                            <div>#{o.code}</div>
+                            <div>{o.fullname}</div>
+                            <div>{o.phone}</div>
+                            <div className="ellipsis">{o.address}</div>
+                            <div>{o.finalPrice?.toLocaleString("vi-VN")} VNĐ</div>
+                            <div>{formatCustom(o.createdAt)}</div>
+                            <div>
+                                <span className={`status ${o.status}`}>
+                                    {statusMap[o.status]}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
             </div>
 
-            {/* PAGINATION */}
-            {renderpagination(pagination, setSearchParams, limit, sort, "", "", "", keyword)}
+            {renderpagination(pagination, setSearchParams, limit, sort, sortStatus, "", "", keyword)}
 
-            {/* DRAWER */}
             {selected && (
                 <div
                     className="order-drawer-overlay"
