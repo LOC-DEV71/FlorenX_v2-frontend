@@ -253,8 +253,8 @@ function ProductByCategory() {
                                                     </div>
                                                     <div className="pbc-card__meta">
                                                         <div className="pbc-card__rating">
-                                                            <span className="pbc-card__star">★ 4.8</span>
-                                                            <span className="pbc-card__count">(120 reviews)</span>
+                                                            <span className="pbc-card__star">★ {item.averageRating.toFixed(1)}</span>
+                                                            <span className="pbc-card__count">({item.totalReviews} reviews)</span>
                                                         </div>
                                                         <div className="pbc-card__favorite" onClick={(e) => handleLike(e, item._id)}>
                                                             {likeIds.includes(item?._id)

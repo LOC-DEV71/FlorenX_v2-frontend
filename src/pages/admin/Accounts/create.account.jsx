@@ -6,6 +6,7 @@ import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
 import { createAccount } from "../../../services/admin/account.admin.service";
 import {getListRoles} from "../../../services/admin/roles.admin.service";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 function CreateAccounts() {
     const [avatar, setAvatar] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState(null)
@@ -19,10 +20,12 @@ function CreateAccounts() {
     });
     const [typeInput, setTypeInput] = useState(true);
     const [roles, setRoles] = useState([])
+    const [loading, setLoading]=useState(false)
 
     const handleCreateAccount = async (e) => {
         e.preventDefault();
         try {
+            setLoading(true)
             let data;
 
             if (avatar) {
@@ -52,6 +55,8 @@ function CreateAccounts() {
             }
         } catch (err) {
             error(err.response?.data?.message || "Có lỗi xảy ra");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -71,6 +76,7 @@ function CreateAccounts() {
 
     return (
         <div className="create-admin-page">
+            {loading && <LoadingOverlay title="Đang tạo tài khoản" />}
             <SEO title={"Tạo tài khoản admin"} />
             <div className="create-admin-card">
                 <div className="card-head">

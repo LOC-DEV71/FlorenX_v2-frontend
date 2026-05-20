@@ -9,6 +9,7 @@ import TinyEditor from "../../../utils/tinyEditor";
 import { getCategoryBySlug, getListCategory, UpdateProductCategory } from "../../../services/admin/product.category.admin";
 import { success, error } from "../../../utils/notift";
 import { renderCategoryOptions } from "../../../utils/buildTree";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 
 function UpdateCategory() {
     const [form, setForm] = useState({
@@ -26,6 +27,7 @@ function UpdateCategory() {
     const fileInputRef = useRef(null);
     const { slug } = useParams();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         try {
@@ -67,6 +69,7 @@ function UpdateCategory() {
 
     const handleUpdateCategory = async () => {
         try {
+            setLoading(true)
             const formData = new FormData();
             Object.keys(form).forEach(key => 
             {
@@ -86,11 +89,14 @@ function UpdateCategory() {
             }
         } catch (err) {
             error(err.response?.data.message)
+        } finally{
+            setLoading(false)
         }
     }
 
     return (
         <div className="create-category-page">
+            {loading && <LoadingOverlay title="Đang cập nhật danh mục"/>}
             <SEO title="Cập nhật danh mục" />
 
             <div className="create-category-page__header">

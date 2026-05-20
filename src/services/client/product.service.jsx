@@ -16,7 +16,3 @@ export const getProductBySlug = async (slug) => {
 export const getProductBySale = async (category) =>{
   return axiosClient.get(`/products/sale/${category}`)
 }
-
-export const commentProduct = async (comment) => {
-  return axiosClient.post("/products/comment", comment)
-}

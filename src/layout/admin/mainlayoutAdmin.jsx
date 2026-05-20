@@ -27,6 +27,11 @@ import Avatar from "../../assets/banner/avatar-none.jpg";
 import { useSocket } from "../../Socket/useSocket";
 import { useEffect } from "react";
 import { success } from "../../utils/notift";
+import { CiUser } from "react-icons/ci";
+import { Badge, Popover, List, Typography } from "antd";
+import { BsBellFill } from "react-icons/bs";
+import formatTimeAgo from "../../utils/formatTimeAgo";
+import { getList, readNotification } from "../../services/admin/notifications.service";
 
 
 
@@ -46,6 +51,7 @@ const MainLayoutAdmin = () => {
   const exitPermissions = permission?.includes("view_permissions");
   const exitNews = permission?.includes("view_news");
   const exitNewsCategory = permission?.includes("view_news_category");
+  const exitUsers = permission?.includes("view_users");
   const { admin } = useSelector((state) => state.auth);
   const menuItems = [
     {
@@ -105,11 +111,20 @@ const MainLayoutAdmin = () => {
         }
       ] : []
     ),
+    ...(exitUsers
+      ? [
+        {
+          key: "8",
+          icon: <CiUser />,
+          label: <Link to="/admin/users">Người dùng</Link>,
+        }
+      ] : []
+    ),
     ...(exitNewsCategory
       ? [
 
         {
-          key: "8",
+          key: "9",
           icon: <TbCategory />,
           label: <Link to="/admin/new-categories">Danh mục bài viết</Link>,
         }
@@ -117,26 +132,26 @@ const MainLayoutAdmin = () => {
     ),
     ...(exitNews
       ? [{
-        key: "9",
+        key: "10",
         icon: <GrArticle />,
         label: <Link to="/admin/news">Bài viết</Link>,
       }] : []
     )
     ,
     {
-      key: "10",
+      key: "11",
       icon: <IoMdChatboxes />,
       label: <Link to="/admin/chat">CSKH</Link>,
     }
     ,
     {
-      key: "11",
+      key: "12",
       icon: <FaRegTrashCan />,
       label: <Link to="/admin/trashcan">Thùng rác</Link>,
     }
     ,
     {
-      key: "12",
+      key: "13",
       icon: <IoSettings />,
       label: <Link to="/admin/setting">Cài đặt</Link>,
     }
@@ -153,12 +168,108 @@ const MainLayoutAdmin = () => {
   const siderWidth = collapsed ? 80 : 200;
   const socket = useSocket();
 
+
+
+  const [notifications, setNotifications] = useState([]);
+  const [openNoti, setOpenNoti] = useState(false);
+
+
   useEffect(() => {
-    console.log("Admin socket ID:", socket.id) 
+    const fetchApi = async () => {
+      try {
+        const res = await getList();
+        if(res?.data?.code){
+          setNotifications(res?.data?.notifications)
+        }
+      } catch (error) {
+        console.log(error.response?.data?.message)
+      }
+    }
+    fetchApi();
+  }, [])
+
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+  };
+
+  const handleRead = async (id) => {
+    try {
+      const res = await readNotification(id);
+
+      if (res?.data?.code) {
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item._id === id ? { ...item, is_read: true } : item
+          )
+        );
+      }
+    } catch (err) {
+      console.log(
+        err.response?.data?.message || "Hệ thống xảy ra lỗi"
+      );
+    }
+  };
+
+
+  const notificationContent = (
+    <div className="noti-dropdown">
+      <div className="noti-header">
+        <span>Thông báo</span>
+        <button onClick={markAllRead}>Đọc tất cả</button>
+      </div>
+      <List
+        dataSource={notifications}
+        renderItem={(item) => (
+          <Link to={item.action_url}
+            className={`noti-item ${!item.is_read ? "unread" : ""}`}
+            onClick={() => handleRead(item._id)}
+          >
+            <List.Item >
+              <div className="noti-text">
+                <h4>{item.title}</h4>
+                <Typography.Text className="message">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: item?.message || "",
+                    }}
+                  />
+                </Typography.Text>
+                <Typography.Text type="secondary" className="noti-time">
+                  {formatTimeAgo(item.createdAt)}
+                </Typography.Text>
+              </div>
+              {!item.is_read && <span className="noti-dot" />}
+            </List.Item>
+          </Link>
+        )}
+      />
+    </div>
+  );
+
+  useEffect(() => {
     socket.on("server_return_order", (data) => {
-      success("Bạn có đơn hàng mới")
-    })
-      return () => socket.off("server_return_order")
+      const notification = data?.notification;
+      success(notification.title || "Bạn có đơn hàng mới");
+      setNotifications((prev) => [
+        notification, ...prev
+      ]);
+    });
+    return () => socket.off("server_return_order")
+  }, [])
+
+  useEffect(() => {
+    socket.on("server_return_product_preview", (data) => {
+      success(
+        <Link to={`/admin/products/${data?.data?.slug}`} style={{textDecoration: "none"}}>Có đánh giá sản phẩm</Link>
+      );
+      setNotifications((prev) => [
+        data?.notification, ...prev
+      ]);
+    });
+    return () => socket.off("server_return_product_preview")
   }, [])
 
   return (
@@ -209,8 +320,8 @@ const MainLayoutAdmin = () => {
         <div className="sider-bot">
           <div>
             <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
-            {collapsed ?  "" : <span>{admin.fullname}</span>}
-           
+            {collapsed ? "" : <span>{admin.fullname}</span>}
+
           </div>
           {/* <button>Đăng xuất</button> */}
         </div>
@@ -224,6 +335,7 @@ const MainLayoutAdmin = () => {
         }}
       >
         <Header
+          className="header-admin"
           style={{
             padding: "0 16px",
             background: "#fff",
@@ -242,6 +354,20 @@ const MainLayoutAdmin = () => {
               height: 40,
             }}
           />
+          <Popover
+            content={notificationContent}
+            trigger="click"
+            open={openNoti}
+            onOpenChange={setOpenNoti}
+            placement="bottomRight"
+            arrow={false}
+          >
+            <div className={`notification ${unreadCount > 0 ? "has-noti" : ""}`}>
+              <Badge count={unreadCount} size="small">
+                <BsBellFill />
+              </Badge>
+            </div>
+          </Popover>
         </Header>
 
         <Content

@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { getListCategory } from "../../../services/admin/product.category.admin";
 import { useEffect } from "react";
 import { renderCategoryOptions } from "../../../utils/buildTree";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 
 function CreateProduct() {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ function CreateProduct() {
   const [images, setImages] = useState([]);
   const [imagesPreview, setImagesPreview] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     try {
@@ -92,7 +94,7 @@ function CreateProduct() {
 
   const handleSubmit = async () => {
     try {
-
+      setLoading(true)
       const formData = new FormData();
 
       Object.keys(form).forEach(key => {
@@ -139,11 +141,14 @@ function CreateProduct() {
       } 
     } catch (err) {
       error(err.response?.data.message);
+    } finally {
+      setLoading(false)
     }
   };
 
   return (
     <div className="create-product">
+      {loading && <LoadingOverlay title="Đang tạo sản phẩm"/>}
       <SEO title="Tạo sản phẩm mới" />
       <div className="page-header">
         <p class="eyebrow">Veltrix Gear</p>

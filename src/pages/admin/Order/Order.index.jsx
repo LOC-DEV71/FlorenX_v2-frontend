@@ -17,6 +17,7 @@ import {
 import { formatCustom } from "../../../utils/formatCustomDate";
 import { renderpagination } from "../../../utils/pagination";
 import { useSocket } from "../../../Socket/useSocket";
+import formatTimeAgo from "../../../utils/formatTimeAgo";
 
 function Orders() {
     const [orders, setOrders] = useState([]);
@@ -46,8 +47,8 @@ function Orders() {
     useEffect(() => {
         console.log("Admin socket ID:", socket.id) 
         socket.on("server_return_order", (data) => {
-            setOrders(prev => [data.order, ...prev]);
-            setNewOrderIds(prev => [...prev, data.order._id])
+            setOrders(prev => [data.data.order, ...prev]);
+            setNewOrderIds(prev => [...prev, data.data.order._id])
         })
         return () => socket.off("server_return_order")
     }, [])
@@ -290,7 +291,7 @@ function Orders() {
                             <div>{o.phone}</div>
                             <div className="ellipsis">{o.address}</div>
                             <div>{o.finalPrice?.toLocaleString("vi-VN")} VNĐ</div>
-                            <div>{formatCustom(o.createdAt)}</div>
+                            <div>{formatTimeAgo(o.createdAt)}</div>
                             <div>
                                 <span className={`status ${o.status}`}>
                                     {statusMap[o.status]}

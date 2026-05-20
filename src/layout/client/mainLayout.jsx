@@ -51,7 +51,9 @@ function MainLayout() {
           <button className="close-btn" onClick={() => setOpenMenu(false)}>
             <CloseOutlined />
           </button>
-          <Menu mode="inline" items={menuItems} />
+          <div className="category-menu-wrapper">  
+            <Menu mode="inline" items={menuItems} />
+          </div>                                    
         </div>
       )}
 

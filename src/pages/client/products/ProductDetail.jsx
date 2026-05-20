@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./ProductDeatil.scss";
-import { commentProduct, getProductBySlug } from "../../../services/client/product.service";
+import { getProductBySlug } from "../../../services/client/product.service";
+import { commentProduct, getList, getProductPreview } from "../../../services/client/product.preview.service";
 import { Link, useParams } from "react-router-dom";
 import SEO from "../../../utils/SEO";
 import { error, success } from "../../../utils/notift";
@@ -12,6 +13,9 @@ import NoData from "../../../assets/banner/empty.png";
 import { StarFilled, StarOutlined } from "@ant-design/icons";
 import { useSocket } from "../../../Socket/useSocket";
 import { useSelector } from "react-redux";
+import { formatCustom } from "../../../utils/formatCustomDate";
+import formatTimeAgo from "../../../utils/formatTimeAgo";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 
 
 function ProductDeatil() {
@@ -23,7 +27,11 @@ function ProductDeatil() {
   const [products, setProducts] = useState([]);
   const [overview, setOverview] = useState(true);
   const [likeIds, setLikedIds] = useState([]);
+  const [productPreviewIds, setProductPreviewIds] = useState([]);
+  const [average, setAverage] = useState(null)
+  const [listRating, setListRating] = useState([])
   const user = useSelector(state => state.authClient.user)
+  const [loadinComment, setLoadingComment] = useState(false)
   const [comment, setComment] = useState({
     rating: null,
     user_name: "",
@@ -31,7 +39,8 @@ function ProductDeatil() {
     product_id: "",
     title: "",
     user_id: "",
-    updated: true
+    updated: true,
+    slug: slug
   })
   const [preview, setPreview] = useState([]);
   const socket = useSocket();
@@ -65,7 +74,7 @@ function ProductDeatil() {
           setData(product);
           setProducts(products);
           setThumbnail(product?.thumbnail || product?.images?.[0] || "");
-          setComment(prev => ({...prev, product_id: product?._id ? product?._id : "" }))
+          setComment(prev => ({ ...prev, product_id: product?._id ? product?._id : "" }))
         }
       } catch (err) {
         console.error(err?.response?.data?.message || err.message);
@@ -85,6 +94,41 @@ function ProductDeatil() {
     };
   }, [slug]);
 
+
+  useEffect(() => {
+    const fetchAPi = async () => {
+      try {
+        const res = await getList(slug);
+
+        if (res?.data?.code) {
+          setPreview(res?.data?.productPreviews || []);
+          setAverage(res?.data?.average);
+          setListRating(res?.data?.ratings);
+        }
+      } catch (err) {
+        console.log(err.response?.data?.message);
+      }
+    };
+
+    if (slug) {
+      fetchAPi();
+    }
+  }, [slug]);
+
+
+  useEffect(() => {
+    const fetchAPi = async () => {
+      try {
+        const res = await getProductPreview();
+        if (res?.data?.code) {
+          setProductPreviewIds(res?.data?.productIds)
+        }
+      } catch (error) {
+        console.log(error.response?.data?.message || "lỗi")
+      }
+    }
+    fetchAPi();
+  }, [])
 
   useEffect(() => {
     const fetchLikes = async () => {
@@ -181,9 +225,22 @@ function ProductDeatil() {
 
 
   const hanldeComment = async () => {
+    setLoadingComment(true)
     try {
-      const res = await commentProduct(comment);
-      if(res.data?.code){
+      if (!comment.rating) {
+        error("Vui lòng chọn sao đánh giá")
+        return;
+      }
+      if (!comment.title) {
+        error("Vui lòng viết tiêu đề đánh giá")
+        return;
+      }
+      if (!comment.comment) {
+        error("Vui lòng viết comment")
+        return;
+      }
+      const res = await commentProduct(comment); 
+      if (res.data?.code) {
         socket.emit("product_preview", comment)
         success(res.data?.message || "Đánh giá thành công")
         console.log("Checkout socket ID:", socket.id)
@@ -191,6 +248,8 @@ function ProductDeatil() {
     } catch (err) {
       error("Đánh giá thất bại")
       console.log(err.response?.data?.message)
+    } finally{
+      setLoadingComment(false)
     }
   }
 
@@ -198,7 +257,7 @@ function ProductDeatil() {
     if (!socket) return;
 
     const handlePreview = (data) => {
-      setPreview(prev => [data, ...prev]);
+      setPreview(prev => [data.data, ...prev]);
     };
 
     socket.on("server_return_product_preview", handlePreview);
@@ -228,6 +287,7 @@ function ProductDeatil() {
 
   return (
     <div className="product-page">
+      {loadinComment && <LoadingOverlay title="Đang gửi comment"/>}
       <SEO
         title={data?.title}
         description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
@@ -282,8 +342,25 @@ function ProductDeatil() {
             <h1>{data?.title || "Tên sản phẩm"}</h1>
 
             <div className="rating">
-              <span className="stars">★★★★★</span>
-              <span>(2 đánh giá)</span>
+              <span className="stars">
+
+                <div className="rating-select">
+                  <span>{average}  </span>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      style={{
+                        fontSize: "11px",
+                        color: star <= average ? "#fadb14" : "#d9d9d9",
+                        marginRight: "4px"
+                      }}
+                    >
+                      {star <= average ? <StarFilled /> : <StarOutlined />}
+                    </span>
+                  ))}
+                </div>
+              </span>
+              <span>({preview.length} đánh giá)</span>
             </div>
 
             <div className="price-row">
@@ -359,51 +436,38 @@ function ProductDeatil() {
             <section className="review-section">
               <div className="review-hero">
                 <div className="review-score">
-                  <div className="review-score__value">4.8</div>
-                  <div className="review-score__stars">★★★★★</div>
-                  <p>Dựa trên 128 đánh giá khách hàng</p>
+                  <div className="review-score__value">{average}</div>
+                  <div className="review-score__stars">
+                    <div className="rating-select">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          style={{
+                            fontSize: "11px",
+                            color: star <= average ? "#fadb14" : "#d9d9d9",
+                            marginRight: "4px"
+                          }}
+                        >
+                          {star <= average ? <StarFilled /> : <StarOutlined />}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <p>Dựa trên {preview.length} đánh giá khách hàng</p>
                 </div>
 
                 <div className="review-bars">
-                  <div className="review-bar">
-                    <span>5 sao</span>
-                    <div className="bar-track">
-                      <div className="bar-fill" style={{ width: "82%" }}></div>
-                    </div>
-                    <strong>82%</strong>
-                  </div>
-
-                  <div className="review-bar">
-                    <span>4 sao</span>
-                    <div className="bar-track">
-                      <div className="bar-fill" style={{ width: "12%" }}></div>
-                    </div>
-                    <strong>12%</strong>
-                  </div>
-
-                  <div className="review-bar">
-                    <span>3 sao</span>
-                    <div className="bar-track">
-                      <div className="bar-fill" style={{ width: "4%" }}></div>
-                    </div>
-                    <strong>4%</strong>
-                  </div>
-
-                  <div className="review-bar">
-                    <span>2 sao</span>
-                    <div className="bar-track">
-                      <div className="bar-fill" style={{ width: "1%" }}></div>
-                    </div>
-                    <strong>1%</strong>
-                  </div>
-
-                  <div className="review-bar">
-                    <span>1 sao</span>
-                    <div className="bar-track">
-                      <div className="bar-fill" style={{ width: "1%" }}></div>
-                    </div>
-                    <strong>1%</strong>
-                  </div>
+                  {listRating && (
+                    listRating.map(item => (
+                      <div className="review-bar">
+                        <span>{item.star} sao</span>
+                        <div className="bar-track">
+                          <div className="bar-fill" style={{ width: `${item.rating}%` }}></div>
+                        </div>
+                        <strong>{item.rating || 0}%</strong>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -416,7 +480,7 @@ function ProductDeatil() {
                           <div className="review-avatar">L</div>
                           <div>
                             <strong>{preview_user.user_name}</strong>
-                            <span>Đánh giá của bạn</span>
+                            <span>Đánh giá của bạn {formatTimeAgo(preview_user.createdAt)}</span>
                             {preview_user?.update && <span> - Đã chỉnh sửa</span>}
                           </div>
                         </div>
@@ -440,7 +504,7 @@ function ProductDeatil() {
 
                       <h4>{preview_user.title}</h4>
                       <p>
-                       {preview_user.comment}
+                        {preview_user.comment}
                       </p>
 
                       <div className="review-tags">
@@ -453,7 +517,7 @@ function ProductDeatil() {
                 }
 
                 <div className="review-grid">
-                  {preview_people && 
+                  {preview_people &&
                     preview_people.map(item => (
                       <div className="review-card">
                         <div className="review-card__top">
@@ -461,7 +525,7 @@ function ProductDeatil() {
                             <div className="review-avatar alt">A</div>
                             <div>
                               <strong>{item.user_name}</strong>
-                              <span>2 ngày trước</span>
+                              <span>{formatTimeAgo(item.createdAt)} {`${item.status === true ? "- Đã chỉnh sửa" : ""}`}</span>
                             </div>
                           </div>
                           <div className="review-stars">
@@ -481,7 +545,7 @@ function ProductDeatil() {
                             </div>
                           </div>
                         </div>
-
+                        <h4>{item.title}</h4>
                         <p>
                           {item.comment}
                         </p>
@@ -491,48 +555,52 @@ function ProductDeatil() {
                 </div>
               </div>
 
-              <div className="review-form">
-                <div className="review-form__head">
-                  <h3>Chia sẻ cảm nhận của bạn</h3>
-                  <div className="review-form__stars">
-                    <div className="rating-select">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span
-                          key={star}
-                          onClick={() => {
-                            setComment(prev => ({...prev, rating: star === comment.rating ? null : star}))
-                          }}
-                          style={{
-                            cursor: "pointer",
-                            fontSize: "20px",
-                            color: star <= comment.rating ? "#fadb14" : "#d9d9d9",
-                            marginRight: "4px"
-                          }}
-                        >
-                          {star <= comment.rating ? <StarFilled /> : <StarOutlined />}
-                        </span>
-                      ))}
+              {productPreviewIds.includes(data?._id) && !preview_user ?
+                (
+                  <div className="review-form">
+                    <div className="review-form__head">
+                      <h3>Chia sẻ cảm nhận của bạn</h3>
+                      <div className="review-form__stars">
+                        <div className="rating-select">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                              key={star}
+                              onClick={() => {
+                                setComment(prev => ({ ...prev, rating: star === comment.rating ? null : star }))
+                              }}
+                              style={{
+                                cursor: "pointer",
+                                fontSize: "20px",
+                                color: star <= comment.rating ? "#fadb14" : "#d9d9d9",
+                                marginRight: "4px"
+                              }}
+                            >
+                              {star <= comment.rating ? <StarFilled /> : <StarOutlined />}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="review-form__group">
+                      <input
+                        type="text"
+                        placeholder="Tên của bạn"
+                        value={comment.user_name}
+                        readOnly
+                        name="user_name"
+                      />
+                      <input type="text" placeholder="Tiêu đề đánh giá" onChange={e => setComment(prev => ({ ...prev, title: e.target.value }))} value={comment.title} />
+                    </div>
+
+                    <textarea placeholder="Hãy chia sẻ trải nghiệm thực tế sau khi sử dụng sản phẩm..." onChange={e => setComment(prev => ({ ...prev, comment: e.target.value }))} value={comment.comment} />
+
+                    <button type="button" className="btn btn--primary" onClick={hanldeComment}>
+                      Gửi đánh giá
+                    </button>
                   </div>
-                </div>
-
-                <div className="review-form__group">
-                  <input
-                    type="text"
-                    placeholder="Tên của bạn"
-                    value={comment.user_name}
-                    readOnly
-                    name="user_name"
-                  />
-                  <input type="text" placeholder="Tiêu đề đánh giá"  onChange={e => setComment(prev => ({...prev, title: e.target.value}))} value={comment.title}/>
-                </div>
-
-                <textarea placeholder="Hãy chia sẻ trải nghiệm thực tế sau khi sử dụng sản phẩm..." onChange={e => setComment(prev => ({...prev, comment: e.target.value}))} value={comment.comment}/>
-
-                <button type="button" className="btn btn--primary" onClick={hanldeComment}>
-                  Gửi đánh giá
-                </button>
-              </div>
+                ) : ""
+              }
             </section>
           )
         }

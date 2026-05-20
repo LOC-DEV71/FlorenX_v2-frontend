@@ -192,8 +192,8 @@ function Sale() {
 
                                                     <div className="product-card__meta">
                                                         <div className="left">
-                                                            <span className="rating">★ 4.8</span>
-                                                            <span className="reviews">(120 reviews)</span>
+                                                            <span className="rating">★ {item.averageRating.toFixed(1)}</span>
+                                                            <span className="reviews">({item.totalReviews} reviews)</span>
                                                         </div>
 
                                                         <div

@@ -32,6 +32,7 @@ import InventoryImportList from "../pages/admin/Products/InventoryImport";
 import InventoryExportCreate from "../pages/admin/Products/InventoryExportCreate";
 import InventoryExportList from "../pages/admin/Products/InventoryExport";
 import Orders from "../pages/admin/Order/Order.index";
+import Users from "../pages/admin/Uses/Users.index";
 
 function AdminRoutes() {
   return (
@@ -162,7 +163,16 @@ function AdminRoutes() {
 
 
         {/* Order */}
-        <Route path="orders" element={<Orders />} />
+        <Route element={<PrivateRoutePermission permission="view_orders"/>}>
+          <Route path="orders" element={<Orders />} />
+        </Route>
+
+
+        {/* users */}
+        <Route element={<PrivateRoutePermission permission="view_orders"/>}>
+          <Route path="users" element={<Users />} />
+        </Route>
+        
 
         {/* cskh */}
         <Route path="chat" element={<CustomerSupportChat />} />

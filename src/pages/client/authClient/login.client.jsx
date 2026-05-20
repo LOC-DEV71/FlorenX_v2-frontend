@@ -44,7 +44,7 @@ function LoginClient() {
             }
         } catch (err) {
             console.error(err);
-            error("Có lỗi xảy ra khi đăng nhập Google");
+            error(err.response?.data?.message ||"Có lỗi xảy ra khi đăng nhập Google");
         } finally {
             setLoadinggg(false)
         }

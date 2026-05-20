@@ -1,0 +1,76 @@
+.loading-corner {
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  z-index: 999;
+  min-width: 240px;
+  max-width: 320px;
+  overflow: hidden;
+
+  background: rgba(22, 163, 74, 0.95); /* xanh lá dịu */
+  border-radius: 14px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Thanh sáng chạy phía trên */
+.loading-corner-bar {
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.95),
+    transparent
+  );
+  animation: loadingCornerBar 1.2s linear infinite;
+}
+
+@keyframes loadingCornerBar {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+/* Nội dung */
+.loading-corner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+/* Spinner */
+.loading-corner-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: loadingCornerSpin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes loadingCornerSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Text */
+.loading-corner-content span {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}

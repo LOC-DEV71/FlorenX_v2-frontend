@@ -9,6 +9,7 @@ import TinyEditor from "../../../utils/tinyEditor";
 import { createProductCategory, getListCategory } from "../../../services/admin/product.category.admin";
 import { success, error } from "../../../utils/notift";
 import { renderCategoryOptions } from "../../../utils/buildTree";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 
 function CreateCategory() {
     const [form, setForm] = useState({
@@ -24,6 +25,7 @@ function CreateCategory() {
     const [thumbnail, setThumbnail] = useState(null);
     const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const fileInputRef = useRef(null);
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         try {
@@ -41,6 +43,7 @@ function CreateCategory() {
 
     const handleCreateCategory = async () => {
         try {
+            setLoading(true)
             const formData = new FormData();
 
             Object.keys(form).forEach((key) => {
@@ -60,10 +63,13 @@ function CreateCategory() {
             }
         } catch (err) {
             error(err.response?.data.message);
+        } finally{
+            setLoading(false)
         }
     };
     return (
         <div className="create-category-page">
+            {loading && <LoadingOverlay title="Đang tạo danh mục"/>}
             <SEO title="Tạo danh mục" />
 
             <div className="create-category-page__header">

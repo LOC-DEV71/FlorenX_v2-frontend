@@ -8,6 +8,7 @@ import { error, success } from "../../../utils/notift";
 import { useNavigate, useParams } from "react-router-dom";
 import { getListCategory } from "../../../services/admin/product.category.admin";
 import { renderCategoryOptions } from "../../../utils/buildTree";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 
 function UpdateProduct() {
 
@@ -32,6 +33,7 @@ function UpdateProduct() {
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         try {
@@ -151,7 +153,7 @@ function UpdateProduct() {
     const handleSubmit = async () => {
 
         try {
-
+            setLoading(true)
             const formData = new FormData();
 
             Object.keys(form).forEach(key => {
@@ -189,6 +191,8 @@ function UpdateProduct() {
 
         } catch (err) {
             console.log(err);
+        } finally{
+            setLoading(false)
         }
 
     };
@@ -196,7 +200,7 @@ function UpdateProduct() {
     return (
 
         <div className="create-product">
-
+            {loading && <LoadingOverlay title="Đang cập nhật sản phẩm"/>}
             <SEO title="Cập nhật sản phẩm" />
 
             <div className="page-header">
