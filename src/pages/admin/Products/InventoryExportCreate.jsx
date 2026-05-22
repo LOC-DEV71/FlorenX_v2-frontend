@@ -7,6 +7,15 @@ import { generateInventoryRefId } from "../../../utils/generateInventoryRefId";
 import { getWarehouseList } from "../../../services/admin/warehouse.service";
 import { getListExport } from "../../../services/admin/product.admin.service";
 import { inventoryExport } from "../../../services/admin/InventoryTransaction.service";
+import {
+    MdArrowBack,
+    MdAdd,
+    MdClose,
+    MdWarehouse,
+    MdOutlineInventory2,
+    MdCheckCircleOutline,
+    MdErrorOutline,
+} from "react-icons/md";
 
 function InventoryExportCreate() {
     const [warehouses, setWarehouses] = useState([]);
@@ -18,15 +27,11 @@ function InventoryExportCreate() {
         ref_code: generateInventoryRefId("XK"),
         export_date: new Date().toISOString().slice(0, 10),
         customer_name: "",
-        note: ""
+        note: "",
     });
 
     const [items, setItems] = useState([
-        {
-            product_id: "",
-            stock: 1,
-            available_stock: 0
-        }
+        { product_id: "", stock: 1, available_stock: 0 },
     ]);
 
     useEffect(() => {
@@ -41,7 +46,6 @@ function InventoryExportCreate() {
                 setLoading(false);
             }
         };
-
         fetchProducts();
     }, [form.warehouse_id]);
 
@@ -54,21 +58,13 @@ function InventoryExportCreate() {
                 console.log(err?.response?.data?.message);
             }
         };
-
         fetchWarehouses();
     }, []);
 
     const handleChangeForm = (key, value) => {
         setForm((prev) => ({ ...prev, [key]: value }));
-
         if (key === "warehouse_id") {
-            setItems([
-                {
-                    product_id: "",
-                    stock: 1,
-                    available_stock: 0
-                }
-            ]);
+            setItems([{ product_id: "", stock: 1, available_stock: 0 }]);
         }
     };
 
@@ -76,34 +72,17 @@ function InventoryExportCreate() {
         setItems((prev) =>
             prev.map((item, i) => {
                 if (i !== index) return item;
-
                 if (key === "product_id") {
-                    const selectedProduct = products.find((p) => p._id === value);
-
-                    return {
-                        ...item,
-                        product_id: value,
-                        available_stock: selectedProduct?.stock || 0
-                    };
+                    const selected = products.find((p) => p._id === value);
+                    return { ...item, product_id: value, available_stock: selected?.stock || 0 };
                 }
-
-                return {
-                    ...item,
-                    [key]: key === "stock" ? Number(value) : value
-                };
+                return { ...item, [key]: key === "stock" ? Number(value) : value };
             })
         );
     };
 
     const handleAddItem = () => {
-        setItems((prev) => [
-            ...prev,
-            {
-                product_id: "",
-                stock: 1,
-                available_stock: 0
-            }
-        ]);
+        setItems((prev) => [...prev, { product_id: "", stock: 1, available_stock: 0 }]);
     };
 
     const handleRemoveItem = (index) => {
@@ -117,50 +96,22 @@ function InventoryExportCreate() {
     );
 
     const validateForm = () => {
-        if (!form.warehouse_id) {
-            error("Vui lòng chọn kho xuất");
-            return false;
-        }
-
+        if (!form.warehouse_id) { error("Vui lòng chọn kho xuất"); return false; }
         for (const item of items) {
-            if (!item.product_id) {
-                error("Vui lòng chọn sản phẩm");
-                return false;
-            }
-
-            if (!item.stock || item.stock <= 0) {
-                error("Số lượng xuất phải lớn hơn 0");
-                return false;
-            }
-
-            if (item.stock > item.available_stock) {
-                error("Có sản phẩm xuất vượt quá tồn kho");
-                return false;
-            }
+            if (!item.product_id) { error("Vui lòng chọn sản phẩm"); return false; }
+            if (!item.stock || item.stock <= 0) { error("Số lượng xuất phải lớn hơn 0"); return false; }
+            if (item.stock > item.available_stock) { error("Có sản phẩm xuất vượt quá tồn kho"); return false; }
         }
-
         return true;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
-
         try {
             setLoading(true);
-
-            const payload = {
-                ...form,
-                items
-            };
-
-            const res = await inventoryExport(payload);
-            if(res.data?.code){
-                success(res.data?.message || "Tạo phiếu xuất kho thành công");
-            }
-
-            
+            const res = await inventoryExport({ ...form, items });
+            if (res.data?.code) success(res.data?.message || "Tạo phiếu xuất kho thành công");
         } catch (err) {
             error(err?.response?.data?.message || "Tạo phiếu xuất thất bại");
         } finally {
@@ -169,49 +120,60 @@ function InventoryExportCreate() {
     };
 
     return (
-        <div className="inventory-page">
+        <div className="iec-page">
             <SEO title="Xuất kho" />
 
-            <div className="inventory-page__header">
-                <div>
-                    <h2>Xuất kho</h2>
-                    <p>Tạo phiếu xuất và trừ tồn kho sản phẩm</p>
+            <div className="iec-page__header">
+                <div className="iec-page__title-group">
+                    <div className="iec-page__icon-wrap">
+                        <MdOutlineInventory2 />
+                    </div>
+                    <div>
+                        <h2>Xuất kho</h2>
+                        <p>Tạo phiếu xuất và trừ tồn kho sản phẩm</p>
+                    </div>
                 </div>
 
-                <div className="inventory-page__actions">
-                    <Link to="/admin/products" className="btn btn-light">
+                <div className="iec-page__actions">
+                    <Link to="/admin/products" className="iec-btn-back">
+                        <MdArrowBack />
                         Quay lại
                     </Link>
-                    <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
+                    <button
+                        className="iec-btn iec-btn--primary"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
                         {loading ? "Đang lưu..." : "Lưu phiếu xuất"}
                     </button>
                 </div>
             </div>
 
-            <form className="inventory-layout" onSubmit={handleSubmit}>
-                <div className="inventory-main-card">
-                    <div className="card">
-                        <div className="card__header">
+            <form className="iec-layout" onSubmit={handleSubmit}>
+                <div className="iec-main">
+                    <section className="iec-card">
+                        <div className="iec-card__header">
                             <h3>Thông tin phiếu xuất</h3>
                         </div>
 
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label>Kho xuất</label>
+                        <div className="iec-form-grid">
+                            <div className="iec-form-group">
+                                <label>
+                                    <MdWarehouse className="iec-label-icon" />
+                                    Kho xuất
+                                </label>
                                 <select
                                     value={form.warehouse_id}
                                     onChange={(e) => handleChangeForm("warehouse_id", e.target.value)}
                                 >
                                     <option value="">-- Chọn kho --</option>
                                     {warehouses.map((wh) => (
-                                        <option key={wh._id} value={wh._id}>
-                                            {wh.name}
-                                        </option>
+                                        <option key={wh._id} value={wh._id}>{wh.name}</option>
                                     ))}
                                 </select>
                             </div>
 
-                            <div className="form-group">
+                            <div className="iec-form-group">
                                 <label>Mã phiếu</label>
                                 <input
                                     value={form.ref_code}
@@ -219,7 +181,7 @@ function InventoryExportCreate() {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="iec-form-group">
                                 <label>Ngày xuất</label>
                                 <input
                                     type="date"
@@ -228,8 +190,8 @@ function InventoryExportCreate() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label>Mã đơn / Đơn vị vận chuyển</label>
+                            <div className="iec-form-group">
+                                <label>Mã đơn / Đơn vị vận chuyển</label>
                                 <input
                                     value={form.customer_name}
                                     onChange={(e) => handleChangeForm("customer_name", e.target.value)}
@@ -237,7 +199,7 @@ function InventoryExportCreate() {
                                 />
                             </div>
 
-                            <div className="form-group form-group--full">
+                            <div className="iec-form-group iec-form-group--full">
                                 <label>Ghi chú</label>
                                 <textarea
                                     rows="4"
@@ -246,106 +208,112 @@ function InventoryExportCreate() {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div className="card">
-                        <div className="card__header card__header--between">
+                    <section className="iec-card">
+                        <div className="iec-card__header iec-card__header--between">
                             <h3>Sản phẩm xuất</h3>
-                            <button type="button" className="btn btn-success" onClick={handleAddItem}>
-                                + Thêm sản phẩm
+                            <button type="button" className="iec-btn iec-btn--success" onClick={handleAddItem}>
+                                <MdAdd />
+                                Thêm sản phẩm
                             </button>
                         </div>
 
-                        <div className="inventory-table">
-                            <div className="inventory-table__head">
+                        <div className="iec-table">
+                            <div className="iec-table__head">
                                 <div>Sản phẩm</div>
                                 <div>Tồn hiện tại</div>
                                 <div>Số lượng xuất</div>
                                 <div>Trạng thái</div>
-                                <div>Thao tác</div>
+                                <div></div>
                             </div>
 
-                            {items.map((item, index) => (
-                                <div className="inventory-table__row" key={index}>
-                                    <div>
-                                        <select
-                                            value={item.product_id}
-                                            onChange={(e) =>
-                                                handleChangeItem(index, "product_id", e.target.value)
-                                            }
-                                        >
-                                            <option value="">-- Chọn sản phẩm --</option>
-                                            {products.map((product) => (
-                                                <option key={product._id} value={product._id}>
-                                                    {product.title} - {product.sku}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                            {items.map((item, index) => {
+                                const isOverStock = item.stock > item.available_stock;
+                                return (
+                                    <div className="iec-table__row" key={index}>
+                                        <div>
+                                            <select
+                                                value={item.product_id}
+                                                onChange={(e) => handleChangeItem(index, "product_id", e.target.value)}
+                                            >
+                                                <option value="">-- Chọn sản phẩm --</option>
+                                                {products.map((product) => (
+                                                    <option key={product._id} value={product._id}>
+                                                        {product.title} - {product.sku}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div className="stock-number">{item.available_stock}</div>
+                                        <div className="iec-stock-number">{item.available_stock}</div>
 
-                                    <div>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={item.stock}
-                                            onChange={(e) =>
-                                                handleChangeItem(index, "stock", e.target.value)
-                                            }
-                                        />
-                                    </div>
+                                        <div>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={item.stock}
+                                                onChange={(e) => handleChangeItem(index, "stock", e.target.value)}
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <span
-                                            className={`stock-badge ${
-                                                item.stock > item.available_stock
-                                                    ? "stock-badge--danger"
-                                                    : "stock-badge--ok"
-                                            }`}
-                                        >
-                                            {item.stock > item.available_stock ? "Vượt tồn" : "Hợp lệ"}
-                                        </span>
-                                    </div>
+                                        <div>
+                                            <span className={`iec-badge ${isOverStock ? "iec-badge--danger" : "iec-badge--ok"}`}>
+                                                {isOverStock
+                                                    ? <><MdErrorOutline /> Vượt tồn</>
+                                                    : <><MdCheckCircleOutline /> Hợp lệ</>
+                                                }
+                                            </span>
+                                        </div>
 
-                                    <div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger-outline"
-                                            onClick={() => handleRemoveItem(index)}
-                                        >
-                                            Xoá
-                                        </button>
+                                        <div className="iec-table__action">
+                                            <button
+                                                type="button"
+                                                className="iec-btn-remove"
+                                                onClick={() => handleRemoveItem(index)}
+                                                title="Xoá dòng"
+                                            >
+                                                <MdClose />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                    </div>
+                    </section>
                 </div>
 
-                <div className="inventory-side-card">
-                    <div className="card summary-card">
+                <aside className="iec-side">
+                    <section className="iec-card iec-summary">
                         <h3>Tổng kết phiếu xuất</h3>
 
-                        <div className="summary-row">
+                        <div className="iec-summary__row">
                             <span>Số dòng sản phẩm</span>
                             <strong>{items.length}</strong>
                         </div>
-
-                        <div className="summary-row">
+                        <div className="iec-summary__row">
                             <span>Tổng số lượng xuất</span>
                             <strong>{totalStock}</strong>
                         </div>
 
-                        <div className="summary-note">
-                            Khi lưu phiếu:
+                        <div className="iec-summary__note">
+                            <strong>Khi lưu phiếu:</strong>
                             <ul>
                                 <li>Stock sẽ giảm theo từng sản phẩm</li>
                                 <li>InventoryTransaction sẽ ghi type = export hoặc sale</li>
                             </ul>
                         </div>
-                    </div>
-                </div>
+
+                        <button
+                            type="button"
+                            className="iec-btn iec-btn--primary iec-btn--block iec-btn--lg"
+                            onClick={handleSubmit}
+                            disabled={loading}
+                        >
+                            {loading ? "Đang lưu..." : "Lưu phiếu xuất"}
+                        </button>
+                    </section>
+                </aside>
             </form>
         </div>
     );

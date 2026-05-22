@@ -8,3 +8,7 @@ export const readNotification = (id) => {
   return axiosAdmin.post(`/notifications/read/${id}`);
 };
 
+export const ReadAllNotification = (id) => {
+  return axiosAdmin.post(`/notifications/read-all`);
+};
+

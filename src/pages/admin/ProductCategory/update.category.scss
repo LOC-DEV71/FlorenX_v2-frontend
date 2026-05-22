@@ -1,8 +1,7 @@
-// Create Category Page Styles
+// Update Category Page Styles
+// Mirrors create.category.scss structure with uc- prefix
 
-.cc-page {
-  padding: 0;
-
+.uc-page {
   &__header {
     display: flex;
     align-items: flex-start;
@@ -35,7 +34,7 @@
   }
 }
 
-.cc-back-btn {
+.uc-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -61,22 +60,21 @@
   }
 }
 
-.cc-layout {
+.uc-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: 20px;
   align-items: start;
 }
 
-.cc-main,
-.cc-sidebar {
+.uc-main,
+.uc-sidebar {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-// Card
-.cc-card {
+.uc-card {
   background: #fff;
   border: 1px solid #e8edf3;
   border-radius: 12px;
@@ -103,14 +101,13 @@
   }
 }
 
-// Form grid
-.cc-form-grid {
+.uc-form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
 }
 
-.cc-form-group {
+.uc-form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -165,8 +162,7 @@
   }
 }
 
-// Upload
-.cc-upload-zone {
+.uc-upload-zone {
   border: 1.5px dashed #dde3ec;
   border-radius: 10px;
   padding: 28px 20px;
@@ -212,7 +208,7 @@
   }
 }
 
-.cc-upload-btn {
+.uc-upload-btn {
   display: inline-block;
   background: #3273ff;
   color: #fff;
@@ -228,11 +224,11 @@
   }
 }
 
-.cc-file-input {
+.uc-file-input {
   display: none;
 }
 
-.cc-thumb-preview {
+.uc-thumb-preview {
   position: relative;
   width: 160px;
 
@@ -264,21 +260,16 @@
     &:hover {
       background: #dc2626;
     }
-
-    &--hidden {
-      display: none;
-    }
   }
 }
 
-// Toggle list
-.cc-toggle-list {
+.uc-toggle-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.cc-toggle-item {
+.uc-toggle-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -317,20 +308,18 @@
   }
 }
 
-// Actions
-.cc-actions {
+.uc-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.cc-sticky {
+.uc-sticky {
   position: sticky;
   top: 20px;
 }
 
-// Buttons
-.cc-btn {
+.uc-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -380,34 +369,33 @@
   }
 }
 
-// Responsive
 @media (max-width: 1024px) {
-  .cc-layout {
+  .uc-layout {
     grid-template-columns: 1fr;
   }
 
-  .cc-sticky {
+  .uc-sticky {
     position: static;
   }
 }
 
 @media (max-width: 768px) {
-  .cc-page__header {
+  .uc-page__header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .cc-form-grid {
+  .uc-form-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 600px) {
-  .cc-card {
+  .uc-card {
     padding: 16px;
   }
 
-  .cc-upload-zone {
+  .uc-upload-zone {
     padding: 20px 14px;
   }
 }

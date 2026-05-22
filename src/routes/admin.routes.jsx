@@ -33,6 +33,7 @@ import InventoryExportCreate from "../pages/admin/Products/InventoryExportCreate
 import InventoryExportList from "../pages/admin/Products/InventoryExport";
 import Orders from "../pages/admin/Order/Order.index";
 import Users from "../pages/admin/Uses/Users.index";
+import ProductsDetail from "../pages/admin/Products/poductsDetail";
 
 function AdminRoutes() {
   return (
@@ -78,6 +79,9 @@ function AdminRoutes() {
         {/* products */}
         <Route element={<PrivateRoutePermission permission="view_products" />}>
           <Route path="products" element={<Products />} />
+        </Route>
+        <Route element={<PrivateRoutePermission permission="view_products" />}>
+          <Route path="products/detail/:slug" element={<ProductsDetail />} />
         </Route>
 
         <Route element={<PrivateRoutePermission permission="update_products" />}>

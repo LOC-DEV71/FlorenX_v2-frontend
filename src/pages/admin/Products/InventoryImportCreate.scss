@@ -2,81 +2,110 @@
     box-sizing: border-box;
 }
 
-.inventory-import-page {
-    padding: 20px;
-    background: #f8fafc;
+// ─── Page ────────────────────────────────────────────────────────────────────
+.iic-page {
+    padding: 24px;
+    background: #f4f6fb;
     min-height: 100%;
 
     &__header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
         gap: 16px;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
+    }
+
+    &__title-group {
+        display: flex;
+        align-items: center;
+        gap: 14px;
 
         h2 {
             margin: 0;
             font-size: 22px;
             font-weight: 700;
             color: #0f172a;
+            line-height: 1.2;
         }
 
         p {
-            margin: 4px 0 0;
+            margin: 3px 0 0;
             color: #64748b;
-            font-size: 14px;
+            font-size: 13px;
         }
+    }
 
-        a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #111827;
-            background: white;
-            border: 1px solid #e5e7eb;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: 0.2s ease;
-
-            &:hover {
-                background: #f9fafb;
-            }
-
-            svg {
-                font-size: 18px;
-            }
-        }
+    &__icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
     }
 }
 
-.inventory-import-layout {
+// ─── Back button ─────────────────────────────────────────────────────────────
+.iic-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: #374151;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+
+    svg {
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+}
+
+// ─── Layout ──────────────────────────────────────────────────────────────────
+.iic-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 300px;
     gap: 20px;
     align-items: start;
 }
 
-.inventory-import-main,
-.inventory-import-side {
+.iic-main,
+.iic-side {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.inventory-card {
-    background: #ffffff;
-    border: 1px solid #eef2f7;
+// ─── Card ────────────────────────────────────────────────────────────────────
+.iic-card {
+    background: #fff;
+    border: 1px solid #e8edf5;
     border-radius: 16px;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
 
     &__header {
-        padding: 18px 20px 0;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid #f1f5f9;
 
         h3 {
             margin: 0;
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             color: #0f172a;
         }
@@ -85,19 +114,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 14px;
         }
     }
 }
 
-.inventory-form-grid {
+// ─── Form ────────────────────────────────────────────────────────────────────
+.iic-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
     padding: 20px;
 }
 
-.inventory-form-group {
+.iic-form-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -107,39 +136,55 @@
     }
 
     label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
         font-size: 12px;
         font-weight: 600;
         color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
     }
 
     input,
     select,
     textarea {
         width: 100%;
-        min-height: 44px;
+        min-height: 42px;
         border-radius: 10px;
         border: 1px solid #e2e8f0;
         background: #f8fafc;
-        padding: 10px 14px;
+        padding: 9px 13px;
         font-size: 14px;
         color: #0f172a;
         outline: none;
-        transition: all 0.2s ease;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        appearance: auto;
 
         &:focus {
             background: #fff;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        &::placeholder {
+            color: #b0bec5;
         }
     }
 
     textarea {
-        min-height: 100px;
+        min-height: 96px;
         resize: vertical;
     }
 }
 
-.inventory-product-table {
+.iic-label-icon {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+// ─── Product Table ────────────────────────────────────────────────────────────
+.iic-table {
     width: 100%;
 
     &__head,
@@ -148,37 +193,42 @@
         grid-template-columns: minmax(260px, 2fr) repeat(4, 1fr);
         gap: 12px;
         align-items: center;
-        padding: 14px 20px;
+        padding: 12px 20px;
     }
 
     &__head {
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 700;
         color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 
     &__row {
-        border-bottom: 1px solid #f1f5f9;
+        border-top: 1px solid #f1f5f9;
+        transition: background 0.12s;
 
         &:hover {
-            background: #f9fafb;
+            background: #fafbfd;
         }
 
         input,
         select {
             width: 100%;
-            min-height: 40px;
+            min-height: 38px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            background: #fff;
-            padding: 8px 10px;
+            background: #f8fafc;
+            padding: 7px 10px;
             font-size: 13px;
+            color: #0f172a;
             outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
 
             &:focus {
                 border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
         }
     }
@@ -187,16 +237,23 @@
         display: flex;
         justify-content: center;
     }
+
+    &__empty {
+        padding: 16px 20px;
+        font-size: 13px;
+        color: #94a3b8;
+    }
 }
 
-.inventory-product-cell {
+// ─── Product Cell ─────────────────────────────────────────────────────────────
+.iic-product-cell {
     display: flex;
     align-items: center;
     gap: 10px;
 
     &__thumb {
-        width: 48px;
-        height: 48px;
+        width: 46px;
+        height: 46px;
         border-radius: 10px;
         overflow: hidden;
         border: 1px solid #e5e7eb;
@@ -211,134 +268,90 @@
     }
 
     &__placeholder {
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 11px;
-        color: #94a3b8;
+        font-size: 10px;
+        font-weight: 600;
+        color: #cbd5e1;
     }
 
     &__info {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
+        min-width: 0;
 
         strong {
-            font-size: 14px;
+            font-size: 13px;
             color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         span {
-            font-size: 12px;
+            font-size: 11px;
             color: #94a3b8;
         }
     }
 }
 
-.inventory-money {
-    font-size: 14px;
+// ─── Subtotal ─────────────────────────────────────────────────────────────────
+.iic-subtotal {
+    font-size: 13px;
     font-weight: 600;
     color: #0f172a;
 }
 
-.inventory-summary-card {
-    padding: 20px;
-
-    h3 {
-        margin: 0 0 16px;
-        font-size: 18px;
-        font-weight: 700;
-    }
-}
-
-.inventory-summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    font-size: 14px;
-    border-bottom: 1px solid #f1f5f9;
-
-    span {
-        color: #64748b;
-    }
-
-    strong {
-        color: #0f172a;
-    }
-}
-
-.inventory-summary-total {
-    padding: 16px 0;
-
-    span {
-        font-size: 12px;
-        color: #3b82f6;
-        font-weight: 600;
-    }
-
-    h2 {
-        margin: 4px 0;
-        font-size: 28px;
-        font-weight: 800;
-        color: #0f172a;
-    }
-
-    small {
-        font-size: 14px;
-        color: #94a3b8;
-    }
-}
-
-.inventory-summary-note {
-    margin-top: 12px;
-    padding: 12px;
-    border-radius: 10px;
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    font-size: 13px;
-    color: #9a3412;
-}
-
-.inventory-quick-actions {
-    padding: 14px;
-}
-
-.inventory-quick-btn {
-    width: 100%;
-    min-height: 48px;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    font-size: 14px;
-    font-weight: 600;
+// ─── Remove button ────────────────────────────────────────────────────────────
+.iic-btn-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: #fef2f2;
+    color: #ef4444;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    transition: background 0.15s, color 0.15s;
 
     &:hover {
-        background: #f8fafc;
+        background: #fee2e2;
+        color: #dc2626;
     }
 }
 
-.inventory-empty {
-    padding: 0 20px 16px;
-    font-size: 13px;
-    color: #64748b;
-}
-
-.btn {
-    min-height: 42px;
+// ─── Buttons ──────────────────────────────────────────────────────────────────
+.iic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
     border-radius: 10px;
     padding: 0 16px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     border: none;
-    transition: all 0.2s ease;
+    transition: background 0.15s, transform 0.1s;
+
+    svg {
+        font-size: 17px;
+        flex-shrink: 0;
+    }
 
     &:hover {
         transform: translateY(-1px);
     }
 
-    &.btn-primary {
+    &--primary {
         background: #3b82f6;
         color: #fff;
 
@@ -347,7 +360,7 @@
         }
     }
 
-    &.btn-soft-primary {
+    &--soft {
         background: #eff6ff;
         color: #2563eb;
 
@@ -355,54 +368,141 @@
             background: #dbeafe;
         }
     }
-}
 
-.btn-block {
-    width: 100%;
-}
+    &--block {
+        width: 100%;
+    }
 
-.btn-lg {
-    min-height: 52px;
-    font-size: 15px;
-}
-
-.btn-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    font-size: 18px;
-}
-
-.btn-icon-danger {
-    background: #fef2f2;
-    color: #dc2626;
-
-    &:hover {
-        background: #fee2e2;
+    &--lg {
+        min-height: 50px;
+        font-size: 14px;
+        border-radius: 12px;
     }
 }
 
+// ─── Summary Card ─────────────────────────────────────────────────────────────
+.iic-summary {
+    padding: 20px;
+
+    h3 {
+        margin: 0 0 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    &__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+
+        span {
+            color: #64748b;
+        }
+
+        strong {
+            color: #0f172a;
+        }
+    }
+
+    &__total {
+        padding: 16px 0 12px;
+
+        span {
+            font-size: 11px;
+            font-weight: 700;
+            color: #3b82f6;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h2 {
+            margin: 4px 0 0;
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+        }
+
+        small {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    }
+
+    &__note {
+        margin: 4px 0 16px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        font-size: 12px;
+        color: #9a3412;
+        line-height: 1.6;
+    }
+}
+
+// ─── Quick Actions ────────────────────────────────────────────────────────────
+.iic-quick-actions {
+    padding: 12px;
+}
+
+.iic-quick-btn {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.15s, border-color 0.15s;
+
+    svg {
+        font-size: 17px;
+        color: #64748b;
+    }
+
+    &:hover {
+        background: #f8fafc;
+        border-color: #d1d5db;
+    }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 1100px) {
-    .inventory-import-layout {
+    .iic-layout {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 768px) {
-    .inventory-import-page {
+    .iic-page {
         padding: 14px;
+
+        &__header {
+            flex-wrap: wrap;
+        }
     }
 
-    .inventory-form-grid {
+    .iic-form-grid {
         grid-template-columns: 1fr;
     }
 
-    .inventory-product-table {
+    .iic-table {
         overflow-x: auto;
 
         &__head,
         &__row {
-            min-width: 780px;
+            min-width: 760px;
         }
     }
 }

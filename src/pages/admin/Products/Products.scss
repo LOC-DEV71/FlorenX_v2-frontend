@@ -296,7 +296,7 @@
 
 .admin-table-header {
     display: grid;
-    grid-template-columns: 50px 300px repeat(6, 1fr) 150px;
+    grid-template-columns: 50px 300px repeat(6, 1fr) 200px;
     padding: 14px;
     font-weight: 600;
     background: #fafafa;
@@ -310,7 +310,7 @@
 
 .admin-table-row {
     display: grid;
-    grid-template-columns: 50px 300px repeat(6, 1fr) 150px;
+    grid-template-columns: 50px 300px repeat(6, 1fr) 200px;
     padding: 14px;
     align-items: center;
     border-bottom: 1px solid #f3f3f3;

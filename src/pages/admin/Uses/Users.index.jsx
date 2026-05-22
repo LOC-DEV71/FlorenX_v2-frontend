@@ -522,7 +522,7 @@ function Users() {
                 </div>
               </div>
 
-              <div>{item.phone}</div>
+              <div>{item.phone ? item.phone : "—"}</div>
 
               <div>
                 <span className={`role member-${item.member}`}>
@@ -544,6 +544,9 @@ function Users() {
                 </button>
                 <button className="delete" onClick={(e) => handleDeleteOne(e, item._id)}>
                   Delete
+                </button>
+                <button className="delete">
+                  Ban
                 </button>
               </div>
             </div>

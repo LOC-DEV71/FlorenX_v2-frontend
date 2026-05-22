@@ -31,7 +31,7 @@ import { CiUser } from "react-icons/ci";
 import { Badge, Popover, List, Typography } from "antd";
 import { BsBellFill } from "react-icons/bs";
 import formatTimeAgo from "../../utils/formatTimeAgo";
-import { getList, readNotification } from "../../services/admin/notifications.service";
+import { getList, ReadAllNotification, readNotification } from "../../services/admin/notifications.service";
 
 
 
@@ -191,8 +191,23 @@ const MainLayoutAdmin = () => {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+  const markAllRead = async () => {
+    const oldNotifications = notifications;
+
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, is_read: true }))
+    );
+
+    try {
+      const res = await ReadAllNotification();
+
+      if (!res?.data?.code) {
+        setNotifications(oldNotifications);
+      }
+    } catch (error) {
+      setNotifications(oldNotifications);
+      console.log(error.response?.data?.message);
+    }
   };
 
   const handleRead = async (id) => {

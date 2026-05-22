@@ -16,7 +16,16 @@ import { useSelector } from "react-redux";
 import { formatCustom } from "../../../utils/formatCustomDate";
 import formatTimeAgo from "../../../utils/formatTimeAgo";
 import LoadingOverlay from "../../../utils/LoadingOverlay";
-
+import {
+  Rate,
+  Progress,
+  Tag,
+  Button,
+  Image,
+  Skeleton,
+  Empty,
+  Avatar,
+} from "antd";
 
 function ProductDeatil() {
   const { slug } = useParams();
@@ -239,7 +248,7 @@ function ProductDeatil() {
         error("Vui lòng viết comment")
         return;
       }
-      const res = await commentProduct(comment); 
+      const res = await commentProduct(comment);
       if (res.data?.code) {
         socket.emit("product_preview", comment)
         success(res.data?.message || "Đánh giá thành công")
@@ -248,7 +257,7 @@ function ProductDeatil() {
     } catch (err) {
       error("Đánh giá thất bại")
       console.log(err.response?.data?.message)
-    } finally{
+    } finally {
       setLoadingComment(false)
     }
   }
@@ -287,7 +296,7 @@ function ProductDeatil() {
 
   return (
     <div className="product-page">
-      {loadinComment && <LoadingOverlay title="Đang gửi comment"/>}
+      {loadinComment && <LoadingOverlay title="Đang gửi comment" />}
       <SEO
         title={data?.title}
         description="Veltrix Gear bán PC Gaming, Laptop, Linh kiện máy tính chất lượng cao."
@@ -512,6 +521,43 @@ function ProductDeatil() {
                         <span>Đóng gói kỹ</span>
                         <span>Đáng tiền</span>
                       </div>
+
+                      {preview_user?.server_return?.comment && (
+                        <div className="admin-reply">
+                          <div className="reply-header">
+                            <div className="admin-info">
+                              <div className="admin-avatar">
+                                <img src={preview_user?.server_return?.avatar} alt="avatar" />
+                              </div>
+
+                              <div className="admin-info-top">
+                                <div className="admin-info-top-header">
+                                  <h4>
+                                    {preview_user?.server_return?.admin_name}
+                                  </h4>
+
+                                  <span className="role">
+                                    {preview_user?.server_return?.role}
+                                  </span>
+                                </div>
+                                <div className="time-ago">
+                                  {formatTimeAgo(preview_user?.server_return?.createdAt)}
+                                </div>
+                              </div>
+
+
+                            </div>
+
+                            <Tag color="blue">
+                              Phản hồi từ shop
+                            </Tag>
+                          </div>
+
+                          <p className="reply-content">
+                            {preview_user?.server_return?.comment}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )
                 }
@@ -549,6 +595,44 @@ function ProductDeatil() {
                         <p>
                           {item.comment}
                         </p>
+
+
+                        {item?.server_return?.comment && (
+                          <div className="admin-reply">
+                            <div className="reply-header">
+                              <div className="admin-info">
+                                <div className="admin-avatar">
+                                  <img src={item?.server_return?.avatar} alt="avatar" />
+                                </div>
+
+                                <div className="admin-info-top">
+                                  <div className="admin-info-top-header">
+                                    <h4>
+                                      {item?.server_return?.admin_name}
+                                    </h4>
+
+                                    <span className="role">
+                                      {item?.server_return?.role}
+                                    </span>
+                                  </div>
+                                  <div className="time-ago">
+                                    {formatTimeAgo(item?.server_return?.createdAt)}
+                                  </div>
+                                </div>
+
+
+                              </div>
+
+                              <Tag color="blue">
+                                Phản hồi từ shop
+                              </Tag>
+                            </div>
+
+                            <p className="reply-content">
+                              {item?.server_return?.comment}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))
                   }

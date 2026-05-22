@@ -488,14 +488,17 @@ function Products() {
                                 </div>
 
                                 <div className="admin-actions">
+                                    <Link className="admin-edit" to={`/admin/products/detail/${item.slug}`}>
+                                        Chi tiết
+                                    </Link>
                                     <Link className="admin-edit" to={`/admin/products/update/${item.slug}`}>
-                                        Edit
+                                        Sửa
                                     </Link>
                                     <button
                                         className="admin-delete"
                                         onClick={() => handleDeleteOne(item._id)}
                                     >
-                                        Delete
+                                        Xóa
                                     </button>
                                 </div>
                             </div>
