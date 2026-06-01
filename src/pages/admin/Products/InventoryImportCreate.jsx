@@ -9,6 +9,7 @@ import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 import { generateInventoryRefId } from "../../../utils/generateInventoryRefId";
 import { MdArrowBack, MdAdd, MdClose, MdPrint, MdWarehouse, MdInventory } from "react-icons/md";
+import LoadingOverlay from "../../../utils/LoadingOverlay";
 
 function InventoryImportCreate() {
     const [products, setProducts] = useState([]);
@@ -128,7 +129,7 @@ function InventoryImportCreate() {
     return (
         <div className="iic-page">
             <SEO title="Nhập kho" />
-            {loadingPost && <Loading />}
+            {loadingPost && <LoadingOverlay title="Đang nhập kho, vui lòng chờ..." />}
 
             <div className="iic-page__header">
                 <div className="iic-page__title-group">

@@ -12,6 +12,10 @@ export const listOrder = (data) => {
     return axiosAdmin.get(`/orders/get-list?${params.toString()}`);
 };
 
+export const getDetailOrder = (code) => {
+    return axiosAdmin.get(`/orders/detail/${code}`);
+};
+
 export const updateOrderStatus = (data) => {
     return axiosAdmin.patch(`/orders/update-status`, data);
 };

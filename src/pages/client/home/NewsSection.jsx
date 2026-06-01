@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./NewsSection.scss";
 import { error, success } from "../../../utils/notift";
-import { getBySLug } from "../../../services/client/news.service";
+import { getByCategory } from "../../../services/client/news.service";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Skeleton } from "antd";
@@ -15,8 +15,8 @@ function NewsSection() {
         const fetchApi = async () => {
             try {
                 const [newsRes, voucherRes] = await Promise.all([
-                    getBySLug("tin-tuc-cong-nghe"),
-                    getBySLug("khuyen-mai")
+                    getByCategory("tin-tuc-cong-nghe"),
+                    getByCategory("khuyen-mai")
                 ]);
 
                 if (newsRes.data.code) {

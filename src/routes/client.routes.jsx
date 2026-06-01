@@ -18,6 +18,7 @@ import ResetPassword from "../pages/client/authClient/reset-password";
 import Checkout from "../pages/client/cart/checkout";
 import OrderSuccess from "../pages/client/cart/OrderSuccess";
 import OrderList from "../pages/client/Order/OrderList";
+import DetailNews from "../pages/client/News/DetailNews";
 
 function ClientRoutes(){
     return(
@@ -47,6 +48,10 @@ function ClientRoutes(){
                 <Route path="/yeu-thich" element={<FavoritesPage/>}/>
                 <Route path="/don-hang" element={<OrderList/>}/>
                 <Route path="/sale" element={<SalePage/>}/>
+
+
+                <Route path="/news/:slug" element={<DetailNews/>}/>
+
 
 
                 <Route path="/order-success/:orderCode" element={<OrderSuccess/>}/>

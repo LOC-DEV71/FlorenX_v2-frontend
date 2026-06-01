@@ -1,14 +1,13 @@
 .hero_section {
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(
-  135deg,
-  #000000 20%,
-  #585858 40%,  
-  #000000 60%,  
-  #585858 80%,
-  #000000 100%,
-);
+  background: linear-gradient(135deg,
+      #000000 20%,
+      #585858 40%,
+      #000000 60%,
+      #585858 80%,
+      #000000 100%,
+    );
   border-bottom: 10px solid gray;
   padding: 0;
   display: flex;
@@ -161,12 +160,10 @@
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.03) 40%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 40%,
+      rgba(255, 255, 255, 0) 70%);
   animation: pulseGlow 4.2s ease-in-out infinite;
 }
 
@@ -218,15 +215,25 @@
 }
 
 @keyframes floatLaptop {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(0.96);
     opacity: 0.3;
   }
+
   50% {
     transform: scale(1.03);
     opacity: 0.5;
@@ -288,6 +295,13 @@
 }
 
 @keyframes floatLaptopMobile {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
 }

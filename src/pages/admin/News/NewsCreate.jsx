@@ -4,9 +4,27 @@ import TinyEditor from "../../../utils/tinyEditor";
 import { error, success } from "../../../utils/notift";
 import { getList } from "../../../services/admin/news.category.service";
 import { createNews } from "../../../services/admin/news.service";
+import {
+  RiArticleLine,
+  RiSaveLine,
+  RiUploadCloud2Line,
+  RiCloseLine,
+  RiImageLine,
+  RiEyeLine,
+  RiBookmarkLine,
+  RiInformationLine,
+  RiAlertLine,
+} from "react-icons/ri";
+
+const STATUS_CONFIG = {
+  draft: { label: "Nháp", color: "#92400e", bg: "#fef3c7" },
+  published: { label: "Xuất bản", color: "#065f46", bg: "#d1fae5" },
+  hidden: { label: "Ẩn", color: "#4b5563", bg: "#f3f4f6" },
+};
 
 const NewsCreate = () => {
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -18,11 +36,12 @@ const NewsCreate = () => {
     views: 0,
   });
   const [thumbnail, setThumbnail] = useState(null);
-  const [thumbnailPreview, setThumbnailPreview] =useState(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
+
   const handleChange = (e) => {
     const { id, value, type, files } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [id]: type === "file" ? files[0] || null : value,
@@ -30,168 +49,218 @@ const NewsCreate = () => {
   };
 
   const handleEditorChange = (value) => {
-    setForm((prev) => ({
-      ...prev,
-      content: value,
-    }));
+    setForm((prev) => ({ ...prev, content: value }));
   };
 
   useEffect(() => {
     const fetchApi = async () => {
       try {
         const res = await getList();
-        if(res.data.code){
-          setCategories(res.data.categories)
-        }
+        if (res.data.code) setCategories(res.data.categories);
       } catch (err) {
-        error(err.response?.data?.message)
+        error(err.response?.data?.message);
       }
-    }
+    };
     fetchApi();
-  }, [])
+  }, []);
+
   const handleClearThumbnail = () => {
     setThumbnail(null);
     setThumbnailPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleFileSelect = (file) => {
+    if (file && file.type.startsWith("image/")) {
+      setThumbnail(file);
+      setThumbnailPreview(URL.createObjectURL(file));
     }
   };
 
-  const hanldeCreateNews = async () => {
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    handleFileSelect(file);
+  };
+
+  const handleCreateNews = async () => {
+    if (!form.title.trim()) return error("Vui lòng nhập tiêu đề bài viết");
+    if (!form.slug_category) return error("Vui lòng chọn danh mục");
+
+    setLoading(true);
     try {
       const formData = new FormData();
-
-      if (thumbnail) {
-        formData.append("thumbnail", thumbnail);
-      }
-
-      Object.keys(form).forEach(key => {
+      if (thumbnail) formData.append("thumbnail", thumbnail);
+      Object.keys(form).forEach((key) => {
         if (key === "slug" && !form.slug) return;
         formData.append(key, form[key]);
       });
-
       const res = await createNews(formData);
-      if(res.data.code){
-        success(res.data.message)
-      }
+      if (res.data.code) success(res.data.message);
     } catch (err) {
-      error(err.response?.data?.message)
+      error(err.response?.data?.message);
+    } finally {
+      setLoading(false);
     }
-  }
-  return (
-    <div className="admin-page">
-      <div className="page-header">
-        <div>
-          <h1>Tạo bài viết</h1>
-          <p>Soạn nội dung bài viết và cấu hình hiển thị.</p>
-        </div>
+  };
 
-        <div className="page-header__actions">
-          <button className="btn btn--primary" type="button" onClick={hanldeCreateNews}>
-            Đăng bài
+  const statusInfo = STATUS_CONFIG[form.status] || STATUS_CONFIG.draft;
+
+  return (
+    <div className="nc-page">
+      {/* Header */}
+      <div className="nc-header">
+        <div className="nc-header__left">
+          <div className="nc-header__icon">
+            <RiArticleLine />
+          </div>
+          <div>
+            <h1 className="nc-header__title">Tạo bài viết mới</h1>
+            <p className="nc-header__sub">Soạn nội dung và cấu hình hiển thị bài viết</p>
+          </div>
+        </div>
+        <div className="nc-header__actions">
+          <button
+            className={`nc-btn nc-btn--primary${loading ? " nc-btn--loading" : ""}`}
+            type="button"
+            onClick={handleCreateNews}
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="nc-btn__spinner" />
+            ) : (
+              <RiSaveLine className="nc-btn__icon" />
+            )}
+            {loading ? "Đang đăng..." : "Đăng bài"}
           </button>
         </div>
       </div>
 
-      <div className="admin-form-layout">
-        <div className="admin-form-main">
-          <div className="card">
-            <div className="card__header">
+      {/* Layout */}
+      <div className="nc-layout">
+        {/* Main */}
+        <div className="nc-main">
+          <div className="nc-card">
+            <div className="nc-card__header">
+              <RiBookmarkLine className="nc-card__header-icon" />
               <h2>Thông tin bài viết</h2>
             </div>
+            <div className="nc-card__body">
+              <div className="nc-form-grid">
 
-            <div className="card__body">
-              <div className="form-grid">
-                <div className="form-group form-group--full">
-                  <label htmlFor="title">Tiêu đề bài viết</label>
+                {/* Title */}
+                <div className="nc-field nc-field--full">
+                  <label className="nc-label" htmlFor="title">
+                    Tiêu đề bài viết <span className="nc-label__required">*</span>
+                  </label>
                   <input
                     id="title"
+                    className="nc-input"
                     type="text"
-                    placeholder="Nhập tiêu đề bài viết"
+                    placeholder="Nhập tiêu đề hấp dẫn cho bài viết..."
                     value={form.title}
                     onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-group form-group--full">
-                  <label htmlFor="slug">Slug</label>
-                  <input
-                    id="slug"
-                    type="text"
-                    placeholder="slug-bai-viet"
-                    value={form.slug}
-                    onChange={handleChange}
-                  />
+                {/* Slug */}
+                <div className="nc-field nc-field--full">
+                  <label className="nc-label" htmlFor="slug">
+                    Slug URL
+                    <span className="nc-label__hint">Để trống sẽ tự động tạo từ tiêu đề</span>
+                  </label>
+                  <div className="nc-input-prefix-wrap">
+                    <span className="nc-input-prefix">/bai-viet/</span>
+                    <input
+                      id="slug"
+                      className="nc-input nc-input--with-prefix"
+                      type="text"
+                      placeholder="slug-bai-viet"
+                      value={form.slug}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group form-group--full">
-                  <label htmlFor="description">Mô tả ngắn</label>
+                {/* Description */}
+                <div className="nc-field nc-field--full">
+                  <label className="nc-label" htmlFor="description">
+                    Mô tả ngắn
+                    <span className="nc-label__count">{form.description.length} ký tự</span>
+                  </label>
                   <textarea
                     id="description"
+                    className="nc-textarea"
                     rows="4"
-                    placeholder="Nhập đoạn mô tả ngắn cho bài viết"
+                    placeholder="Đoạn mô tả ngắn sẽ hiển thị trong kết quả tìm kiếm và danh sách bài viết..."
                     value={form.description}
                     onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-group form-group--full">
-                  <label htmlFor="content">Nội dung</label>
-                  <TinyEditor
-                    id="content"
-                    rows="12"
-                    placeholder="Nhập nội dung bài viết..."
-                    value={form.content}
-                    onChange={handleEditorChange}
-                  />
+                {/* Content */}
+                <div className="nc-field nc-field--full">
+                  <label className="nc-label" htmlFor="content">Nội dung bài viết</label>
+                  <div className="nc-editor-wrap">
+                    <TinyEditor
+                      id="content"
+                      value={form.content}
+                      onChange={handleEditorChange}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="slug_category">Danh mục</label>
+                {/* Row: Category + Status */}
+                <div className="nc-field">
+                  <label className="nc-label" htmlFor="slug_category">
+                    Danh mục <span className="nc-label__required">*</span>
+                  </label>
                   <select
                     id="slug_category"
+                    className="nc-select"
                     value={form.slug_category}
                     onChange={handleChange}
                   >
-                    <option value="">
-                      Chọn danh mục
-                    </option>
-                    {categories && categories.map(item => (
-                      <option value={item.slug}>{item.title}</option>
+                    <option value="">-- Chọn danh mục --</option>
+                    {categories.map((item) => (
+                      <option key={item.slug} value={item.slug}>{item.title}</option>
                     ))}
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="status">Trạng thái</label>
+                <div className="nc-field">
+                  <label className="nc-label" htmlFor="status">Trạng thái</label>
                   <select
                     id="status"
+                    className="nc-select"
                     value={form.status}
                     onChange={handleChange}
                   >
-                    <option value="draft">Nháp</option>
-                    <option value="published">Xuất bản</option>
-                    <option value="hidden">Ẩn</option>
+                    <option value="draft">Nháp</option>
+                    <option value="published">Xuất bản</option>
+                    <option value="hidden">Ẩn</option>
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="featured">Bài viết nổi bật</label>
+                <div className="nc-field">
+                  <label className="nc-label" htmlFor="featured">Bài viết nổi bật</label>
                   <select
                     id="featured"
+                    className="nc-select"
                     value={form.featured}
                     onChange={handleChange}
                   >
-                    <option value="no">Không</option>
-                    <option value="yes">Có</option>
+                    <option value="no">Không nổi bật</option>
+                    <option value="yes">Đánh dấu nổi bật</option>
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="views">Lượt xem</label>
+                <div className="nc-field">
+                  <label className="nc-label" htmlFor="views">Lượt xem ban đầu</label>
                   <input
                     id="views"
+                    className="nc-input"
                     type="number"
                     min="0"
                     placeholder="0"
@@ -205,74 +274,118 @@ const NewsCreate = () => {
           </div>
         </div>
 
-        <div className="admin-form-side">
-          <div className="card">
-            <div className="card__header">
-              <h2>Xem nhanh</h2>
+        {/* Sidebar */}
+        <div className="nc-side">
+
+          {/* Thumbnail Upload */}
+          <div className="nc-card">
+            <div className="nc-card__header">
+              <RiImageLine className="nc-card__header-icon" />
+              <h2>Ảnh đại diện</h2>
             </div>
-
-            <div className="card__body">
-              <div className="preview-box">
-                <div className="preview-box__thumb">
-                  {thumbnailPreview ?
-                    <>
-                      <span onClick={handleClearThumbnail}>X</span>
-                      <img src={thumbnailPreview} alt="thumbnail" />
-                    </>:
-                    <>Thumbnail</>
-                  }
+            <div className="nc-card__body">
+              {thumbnailPreview ? (
+                <div className="nc-thumb-preview">
+                  <img src={thumbnailPreview} alt="thumbnail" className="nc-thumb-preview__img" />
+                  <button className="nc-thumb-preview__remove" onClick={handleClearThumbnail}>
+                    <RiCloseLine />
+                  </button>
+                  <div className="nc-thumb-preview__overlay">
+                    <span>Nhấn X để thay đổi</span>
+                  </div>
                 </div>
-
-                <div className="preview-box__upload">
-                  <label
-                    htmlFor="thumbnailFile"
-                    className="preview-box__upload-label"
-                  >
-                    Chọn ảnh thumbnail
-                  </label>
+              ) : (
+                <div
+                  className={`nc-dropzone${dragOver ? " nc-dropzone--over" : ""}`}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <RiUploadCloud2Line className="nc-dropzone__icon" />
+                  <p className="nc-dropzone__title">Kéo thả hoặc nhấn để tải ảnh</p>
+                  <p className="nc-dropzone__sub">PNG, JPG, WEBP tối đa 5MB</p>
                   <input
+                    ref={fileInputRef}
                     id="thumbnailFile"
                     type="file"
                     accept="image/*"
-                    onChange={e => {
-                      const file = e.target.files[0];
-                      if(file){
-                        setThumbnail(file)
-                        setThumbnailPreview(URL.createObjectURL(file))
-                      }
-                    }}
+                    style={{ display: "none" }}
+                    onChange={(e) => handleFileSelect(e.target.files[0])}
                   />
                 </div>
+              )}
+            </div>
+          </div>
 
-                <div className="preview-box__content">
-                  <h3>{form.title || "Tiêu đề bài viết"}</h3>
-                  <p>
-                    {form.description ||
-                      "Mô tả ngắn của bài viết sẽ hiển thị tại đây để preview nhanh."}
+          {/* Preview */}
+          <div className="nc-card">
+            <div className="nc-card__header">
+              <RiEyeLine className="nc-card__header-icon" />
+              <h2>Xem trước</h2>
+            </div>
+            <div className="nc-card__body">
+              <div className="nc-preview">
+                <div className="nc-preview__thumb">
+                  {thumbnailPreview
+                    ? <img src={thumbnailPreview} alt="" />
+                    : <span><RiImageLine /> Chưa có ảnh</span>
+                  }
+                </div>
+                <div className="nc-preview__body">
+                  <h3 className="nc-preview__title">
+                    {form.title || "Tiêu đề bài viết sẽ hiển thị tại đây"}
+                  </h3>
+                  <p className="nc-preview__desc">
+                    {form.description || "Mô tả ngắn sẽ hiển thị tại đây để người đọc nắm bắt nhanh nội dung."}
                   </p>
-                  <div className="preview-meta">
-                    <span className="badge">{form.status}</span>
-                    <span className="meta-text">{form.views} lượt xem</span>
+                  <div className="nc-preview__meta">
+                    <span
+                      className="nc-badge"
+                      style={{ color: statusInfo.color, background: statusInfo.bg }}
+                    >
+                      {statusInfo.label}
+                    </span>
+                    {form.featured === "yes" && (
+                      <span className="nc-badge nc-badge--featured">⭐ Nổi bật</span>
+                    )}
+                    <span className="nc-preview__views">
+                      <RiEyeLine /> {Number(form.views).toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="card">
-            <div className="card__header">
-              <h2>Lưu ý</h2>
+          {/* Tips */}
+          <div className="nc-card nc-card--tips">
+            <div className="nc-card__header">
+              <RiInformationLine className="nc-card__header-icon nc-card__header-icon--info" />
+              <h2>Lưu ý khi tạo bài</h2>
             </div>
-
-            <div className="card__body">
-              <ul className="info-list">
-                <li>Category là field bắt buộc theo schema.</li>
-                <li>Status mặc định nên để draft.</li>
-                <li>PublishedAt chỉ cần khi bài viết được xuất bản.</li>
-                <li>Featured dùng để đánh dấu bài ưu tiên hiển thị.</li>
+            <div className="nc-card__body">
+              <ul className="nc-tips">
+                <li className="nc-tips__item">
+                  <RiAlertLine className="nc-tips__icon" />
+                  <span><strong>Danh mục</strong> là trường bắt buộc theo schema.</span>
+                </li>
+                <li className="nc-tips__item">
+                  <RiAlertLine className="nc-tips__icon" />
+                  <span><strong>Trạng thái</strong> mặc định nên để <em>Nháp</em> cho đến khi hoàn thiện.</span>
+                </li>
+                <li className="nc-tips__item">
+                  <RiAlertLine className="nc-tips__icon" />
+                  <span><strong>Slug</strong> tự động sinh từ tiêu đề nếu để trống.</span>
+                </li>
+                <li className="nc-tips__item">
+                  <RiAlertLine className="nc-tips__icon" />
+                  <span><strong>Nổi bật</strong> dùng để ưu tiên hiển thị trên trang chủ.</span>
+                </li>
               </ul>
             </div>
           </div>
+
         </div>
       </div>
     </div>

@@ -1,0 +1,479 @@
+// OrderDetail
+
+$border:   #eef0f4;
+$text:     #1e293b;
+$muted:    #64748b;
+$accent:   #6366f1;
+$radius:   12px;
+
+.od {
+    padding: 24px;
+    animation: od-fadein 0.3s ease;
+}
+
+@keyframes od-fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+// State
+.od-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    gap: 14px;
+    color: $muted;
+
+    svg {
+        font-size: 40px;
+        opacity: 0.4;
+    }
+
+    p {
+        font-size: 15px;
+    }
+
+    &--empty svg {
+        color: #9ca3af;
+    }
+}
+
+.od-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: $accent;
+    border-radius: 50%;
+    animation: od-spin 0.7s linear infinite;
+}
+
+// Heading
+.od__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.od__heading-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.od__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    color: $muted;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+
+    &:hover {
+        color: $accent;
+    }
+}
+
+.od__title-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.od__title-icon {
+    font-size: 32px;
+    color: $accent;
+    background: #eef2ff;
+    padding: 9px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.od__sub {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: $muted;
+    text-transform: uppercase;
+}
+
+.od__code {
+    margin: 4px 0 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: $text;
+    letter-spacing: -0.02em;
+}
+
+.od__heading-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+// Buttons
+.od__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+
+    svg {
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &:not(:disabled):hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    &:not(:disabled):active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    &.btn--confirm {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    &.btn--cancel {
+        background: #fff;
+        color: #b91c1c;
+        border: 1.5px solid #fca5a5;
+
+        &:not(:disabled):hover {
+            background: #fff5f5;
+        }
+    }
+
+    &.btn--ship {
+        background: #6d28d9;
+        color: #fff;
+    }
+
+    &.btn--done {
+        background: #065f46;
+        color: #fff;
+    }
+}
+
+.od__btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: od-spin 0.7s linear infinite;
+}
+
+.od__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    border: 1.5px solid currentColor;
+}
+
+// Grid
+.od__grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 16px;
+    align-items: start;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.od__col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+// Card
+.od__card {
+    background: #fff;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 20px 22px;
+
+    &--summary {
+        background: #fafbff;
+        border-color: #eef2ff;
+    }
+}
+
+.od__card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $muted;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $border;
+}
+
+.od__count {
+    margin-left: auto;
+    background: $accent;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+// Info grid (icon-based like the modal)
+.od__info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.od__info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+
+    &--full {
+        grid-column: 1 / -1;
+    }
+
+    div {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+}
+
+.od__info-icon {
+    font-size: 16px;
+    color: $accent;
+    margin-top: 2px;
+    flex-shrink: 0;
+
+    &--voucher {
+        color: #7c3aed;
+    }
+}
+
+.od__info-label {
+    font-size: 10.5px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+.od__info-value {
+    font-size: 13.5px;
+    color: $text;
+    font-weight: 500;
+    word-break: break-word;
+
+    &--voucher {
+        color: #7c3aed;
+        font-weight: 700;
+    }
+}
+
+// Summary
+.od__summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 13.5px;
+        color: $muted;
+        border-bottom: 1px dashed $border;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        span:last-child {
+            color: $text;
+            font-weight: 600;
+        }
+    }
+}
+
+.od__summary-discount {
+    span:last-child {
+        color: #10b981 !important;
+    }
+}
+
+.od__summary-total {
+    padding-top: 10px !important;
+    margin-top: 4px;
+
+    span {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: $text !important;
+
+        &:last-child {
+            color: $accent !important;
+            font-size: 18px !important;
+        }
+    }
+}
+
+// Products
+.od__products {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.od__product {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid $border;
+    background: #f8fafc;
+    transition: background 0.15s;
+
+    &:hover {
+        background: #f1f5ff;
+        border-color: #c7d2fe;
+    }
+}
+
+.od__product-img {
+    position: relative;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f1f5f9;
+    border: 1px solid $border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+}
+
+.od__product-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+.od__product-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.od__product-name {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: $text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.od__product-meta {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.od__product-qty {
+    font-size: 12px;
+    font-weight: 600;
+    background: #e5e7eb;
+    color: #374151;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.od__product-unit {
+    font-size: 12px;
+    color: $muted;
+}
+
+.od__product-price {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: $accent;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@keyframes od-spin {
+    to { transform: rotate(360deg); }
+}

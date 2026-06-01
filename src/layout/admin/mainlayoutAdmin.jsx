@@ -240,7 +240,10 @@ const MainLayoutAdmin = () => {
         renderItem={(item) => (
           <Link to={item.action_url}
             className={`noti-item ${!item.is_read ? "unread" : ""}`}
-            onClick={() => handleRead(item._id)}
+            onClick={() => {
+              handleRead(item._id) 
+              setOpenNoti(false)
+            }}
           >
             <List.Item >
               <div className="noti-text">

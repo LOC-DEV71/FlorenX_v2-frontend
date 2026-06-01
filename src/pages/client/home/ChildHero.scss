@@ -53,7 +53,7 @@
     transform: translateX(-50%) scale(1.05);
   }
 
-  
+
 
   &__title {
     position: absolute;
@@ -92,14 +92,14 @@
 @media (max-width: 768px) {
   .hero-banner {
     width: 100%;
-    height: auto; 
+    height: auto;
     min-height: unset;
 
     &__img {
       width: 100%;
-      height: auto; 
+      height: auto;
       object-fit: cover;
-      object-position: 25% top; 
+      object-position: 25% top;
     }
 
     &__title {
@@ -118,7 +118,7 @@
 @media (max-width: 480px) {
   .hero-banner {
     &__img {
-      object-position: 20% top; 
+      object-position: 20% top;
     }
 
     &__title {
