@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import "./Checkout.scss";
+import "./checkout.scss";
 import { useSelector } from "react-redux";
 import { error, success } from "../../../utils/notift";
 import { getVoucher } from "../../../services/client/voucher.service";

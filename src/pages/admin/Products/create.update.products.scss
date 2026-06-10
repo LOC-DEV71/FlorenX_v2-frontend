@@ -1,3 +1,4 @@
+@use "sass:color";
 
 $blue: #2563EB;
 $blue-50: #EFF6FF;
@@ -374,7 +375,7 @@ $red-600: #DC2626;
     transition: background .15s, transform .12s;
 
     svg { font-size: 16px; }
-    &:hover { background: darken($blue, 7%); }
+    &:hover { background: color.adjust($blue, $lightness: -7%); }
     &:active { transform: scale(.985); }
   }
 
