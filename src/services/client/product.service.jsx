@@ -16,3 +16,9 @@ export const getProductBySlug = async (slug) => {
 export const getProductBySale = async (category) =>{
   return axiosClient.get(`/products/sale/${category}`)
 }
+
+
+export const getCrossSellProducts = async () =>{
+  return axiosClient.get(`/products/cross-sell`)
+}
+

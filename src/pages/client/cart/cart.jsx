@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getCart, updateQuantity } from "../../../services/client/cart.service";
 import "./cart.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { getProductByCategory } from "../../../services/client/product.service";
+import { getCrossSellProducts, getProductByCategory } from "../../../services/client/product.service";
 import { HeartOutlined, HeartFilled, DeleteOutlined } from "@ant-design/icons";
 import { addLike, getListLike } from "../../../services/client/like.service";
 import { error, success } from "../../../utils/notift";
@@ -59,7 +59,7 @@ function Cart() {
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const res = await getProductByCategory({ category: "pc", limit: 4, page: 1 });
+        const res = await getCrossSellProducts();
         if (res?.data?.code) {
           setProduct(res.data.products || []);
         }
@@ -70,6 +70,7 @@ function Cart() {
 
     fetchCart();
   }, [])
+
 
   useEffect(() => {
     const fetchLikes = async () => {
@@ -170,8 +171,6 @@ function Cart() {
       }
     })
   }
-
-  console.log(data)
 
   return (
     <div className="cart-page" id="cart-page">
@@ -311,7 +310,7 @@ function Cart() {
       </div>
 
       <div className="section-product-cart">
-        <h3 className="line-product-cart">SẢN PHẨM NỔI BẬT</h3>
+        <h3 className="line-product-cart">SẢN PHẨM THƯỜNG ĐƯỢC MUA CÙNG</h3>
         <div className="product-grid">
           {product.map((item, index) => {
             const originalPrice = Number(item?.price) || 0;
