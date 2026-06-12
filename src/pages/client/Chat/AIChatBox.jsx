@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from "react";
-import { FaRobot, FaPaperPlane } from "react-icons/fa";
+import { FaPaperPlane } from "react-icons/fa";
 import { CloseOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import axiosClient from "../../../utils/axios.client";
+import botAiImg from "../../../assets/banner/bot-ai.jpg";
 import "./AIChatBox.scss";
 
 function AIChatBox() {
     const [openChat, setOpenChat] = useState(false);
     const [chatMessage, setChatMessage] = useState("");
     const [messages, setMessages] = useState([]);
+    const [showTooltip, setShowTooltip] = useState(false);
     const chatEndRef = useRef(null);
 
     // Lấy hoặc tạo sessionId
@@ -21,6 +23,28 @@ function AIChatBox() {
             localStorage.setItem("ai_session_id", sid);
         }
         return sid;
+    };
+
+    // Quản lý hiển thị Tooltip chào mừng (Ẩn 5 phút nếu bị tắt)
+    useEffect(() => {
+        const closedAt = localStorage.getItem("ai_tooltip_closed_at");
+        if (closedAt) {
+            const timeDiff = Date.now() - parseInt(closedAt, 10);
+            if (timeDiff < 5 * 60 * 1000) { // 5 phút
+                setShowTooltip(false);
+            } else {
+                localStorage.removeItem("ai_tooltip_closed_at");
+                setTimeout(() => setShowTooltip(true), 2000);
+            }
+        } else {
+            setTimeout(() => setShowTooltip(true), 2000);
+        }
+    }, []);
+
+    const handleCloseTooltip = (e) => {
+        e.stopPropagation();
+        setShowTooltip(false);
+        localStorage.setItem("ai_tooltip_closed_at", Date.now().toString());
     };
 
     // Load lịch sử khi mở web
@@ -97,7 +121,7 @@ function AIChatBox() {
                 <div className="ai-chat-box">
                     <div className="ai-chat-header">
                         <div className="header-info">
-                            <FaRobot size={20} />
+                            <img src={botAiImg} alt="Veltrix AI" className="header-avatar" />
                             <span>Veltrix AI Assistant</span>
                         </div>
                         <CloseOutlined className="close-icon" onClick={() => setOpenChat(false)} />
@@ -139,8 +163,18 @@ function AIChatBox() {
                 </div>
             )}
 
+            {!openChat && showTooltip && (
+                <div className="ai-tooltip" onClick={() => setOpenChat(true)}>
+                    <img src={botAiImg} alt="Avatar" className="tooltip-avatar" />
+                    <span>Cậu cần Veltrix-chan hỗ trợ gì không nè?</span>
+                    <div className="tooltip-close" onClick={handleCloseTooltip}>
+                        <CloseOutlined style={{ fontSize: '10px' }} />
+                    </div>
+                </div>
+            )}
+
             <button className="ai-chat-toggle-btn" onClick={() => setOpenChat(!openChat)}>
-                {openChat ? <CloseOutlined /> : <FaRobot />}
+                {openChat ? <CloseOutlined /> : <img src={botAiImg} alt="Veltrix AI" className="btn-avatar" />}
             </button>
         </div>
     );
