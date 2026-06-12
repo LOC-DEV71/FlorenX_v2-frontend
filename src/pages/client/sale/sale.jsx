@@ -105,17 +105,36 @@ function Sale() {
         <div className="sale-page" id="sale-page">
             <div className="sale">
                 <SEO title="Veltrix - Trang giảm giá" />
-                <img
-                    src={banner?.desktopImage}
-                    alt="sale-banner"
-                    className="sale-img"
-                />
+                <div className="sale-banner-premium">
+                    {banner?.desktopImage && (
+                        <img
+                            src={banner.desktopImage}
+                            alt="sale-banner"
+                            className="sale-bg desktop"
+                        />
+                    )}
+                    {banner?.mobileImage && (
+                        <img
+                            src={banner.mobileImage}
+                            alt="sale-banner mobile"
+                            className="sale-bg mobile"
+                        />
+                    )}
 
-                <div className="sale-overlay">
-                    <span className="sale-tag">SIÊU GIẢM GIÁ</span>
-                    <h1 className="sale-title">{banner?.title}</h1>
-                    <p className="sale-desc">{banner?.shortDescription}</p>
-                    <div className="sale-discount">{banner?.discountText}</div>
+                    <div className="sale-overlay-premium"></div>
+
+                    <div className="sale-content-container">
+                        <div className="sale-content-inner">
+                            <div className="sale-content">
+                                <span className="sale-tag">SIÊU GIẢM GIÁ</span>
+                                <h1 className="sale-title">{banner?.title}</h1>
+                                <p className="sale-desc">{banner?.shortDescription}</p>
+                                <div className="sale-discount">
+                                    <span className="discount-text">{banner?.discountText}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

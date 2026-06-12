@@ -1,6 +1,4 @@
-// ===== Veltrix Gear — DetailNews =====
-// Dark gaming aesthetic, neon green accents, clean typography
-// =============================================
+
 
 $dark-bg: #0a0a0a;
 $surface-1: #111111;
@@ -49,6 +47,12 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
   .active {
     color: $accent;
     font-weight: 500;
+  }
+
+  a{
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
   }
 }
 
@@ -290,6 +294,9 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.25s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   &:hover {
     border-color: rgba(0, 255, 136, 0.4);
@@ -356,6 +363,7 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex: 1;
 }
 
 .card-date {
@@ -394,7 +402,7 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid $border;
 }
@@ -411,7 +419,6 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
   letter-spacing: 0.03em;
 }
 
-// ===== ARTICLE DETAIL =====
 .dn-article {
   animation: fadeUp 0.3s ease;
 }
@@ -521,7 +528,6 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
   }
 }
 
-// ===== ARTICLE BODY =====
 .article-body {
   font-size: 15px;
   line-height: 1.85;
@@ -578,6 +584,17 @@ $font-body: 'DM Sans', 'Segoe UI', sans-serif;
     max-width: 100%;
     border-radius: 4px;
     border: 1px solid $border;
+  }
+
+  .article-description {
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.85;
+    color: rgba(240, 240, 240, 0.85);
+
+    p {
+      margin: 0 0 20px;
+    }
   }
 }
 
