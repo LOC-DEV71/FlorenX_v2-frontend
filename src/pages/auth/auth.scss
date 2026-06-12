@@ -1,87 +1,145 @@
-.auth_admin{
-    height: 80vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    &-top{
-        width: 250px;
-        margin: 0 auto 30px;
-        text-align: center;
-
-        img{
-            width: 150px;
-        }
-
-        p{
-            margin: 0;
-            font-weight: 600;
-        }
-    }
-
-    &-main{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        align-items: center;
-        width: 900px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        overflow: hidden;
-
-        &-left{
-            img{
-                width: 100%;
-            }
-        }
-
-        &-right{
-            padding: 40px;
-
-            h2{
-                margin-bottom: 25px;
-            }
-        }
-    }
-}
-
-.form-data{
+.veltrix_admin_login {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    overflow-y: auto;
+    min-height: 100vh;
     display: flex;
     align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 10px;
-    margin-bottom: 15px;
-    gap: 10px;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #0f172a;
 
-    input{
-        border: none;
-        outline: none;
-        flex: 1;
+    .glass-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(2, 6, 23, 0.8) 100%);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 1;
     }
 
-    svg{
-        font-size: 18px;
-        color: #777;
-    }
+    .login-glass-box {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 440px;
+        padding: 48px 40px;
+        border-radius: 24px;
+        margin: 20px;
+        
+        /* Glassmorphism Core */
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
-    .eye{
-        cursor: pointer;
-    }
-}
+        color: #fff;
+        text-align: center;
 
-.btn-login{
-    width: 100%;
-    padding: 10px;
-    background: #6a5cff;
-    border: none;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
+        &-header {
+            margin-bottom: 32px;
 
+            img {
+                width: 150px;
+                margin-bottom: 16px;
+                filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));
+            }
 
-    &:active{
-        background: #342a9b;
+            p {
+                margin: 0;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 3px;
+                color: #38bdf8;
+                text-transform: uppercase;
+            }
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #f8fafc;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 32px;
+        }
+
+        .form-data {
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            gap: 12px;
+            transition: all 0.3s ease;
+
+            &:focus-within {
+                border-color: rgba(56, 189, 248, 0.5);
+                background: rgba(15, 23, 42, 0.8);
+                box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+            }
+
+            input {
+                border: none;
+                outline: none;
+                background: transparent;
+                color: #fff;
+                flex: 1;
+                font-size: 15px;
+
+                &::placeholder {
+                    color: #64748b;
+                }
+            }
+
+            svg {
+                font-size: 20px;
+                color: #94a3b8;
+            }
+
+            .eye {
+                cursor: pointer;
+                transition: color 0.3s;
+
+                &:hover {
+                    color: #fff;
+                }
+            }
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            margin-top: 12px;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            border: none;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s ease;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 25px rgba(37, 99, 235, 0.6);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+        }
     }
 }

@@ -12,7 +12,7 @@ import { loginClient, logoutClient, setLoadingClient } from "./redux/auth.client
 import { getMe } from "./services/client/Auth.service";
 
 import settingService from "./services/admin/setting.service";
-import { setSettings } from "./redux/settingSlice";
+import { setSettings, setSettingLoading } from "./redux/settingSlice";
 
 function App() {
   const dispatch = useDispatch();
@@ -67,11 +67,13 @@ function App() {
 
   useEffect(() => {
     const fetchSetting = async () => {
+      dispatch(setSettingLoading(true));
       try {
         const res = await settingService.getDetail();
         dispatch(setSettings(res.data));
       } catch (err) {
         console.error("Load settings failed", err);
+        dispatch(setSettingLoading(false));
       }
     };
 
