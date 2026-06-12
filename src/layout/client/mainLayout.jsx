@@ -11,6 +11,7 @@ import { getTreeCategory } from "../../services/client/product.category.client";
 import { mapCategoryToMenuItems } from "../../utils/buildTree";
 import { useSelector } from "react-redux";
 import ChatBox from "../../pages/client/Chat/ChatBox";
+import AIChatBox from "../../pages/client/Chat/AIChatBox";
 
 function MainLayout() {
   const [menuItems, setMenuItems] = useState([]);
@@ -61,7 +62,8 @@ function MainLayout() {
         <Outlet />
       </main>
 
-      {/* Chat Component đã tách */}
+      {/* Chat Components */}
+      <AIChatBox />
       <ChatBox room_chat_id={room_chat_id} />
 
       <Footer />
