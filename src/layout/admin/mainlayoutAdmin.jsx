@@ -20,7 +20,7 @@ import { GrArticle } from "react-icons/gr";
 import { useSelector } from "react-redux";
 import { IoMdChatboxes } from "react-icons/io";
 import { TbCategory } from "react-icons/tb";
-import { FaRegTrashCan } from "react-icons/fa6";
+import { FaRegTrashCan, FaServer } from "react-icons/fa6";
 import { IoSettings } from "react-icons/io5";
 import "./MainLayoutAdmin.scss";
 import Avatar from "../../assets/banner/avatar-none.jpg";
@@ -154,6 +154,11 @@ const MainLayoutAdmin = () => {
       key: "13",
       icon: <IoSettings />,
       label: <Link to="/admin/setting">Cài đặt</Link>,
+    },
+    {
+      key: "14",
+      icon: <FaServer />,
+      label: <Link to="/admin/system-management">Hệ thống</Link>,
     }
 
   ];

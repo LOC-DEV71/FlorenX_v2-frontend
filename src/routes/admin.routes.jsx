@@ -35,6 +35,7 @@ import Orders from "../pages/admin/Order/Order.index";
 import Users from "../pages/admin/Uses/Users.index";
 import ProductsDetail from "../pages/admin/Products/poductsDetail";
 import OrderDetail from "../pages/admin/Order/OrderDetail";
+import SystemManagement from "../pages/admin/ManagementSystem/index.system";
 
 function AdminRoutes() {
   return (
@@ -191,6 +192,9 @@ function AdminRoutes() {
 
         {/* setting */}
         <Route path="setting" element={<SettingPage />} />
+
+        {/* system management */}
+        <Route path="system-management" element={<SystemManagement />} />
       </Route>
     </Routes>
   );
