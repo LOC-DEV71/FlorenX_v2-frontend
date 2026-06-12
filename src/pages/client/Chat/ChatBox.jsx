@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 import {
     MessageFilled,
     CloseOutlined,
@@ -18,6 +20,16 @@ function ChatBox({ room_chat_id }) {
     const userId = useSelector((state) => state.authClient.user?._id);
     const fullname = useSelector((state) => state.authClient.user?.fullname);
     const [manager, setManager] = useState("")
+    const navigate = useNavigate();
+
+    const handleToggleChat = () => {
+        if (!openChat && (!userId || !room_chat_id)) {
+            message.warning("Vui lòng đăng nhập để chat với nhân viên tư vấn!");
+            navigate("/login");
+            return;
+        }
+        setOpenChat(!openChat);
+    };
 
     // Gửi roomId lên server ngay khi ID tồn tại
     useEffect(() => {
@@ -132,7 +144,7 @@ function ChatBox({ room_chat_id }) {
                 </div>
             )}
 
-            <button className="chat-toggle-btn" onClick={() => setOpenChat(!openChat)}>
+            <button className="chat-toggle-btn" onClick={handleToggleChat}>
                 {openChat ? <CloseOutlined /> : <MessageFilled />}
             </button>
         </div>
