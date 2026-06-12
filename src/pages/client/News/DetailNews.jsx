@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { FiEye, FiArrowLeft, FiArrowRight, FiMenu } from "react-icons/fi";
 import { getCategories, getDetailBySlug, getRecentNews, getByCategory } from "../../../services/client/news.service";
 import SEO from "../../../utils/SEO";
 import "./DetailNews.scss";
+import Loading from "../../../utils/loading";
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -19,7 +21,6 @@ function DetailNews() {
   
   // State for determining view mode
   const [viewMode, setViewMode] = useState("loading"); // "loading", "detail", "list", "error"
-  
   // Data states
   const [article, setArticle] = useState(null);
   const [categoryNews, setCategoryNews] = useState([]);
@@ -99,7 +100,8 @@ function DetailNews() {
 
   return (
     <div className="detail-news">
-      <SEO title={article ? article.title : `Veltrix - ${activeCategoryLabel}`} />
+      {viewMode === "loading" && <Loading />}
+      <SEO title={article ? `Veltrix - ${article.title}` : `Veltrix - ${activeCategoryLabel}`} />
       
       {/* Breadcrumb */}
       <div className="dn-breadcrumb">
@@ -170,13 +172,13 @@ function DetailNews() {
             /* Article Detail View */
             <div className="dn-article">
               <button className="dn-back-btn" onClick={() => navigate(-1)}>
-                ← Quay lại
+                <FiArrowLeft /> Quay lại
               </button>
 
               <div className="article-meta">
                 <span className="article-category">{activeCategoryLabel}</span>
                 <span className="article-date">{formatDate(article.createdAt)}</span>
-                <span className="article-views">👁 {article.views?.toLocaleString()}</span>
+                <span className="article-views" style={{display: 'flex', alignItems: 'center', gap: '6px'}}><FiEye /> {article.views?.toLocaleString()}</span>
               </div>
 
               <h1 className="article-title">{article.title}</h1>
@@ -231,8 +233,8 @@ function DetailNews() {
                         <h3 className="card-title">{n.title}</h3>
                         <p className="card-desc">{n.description}</p>
                         <div className="card-footer">
-                          <span className="card-views">👁 {n.views?.toLocaleString()}</span>
-                          <span className="card-read">Đọc thêm →</span>
+                          <span className="card-views" style={{display: 'flex', alignItems: 'center', gap: '6px'}}><FiEye /> {n.views?.toLocaleString()}</span>
+                          <span className="card-read" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>Đọc thêm <FiArrowRight /></span>
                         </div>
                       </div>
                     </div>
@@ -254,8 +256,8 @@ function DetailNews() {
                         <h3 className="card-title">{n.title}</h3>
                         <p className="card-desc">{n.description}</p>
                         <div className="card-footer">
-                          <span className="card-views">👁 {n.views?.toLocaleString()}</span>
-                          <span className="card-read">Đọc thêm →</span>
+                          <span className="card-views" style={{display: 'flex', alignItems: 'center', gap: '6px'}}><FiEye /> {n.views?.toLocaleString()}</span>
+                          <span className="card-read" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>Đọc thêm <FiArrowRight /></span>
                         </div>
                       </div>
                     </div>
@@ -273,7 +275,7 @@ function DetailNews() {
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Mở danh mục"
       >
-        ☰ Danh mục
+        <FiMenu size={16}/> Danh mục
       </button>
     </div>
   );
