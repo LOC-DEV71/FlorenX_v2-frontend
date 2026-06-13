@@ -19,6 +19,7 @@ import Checkout from "../pages/client/cart/checkout";
 import OrderSuccess from "../pages/client/cart/OrderSuccess";
 import OrderList from "../pages/client/Order/OrderList";
 import DetailNews from "../pages/client/News/DetailNews";
+import NotFound from "../pages/client/NotFound/NotFound";
 
 function ClientRoutes(){
     return(
@@ -55,6 +56,8 @@ function ClientRoutes(){
 
 
                 <Route path="/order-success/:orderCode" element={<OrderSuccess/>}/>
+                
+                <Route path="*" element={<NotFound/>}/>
             </Route>
         </Routes>
     )

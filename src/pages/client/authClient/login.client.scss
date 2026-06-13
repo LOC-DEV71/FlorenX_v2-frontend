@@ -1,9 +1,19 @@
 .login-client {
   min-height: 100vh;
-  background: #03050a;
+  background: radial-gradient(circle at 50% -20%, #1a202c 0%, #000000 100%);
   color: #ffffff;
   position: relative;
   overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(rgba(28, 255, 149, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
   &__input-wrapper {
     position: relative;
@@ -27,7 +37,7 @@
     transition: 0.2s ease;
 
     &:hover {
-      color: #22d3ee;
+      color: #1cff95;
     }
 
     .anticon {
@@ -48,15 +58,17 @@
     font-weight: 500;
     z-index: 10;
     padding: 10px 14px;
-    border: 1px solid #334155;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(10px);
     transition: all 0.2s ease;
 
     &:hover {
-      color: #22d3ee;
-      border-color: #22d3ee;
-      background: #06111f;
+      color: #1cff95;
+      border-color: #1cff95;
+      background: rgba(28, 255, 149, 0.1);
+      box-shadow: 0 0 15px rgba(28, 255, 149, 0.2);
     }
   }
 
@@ -65,6 +77,8 @@
     margin: 0 auto;
     display: flex;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
   }
 
   &__left {
@@ -80,12 +94,21 @@
     }
   }
 
+  &__img {
+    img {
+      max-width: 250px;
+      margin-bottom: 20px;
+      animation: float 6s ease-in-out infinite;
+    }
+  }
+
   &__brand {
-    color: #22d3ee;
+    color: #1cff95;
     margin-bottom: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(28, 255, 149, 0.4);
   }
 
   &__title {
@@ -113,26 +136,30 @@
 
   &__box {
     width: 100%;
-    max-width: 520px;
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
+    max-width: 480px;
+    background: rgba(17, 17, 17, 0.6);
+    backdrop-filter: blur(20px);
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
     h2 {
       margin: 0 0 8px;
-      font-size: 40px;
+      font-size: 36px;
       color: #ffffff;
-      font-weight: 700;
+      font-weight: 800;
       line-height: 1.2;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
   }
 
   &__sub {
     margin: 0 0 32px;
-    color: #cbd5e1;
+    color: #8b95a7;
     font-size: 16px;
+    font-weight: 500;
   }
 
   &__form-group {
@@ -141,38 +168,40 @@
     label {
       display: block;
       margin-bottom: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #f1f5f9;
+      font-size: 13px;
+      font-weight: 700;
+      color: #cbd5e1;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .ant-input,
     .ant-input-password {
       background: transparent;
       border: none;
-      border-bottom: 1px solid #334155;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.15);
       color: #ffffff;
       border-radius: 0;
-      min-height: 40px;
+      min-height: 44px;
       padding: 0;
       box-shadow: none;
+      transition: all 0.3s ease;
     }
 
     .ant-input {
       padding: 0 0 10px;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .ant-input::placeholder,
     .ant-input-password input::placeholder {
-      color: #94a3b8;
-      font-size: 14px;
+      color: #64748b;
+      font-size: 15px;
     }
 
     .ant-input:hover,
     .ant-input-password:hover {
-      border-bottom-color: #22d3ee;
+      border-bottom-color: rgba(28, 255, 149, 0.5);
     }
 
     .ant-input:focus,
@@ -180,8 +209,8 @@
     .ant-input-password-focused,
     .ant-input-password:focus-within {
       border: none;
-      border-bottom: 1px solid #22d3ee;
-      box-shadow: none;
+      border-bottom: 2px solid #1cff95;
+      box-shadow: 0 10px 10px -10px rgba(28, 255, 149, 0.3);
     }
 
     .ant-input-password .ant-input {
@@ -201,10 +230,10 @@
       }
 
       &:hover {
-        color: #22d3ee;
+        color: #1cff95;
 
         .anticon {
-          color: #22d3ee;
+          color: #1cff95;
         }
       }
     }
@@ -221,38 +250,64 @@
   &__forgot {
     color: #cbd5e1;
     cursor: pointer;
+    font-weight: 500;
     transition: 0.2s;
 
     &:hover {
-      color: #22d3ee;
+      color: #1cff95;
+      text-shadow: 0 0 10px rgba(28, 255, 149, 0.5);
     }
   }
 
   &__btn {
     width: 100%;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    height: 42px;
-    background: #2d5aa3;
-    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 48px;
+    background: #1cff95;
+    color: #000000;
     border: none;
     margin-bottom: 26px;
-    font-size: 16px;
+    font-size: 15px;
+    box-shadow: 0 5px 15px rgba(28, 255, 149, 0.3);
 
     &:hover {
-      background: #244b88;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(28, 255, 149, 0.4);
+      filter: brightness(1.1);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
   }
 
   &__divider {
     text-align: center;
     margin: 10px 0 24px;
+    position: relative;
+
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 35%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &::before { left: 0; }
+    &::after { right: 0; }
 
     span {
-      color: #cbd5e1;
-      font-size: 16px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
   }
@@ -271,20 +326,20 @@
 
   &__btn-google {
     width: 100%;
-    min-height: 58px;
+    min-height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 6px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
 
     &:hover {
-      border-color: #22d3ee;
-      background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
-      box-shadow:
-        0 12px 34px rgba(34, 211, 238, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     > div {
@@ -293,28 +348,36 @@
 
     iframe {
       width: 100% !important;
-      min-height: 46px !important;
+      min-height: 40px !important;
       border-radius: 999px !important;
     }
   }
 
   &__register {
-    margin-top: 36px;
+    margin-top: 32px;
     font-size: 15px;
     text-align: center;
     color: #cbd5e1;
 
     a {
-      color: #22d3ee;
+      color: #1cff95;
       text-decoration: none;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 700;
+      margin-left: 5px;
 
       &:hover {
-        color: #67e8f9;
+        color: #fff;
+        text-shadow: 0 0 10px #1cff95;
       }
     }
   }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
 }
 
 @media (max-width: 768px) {
@@ -337,9 +400,11 @@
 
     &__box {
       max-width: 100%;
+      background: rgba(17, 17, 17, 0.8);
+      padding: 30px 20px;
 
       h2 {
-        font-size: 34px;
+        font-size: 32px;
       }
     }
 
@@ -356,14 +421,14 @@
     }
 
     &__btn {
-      height: 50px;
-      font-size: 16px;
+      height: 48px;
+      font-size: 15px;
     }
 
     &__btn-google {
-      min-height: 54px;
+      min-height: 48px;
       padding: 5px;
-      border-radius: 14px;
+      border-radius: 10px;
     }
   }
 }

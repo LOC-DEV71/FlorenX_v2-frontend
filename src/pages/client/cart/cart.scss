@@ -1,10 +1,23 @@
 .cart-page {
-    background: #000;
     min-height: 100vh;
+    padding: 60px 0 80px;
+    background: radial-gradient(circle at 50% -20%, #1a202c 0%, #000000 100%);
     color: #fff;
-    padding: 40px 0 80px;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: radial-gradient(rgba(28, 255, 149, 0.03) 1px, transparent 1px);
+        background-size: 30px 30px;
+        pointer-events: none;
+        z-index: 0;
+    }
 
     &__inner {
+        position: relative;
+        z-index: 1;
         width: min(1280px, calc(100% - 48px));
         margin: 0 auto;
         margin-bottom: 100px; 
@@ -81,12 +94,12 @@
 }
 
 .cart-left {
-    border-top: 1px solid #1e1e1e;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
 
     &__promo {
         margin-top: 40px;
         padding-top: 28px;
-        border-top: 1px solid #1e1e1e;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
 
         button {
             background: transparent;
@@ -111,7 +124,7 @@
 
 .cart-product {
     padding: 28px 0;
-    border-bottom: 1px solid #1e1e1e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 
     &__discount {
         margin-top: 8px;
@@ -358,7 +371,7 @@
 
     &__line {
         height: 1px;
-        background: #2a2a2a;
+        background: rgba(255, 255, 255, 0.15);
         margin: 22px 0;
     }
 
