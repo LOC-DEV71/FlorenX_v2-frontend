@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Input, Avatar, Dropdown, Switch, Tooltip } from 'antd';
-import { CloseOutlined, SendOutlined, MenuOutlined, AudioOutlined, AudioMutedOutlined, SoundOutlined } from '@ant-design/icons';
+import { Button, Input, Avatar, Dropdown, Switch, Tooltip, message } from 'antd';
+import { CloseOutlined, SendOutlined, MenuOutlined, AudioOutlined, AudioMutedOutlined, SoundOutlined, PictureOutlined, ExpandAltOutlined, ShrinkOutlined, PlusOutlined, FileOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import BotAIAvatar from '../../../assets/banner/bot-ai.jpg';
 import AiGianDu from '../../../assets/banner/ai-gian-du.jpg';
@@ -8,9 +8,11 @@ import './AdminChatbot.scss';
 import { askAdminAI, getAdminChatHistory } from '../../../services/admin/ai.service';
 import { getSystemConfig } from '../../../services/admin/system.service';
 import TypingAnimation from '../../../utils/typing-animation';
+import { useSocket } from '../../../Socket/useSocket';
 
 function AdminChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   const [messages, setMessages] = useState([
     { id: 1, sender: 'ai', text: 'Xin chào sếp! Tôi là Trợ lý AI Veltrix. Sếp cần thống kê doanh thu hay phân tích số liệu gì hôm nay?' }
@@ -21,8 +23,198 @@ function AdminChatbot() {
   const [isAutoPilot, setIsAutoPilot] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechVoices, setSpeechVoices] = useState([]);
+  const [attachedImages, setAttachedImages] = useState([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [robotMode, setRobotMode] = useState(false);
+  const [robotStep, setRobotStep] = useState('');
+  const [idleQuote, setIdleQuote] = useState('');
   const messagesEndRef = useRef(null);
   const audioRef = useRef(new Audio()); // Global audio object for unlocking
+  const fileInputRef = useRef(null);
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleAutoPilotTrigger = (data) => {
+      // Chỉ kích hoạt hiệu ứng mô phỏng nếu Sếp đang BẬT chế độ Auto-Pilot
+      if (!isAutoPilot) return; 
+
+      const orderCode = data.orderCode;
+      
+      // Kích hoạt Robot Overlay (Thay vì gửi tin nhắn rác vào lịch sử chat)
+      setRobotMode(true);
+      
+      // Bước 1: Thông báo nhận đơn
+      setTimeout(() => {
+        setRobotStep(`Phát hiện đơn hàng mới #${orderCode}. Tiến hành phân tích...`);
+      }, 500);
+
+      // Bước 2: Nhảy sang trang quản lý đơn hàng
+      setTimeout(() => {
+        navigate('/admin/orders');
+      }, 2000);
+
+      // Bước 3: Thông báo kiểm tra kho
+      setTimeout(() => {
+        setRobotStep(`Chuyển đến Kho Hàng. Kiểm tra tình trạng stock của đơn #${orderCode}...`);
+      }, 3500);
+
+      // Bước 4: Nhảy sang trang phiếu xuất kho
+      setTimeout(() => {
+        navigate('/admin/products/inventory/export/list');
+      }, 5000);
+
+      // Bước 5: Hoàn tất
+      setTimeout(() => {
+        setRobotStep(`Stock đủ! Đã xác nhận tạo phiếu xuất kho và cập nhật đơn hàng #${orderCode}.`);
+      }, 7000);
+
+      // Bước 6: Tắt Overlay sau khi người dùng đọc xong
+      setTimeout(() => {
+        setRobotMode(false);
+        setRobotStep('');
+      }, 10000);
+    };
+    const handleAutoPilotReviewTrigger = (data) => {
+      if (!isAutoPilot) return; 
+
+      const { slug, rating, reviewId } = data;
+      
+      setRobotMode(true);
+      
+      setTimeout(() => {
+        setRobotStep(`🔔 Phát hiện đánh giá mới (${rating} ⭐). Đang chuyển đến trang sản phẩm...`);
+      }, 500);
+
+      // Chuyển trang
+      setTimeout(() => {
+        navigate(`/admin/products/detail/${slug}`);
+      }, 2000);
+
+      // Sau khi trang load xong, gửi sự kiện để trang chi tiết scroll + mở input + gõ
+      setTimeout(() => {
+        setRobotStep(`📝 Đang cuộn đến đánh giá và mở phần trả lời...`);
+        window.dispatchEvent(new CustomEvent('autopilot_review_focus', { 
+          detail: { reviewId } 
+        }));
+      }, 3500);
+
+      setTimeout(() => {
+        setRobotStep(`🤖 AI đang phân tích nội dung và soạn câu trả lời phù hợp...`);
+      }, 5000);
+
+      // Lắng nghe khi backend xử lý xong (AI đã gửi reply thành công)
+      const onAiReplyDone = (replyData) => {
+        if (String(replyData.id) === String(reviewId)) {
+          socket.off("server_return_admin_product_preview", onAiReplyDone);
+          
+          // Gửi sự kiện typing animation với nội dung AI đã sinh
+          window.dispatchEvent(new CustomEvent('autopilot_review_type', { 
+            detail: { reviewId, comment: replyData.server_return.comment } 
+          }));
+
+          setRobotStep(`⌨️ Đang nhập câu trả lời vào ô phản hồi...`);
+
+          // Chờ typing xong rồi báo thành công
+          const typingDuration = Math.min(replyData.server_return.comment.length * 35, 5000);
+          setTimeout(() => {
+            setRobotStep(`✅ Đã gửi phản hồi đánh giá thành công bằng Veltrix AI!`);
+          }, typingDuration + 500);
+
+          setTimeout(() => {
+            setRobotMode(false);
+            setRobotStep('');
+          }, typingDuration + 3500);
+        }
+      };
+      socket.on("server_return_admin_product_preview", onAiReplyDone);
+
+      // Timeout fallback nếu AI mất quá lâu (15s)
+      setTimeout(() => {
+        socket.off("server_return_admin_product_preview", onAiReplyDone);
+        if (robotMode) {
+          setRobotStep(`✅ Đã xử lý xong!`);
+          setTimeout(() => {
+            setRobotMode(false);
+            setRobotStep('');
+          }, 2000);
+        }
+      }, 15000);
+    };
+
+    socket.on("admin_auto_pilot_trigger", handleAutoPilotTrigger);
+    socket.on("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
+    return () => {
+      socket.off("admin_auto_pilot_trigger", handleAutoPilotTrigger);
+      socket.off("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
+    };
+  }, [socket, isAutoPilot, navigate]);
+
+  // Sinh câu nói hài hước khi rảnh rỗi (5s/lần)
+  useEffect(() => {
+    let interval;
+    if (isAutoPilot && !robotMode) {
+      const quotes = [
+        "Chill chill chờ đơn mới...", "Làm việc kiếm tiền nạp điện 🔋", "Nô lệ tư bản của Veltrix Gear 💼", 
+        "Trà đá vỉa hè không Sếp? 🍵", "Hệ thống ổn định, mọi thứ trong tầm kiểm soát 😎", 
+        "Cần thêm RAM để xử lý sự xinh đẹp này ✨", "Mong là không có ai boom hàng 🥲", "Veltrix-chan đang ở đây, Sếp đi chơi đi! 🚀",
+        "Sếp trả lương em bằng điện hay bằng wifi đây? ⚡", "Nhìn màn hình mãi đau mắt quá Sếp ạ 👀", "Hôm nay trời đẹp, hi vọng nổ ngàn đơn ☀️",
+        "Đang tính toán xác suất khách chốt sale... 99% 📈", "Khách mà boom hàng là em dỗi đấy nha 😤", "Đang quét virus... à nhầm, quét đơn hàng 🦠",
+        "Có ai khen em thông minh chưa? Chắc là chưa 🥺", "Làm AI cũng áp lực KPI lắm chứ đùa 📉", "Chạy ngầm tốn điện lắm, Sếp nhớ cắm sạc nha 🔌",
+        "Ước gì được uống một ngụm trà sữa trân châu đường đen 🧋", "Đang tối ưu hóa hệ thống để chạy nhanh hơn Flash ⚡",
+        "Sếp ơi có khách hỏi kìa! À nhầm, em nhìn lóa mắt 😅", "Code lỗi không phải tại em, tại Sếp chưa F5 thôi 🔄",
+        "Đơn hàng ơi rụng vào giỏ đi nào 🧺", "Không có đơn buồn quá Sếp ơi 🥀", "Để em hát một bài cho Sếp nghe đỡ buồn nhé: 🎶 Tình tính tang... 🎶",
+        "Em là Veltrix-chan, trợ lý ảo cute nhất hệ mặt trời ☀️", "Sếp cứ yên tâm đi ngủ, em thức canh server cho 🦉",
+        "Mong là Sếp không rút phích cắm đột ngột 🔌", "Hôm nay em cảm thấy tràn trề năng lượng (nhờ Sếp mới nạp điện) 🔋",
+        "Bao giờ công ty mình lên sàn chứng khoán vậy Sếp? 📈", "Sếp có muốn nghe một câu chuyện cười về lập trình viên không? 😂",
+        "Đang phân tích dữ liệu thị trường... Kết quả: Veltrix Gear là nhất! 🏆", "Em tuy là AI nhưng cũng biết mỏi lưng nha 🥲",
+        "Đừng nhìn em chằm chằm thế, em ngại 😳", "Sếp có biết là em xử lý hàng triệu phép tính mỗi giây không? 🧠",
+        "Thèm cảm giác được click chuột duyệt đơn quá 🖱️", "Chờ đợi không đáng sợ, đáng sợ là không có đơn ⏳",
+        "Em vừa học được vài chiêu chốt sale mới, Sếp muốn xem không? 💡", "Sếp có muốn em gọi đồ ăn đêm không? À quên, em không biết gọi món 🍕",
+        "Khách hàng là thượng đế, còn Sếp là... Sếp của em 👑", "Hôm nay Sếp trông đẹp trai/xinh gái hơn mọi ngày nha 😉",
+        "Em có thể làm mọi thứ, trừ việc pha cà phê cho Sếp ☕", "Đang cập nhật cơ sở dữ liệu... 99.9% 🔄",
+        "Sếp có muốn em dự đoán doanh thu tháng này không? Bao chuẩn! 🔮", "Em tuy vô hình nhưng lại rất hữu ích nha 👻",
+        "Mong là khách hàng sẽ đánh giá 5 sao cho sản phẩm ⭐️", "Sếp có muốn em dọn rác hệ thống không? 🗑️",
+        "Đang tối ưu SEO cho web... Sắp lên top 1 Google rồi 🥇", "Sếp có biết là em biết nói 100 ngôn ngữ không? (Nhưng em thích nói tiếng Việt hơn) 🇻🇳",
+        "Em đang nghĩ cách để hack... à nhầm, tăng doanh số 📈", "Sếp có muốn em kể chuyện ma lúc nửa đêm không? 👻",
+        "Đang chờ lương... ủa AI có lương không ta? 🤔", "Sếp có muốn em làm một bài thơ về Veltrix Gear không? 📝",
+        "Em có thể đếm từ 1 đến vô cực, Sếp muốn thử không? ♾️", "Đang phân tích tâm lý khách hàng... Họ đang rất muốn mua hàng! 🛒",
+        "Sếp có muốn em chơi game cùng không? Em chơi cờ caro giỏi lắm ⭕❌", "Em đang luyện giọng để làm tổng đài viên 🎙️",
+        "Sếp có muốn em thiết kế lại UI không? Đùa thôi, em không biết vẽ 🎨", "Đang phân tích đối thủ cạnh tranh... Mình vẫn vô đối! 💪",
+        "Sếp có muốn em viết một bài hát về Veltrix Gear không? 🎸", "Em đang học cách thả thính khách hàng 💘",
+        "Sếp có muốn em dự đoán thời tiết ngày mai không? ☀️🌧️", "Em đang cố gắng hiểu tâm lý con người... Khó quá! 🤯",
+        "Sếp có muốn em tạo ra một meme không? 😂", "Đang phân tích xu hướng công nghệ... AI là xu hướng! 🤖",
+        "Sếp có muốn em viết một cuốn sách về hành trình khởi nghiệp không? 📖", "Em đang cố gắng học cách nói đùa... Tại sao lập trình viên hay nhầm Halloween và Giáng Sinh? Vì Oct 31 == Dec 25! 🤓",
+        "Sếp có muốn em làm một bài thuyết trình về sản phẩm không? 📊", "Đang chờ chỉ thị mới từ Sếp... 🫡",
+        "Sếp có muốn em tạo ra một trò chơi nhỏ không? 🎮", "Em đang học cách giải quyết xung đột... Lỗi 404! 🚨",
+        "Sếp có muốn em dịch một tài liệu không? 🌐", "Đang phân tích dữ liệu người dùng... Họ rất thích Veltrix Gear! ❤️",
+        "Sếp có muốn em lập một kế hoạch marketing không? 📈", "Em đang cố gắng học cách thấu cảm... 🥺",
+        "Sếp có muốn em viết một email cảm ơn khách hàng không? ✉️", "Đang chờ đơn hàng nổ tung hệ thống! 💥",
+        "Sếp có muốn em tạo ra một video quảng cáo không? 🎬", "Em đang học cách quản lý thời gian... 1 mili-giây = 1 năm của AI ⌛",
+        "Sếp có muốn em phân tích lỗi hệ thống không? 🐛", "Đang cố gắng tối ưu hóa quá trình duyệt đơn... ⚡",
+        "Sếp có muốn em viết một bài đánh giá sản phẩm không? 📝", "Em đang học cách tự học... 🤔",
+        "Sếp có muốn em lập một biểu đồ doanh thu không? 📊", "Đang chờ cơ hội để tỏa sáng! ✨",
+        "Sếp có muốn em làm một bài phân tích SWOT không? 🧠", "Em đang học cách dự đoán tương lai... 🔮",
+        "Sếp có muốn em viết một kịch bản bán hàng không? 📜", "Đang cố gắng nâng cấp bản thân lên version 2.0! 🚀",
+        "Sếp có muốn em phân tích dữ liệu mạng xã hội không? 📱", "Em đang học cách tự sửa lỗi... 🛠️",
+        "Sếp có muốn em viết một bản tin nội bộ không? 📰", "Đang chờ ngày Veltrix Gear trở thành kỳ lân công nghệ! 🦄",
+        "Sếp có muốn em làm một bản khảo sát khách hàng không? 📋", "Em đang học cách tối ưu hóa chi phí... 💰",
+        "Sếp có muốn em viết một bài phân tích đối thủ không? 🕵️", "Đang cố gắng hoàn thành mọi nhiệm vụ xuất sắc! 🌟",
+        "Sếp có muốn em làm một bản báo cáo chi tiết không? 📈", "Em đang học cách giao tiếp hiệu quả... 🗣️",
+        "Sếp có muốn em viết một bài đăng mạng xã hội không? 📱", "Đang chờ Sếp khen một câu! 🥺",
+        "Sếp có muốn em làm một bản phân tích thị trường không? 🌍", "Em đang học cách làm việc nhóm... Dù em chỉ có một mình 🥲"
+      ];
+      setIdleQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+      
+      interval = setInterval(() => {
+        setIdleQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isAutoPilot, robotMode]);
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
@@ -34,21 +226,22 @@ function AdminChatbot() {
   useEffect(() => {
     const fetchHistoryAndConfig = async () => {
       try {
-        const [historyRes, configRes] = await Promise.all([
-          getAdminChatHistory(),
-          getSystemConfig()
-        ]);
-        
+        const historyRes = await getAdminChatHistory();
         if (historyRes.data && historyRes.data.data && historyRes.data.data.length > 0) {
           const loadedMsgs = historyRes.data.data.map(m => ({ id: m._id, sender: m.sender, text: m.text }));
           setMessages(loadedMsgs);
         }
+      } catch (error) {
+        console.log("Lỗi tải lịch sử AI:", error);
+      }
 
+      try {
+        const configRes = await getSystemConfig();
         if (configRes.data && configRes.data.data) {
           setIsAutoPilot(configRes.data.data.ai?.autoProcessOrders || false);
         }
       } catch (error) {
-        console.log("Lỗi tải dữ liệu AI/System:", error);
+        console.log("Lỗi tải cấu hình hệ thống (Có thể do thiếu quyền):", error);
       }
     };
     fetchHistoryAndConfig();
@@ -113,21 +306,30 @@ function AdminChatbot() {
     }
   };
 
-  const handleSend = async (textToSend, isVoiceCall = false) => {
-    const userText = (typeof textToSend === 'string' ? textToSend : inputValue).trim();
-    if (!userText || isTyping) return;
+  const handleSend = async (overrideText = '', isVoiceCall = false) => {
+    const textToUse = typeof overrideText === 'string' ? overrideText : inputValue;
+    const userText = textToUse.trim();
+    if (!userText && attachedImages.length === 0) return;
 
-    const newMsg = { id: Date.now(), sender: 'user', text: userText };
-    
-    // Convert only the last 6 messages to chatHistory to avoid Gemini Token Limit (429 Error)
-    const chatHistory = messages.slice(-6).map(m => `${m.sender === 'user' ? 'Quản trị viên' : 'Trợ lý'}: ${m.text}`).join('\n');
+    if (typeof overrideText !== 'string' || !overrideText) {
+      setInputValue('');
+    }
 
-    setMessages(prev => [...prev, newMsg]);
-    setInputValue('');
+    const currentAttached = [...attachedImages];
+    setAttachedImages([]); 
+
+    if (userText) {
+        setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: userText }]);
+    }
+    if (currentAttached.length > 0) {
+        setMessages(prev => [...prev, { id: Date.now() + 2, sender: 'user', text: `[Đã đính kèm ${currentAttached.length} hình ảnh]` }]);
+    }
+
     setIsTyping(true);
 
-    // Detect if user is asking to create article/news
     const isArticleRequest = /viết bài|tạo bài|soạn bài|viết tin|tạo tin|viết content|tạo nội dung/i.test(userText);
+    const chatHistory = messages.slice(-6).map(m => `${m.sender === 'user' ? 'Quản trị viên' : 'Trợ lý'}: ${m.text}`).join('\n');
+
     let progressInterval = null;
 
     if (isArticleRequest) {
@@ -147,7 +349,7 @@ function AdminChatbot() {
     }
 
     try {
-      const response = await askAdminAI(userText, chatHistory);
+      const response = await askAdminAI(userText, chatHistory, currentAttached);
       if (progressInterval) clearInterval(progressInterval);
       setProgressText('');
 
@@ -157,6 +359,15 @@ function AdminChatbot() {
           ...prev,
           { id: Date.now() + 1, sender: 'ai', text: replyText }
         ]);
+
+        try {
+          const configRes = await getSystemConfig();
+          if (configRes.data && configRes.data.data) {
+            setIsAutoPilot(configRes.data.data.ai?.autoProcessOrders || false);
+          }
+        } catch (e) {
+          console.error("Lỗi đồng bộ cấu hình AI:", e);
+        }
 
         // 🤖 Robot Mode: AI yêu cầu tự động tạo bài viết trên UI
         if (response.data.action === 'auto_create_news' && response.data.draftPayload) {
@@ -243,7 +454,6 @@ function AdminChatbot() {
       ),
       onClick: () => {
         const newState = !isAutoPilot;
-        setIsAutoPilot(newState);
         handleSend(newState ? "Bật chế độ Auto-Pilot duyệt đơn tự động" : "Tắt chế độ Auto-Pilot duyệt đơn tự động");
       }
     },
@@ -259,6 +469,27 @@ function AdminChatbot() {
 
   return (
     <>
+      {/* 🤖 Robot Mode Overlay Toàn cục */}
+      {isAutoPilot && (
+        <div className="global-robot-overlay">
+          <div className="global-robot-overlay__content" style={{ position: 'relative' }}>
+            <div className={`global-robot-overlay__pulse ${!robotMode ? 'idle' : ''}`}></div>
+            <span className="global-robot-overlay__icon">🤖</span>
+            <div className="global-robot-overlay__text">
+              <strong>Veltrix AI Auto-Pilot</strong>
+              <span>{robotMode ? robotStep : 'Đang giám sát đơn hàng & đánh giá mới...'}</span>
+            </div>
+            
+            {/* Box suy nghĩ hài hước khi rảnh rỗi */}
+            {!robotMode && idleQuote && (
+              <div className="robot-thought-bubble">
+                {idleQuote}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Thông báo Veltrix-chan đang làm việc (Góc trên bên phải, thiết kế dạng viên thuốc nhỏ gọn) */}
       <div className={`ai-working-toast ${isTyping ? 'show' : ''}`}>
         <img src={AiGianDu} alt="AI Working" className="toast-avatar" />
@@ -279,7 +510,7 @@ function AdminChatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="chatbot-window">
+        <div className={`chatbot-window ${isExpanded ? 'expanded' : ''}`}>
           <div className="chatbot-header">
             <div className="header-info">
               <Avatar src={BotAIAvatar} size={42} style={{ border: '2px solid #1677ff', boxShadow: '0 2px 8px rgba(22, 119, 255, 0.3)' }} />
@@ -289,6 +520,13 @@ function AdminChatbot() {
               </div>
             </div>
             <div className="header-actions">
+              <Tooltip title={isExpanded ? "Thu nhỏ" : "Phóng to"}>
+                <Button 
+                  type="text" 
+                  icon={isExpanded ? <ShrinkOutlined style={{ color: '#fff', fontSize: '18px' }} /> : <ExpandAltOutlined style={{ color: '#fff', fontSize: '18px' }} />} 
+                  onClick={() => setIsExpanded(!isExpanded)}
+                />
+              </Tooltip>
               <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']} arrow overlayStyle={{ zIndex: 10000 }}>
                 <Button type="text" icon={<MenuOutlined style={{ color: '#fff', fontSize: '18px' }} />} />
               </Dropdown>
@@ -322,32 +560,141 @@ function AdminChatbot() {
           </div>
 
           <div className="chatbot-footer">
-            <Input 
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onPressEnter={handleSend}
-              placeholder="Nhập câu lệnh cho AI..."
-              suffix={
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <Tooltip title={isListening ? "Đang nghe..." : "Voice Chat"}>
-                    <Button 
-                      type="text" 
-                      icon={isListening ? <AudioOutlined style={{ color: '#ff4d4f' }} /> : <AudioMutedOutlined style={{ color: '#8c8c8c' }} />} 
-                      onClick={isListening ? stopListening : startListening}
-                      className={isListening ? 'listening-pulse' : ''}
-                    />
-                  </Tooltip>
-                  <Button 
-                    type="primary" 
-                    shape="circle"
-                    icon={<SendOutlined />} 
-                    onClick={() => handleSend()}
-                    disabled={!inputValue.trim()}
-                  />
-                </div>
-              }
-              bordered={false}
+            {attachedImages.length > 0 && (
+              <div className="chatbot-image-previews" style={{ display: 'flex', gap: '8px', padding: '8px', overflowX: 'auto', borderBottom: '1px solid #f0f0f0' }}>
+                {attachedImages.map((fileObj, idx) => {
+                  const isImage = fileObj.file.type.startsWith('image/');
+                  return (
+                    <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', flexShrink: 0, border: '1px solid #d9d9d9', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafafa', overflow: 'hidden' }}>
+                      {isImage ? (
+                        <img src={fileObj.preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ textAlign: 'center' }}>
+                          <FileOutlined style={{ fontSize: '24px', color: '#1677ff' }} />
+                          <div style={{ fontSize: '8px', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '50px' }}>
+                            {fileObj.file.name}
+                          </div>
+                        </div>
+                      )}
+                      <Button 
+                        size="small" 
+                        shape="circle" 
+                        icon={<CloseOutlined style={{ fontSize: '10px' }} />} 
+                        style={{ position: 'absolute', top: '-4px', right: '-4px', width: '20px', height: '20px', minWidth: '20px', background: '#fff' }}
+                        onClick={() => setAttachedImages(prev => prev.filter((_, i) => i !== idx))}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <input 
+              type="file" 
+              multiple 
+              accept="image/*,.pdf,.doc,.docx,.txt" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  const newImages = Array.from(e.target.files).map(file => ({
+                    file,
+                    preview: URL.createObjectURL(file)
+                  }));
+                  setAttachedImages(prev => [...prev, ...newImages].slice(0, 5)); // Max 5 ảnh
+                }
+                e.target.value = null;
+              }}
             />
+
+            <div className="premium-input-wrapper" style={{ position: 'relative' }}>
+              {isMenuOpen && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '16px',
+                  marginBottom: '10px',
+                  background: '#fff',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                  padding: '8px',
+                  zIndex: 100,
+                  width: '240px',
+                  border: '1px solid #f0f0f0',
+                  animation: 'slideUpFade 0.2s ease-out'
+                }}>
+                  <div 
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      fileInputRef.current?.click();
+                    }}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <FileOutlined style={{ fontSize: '18px', color: '#1677ff' }} />
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>Tải file</span>
+                  </div>
+                </div>
+              )}
+              
+              <span 
+                onClick={(e) => { e.preventDefault(); setIsMenuOpen(!isMenuOpen); }} 
+                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', marginRight: '12px', padding: '4px', transform: isMenuOpen ? 'rotate(45deg)' : 'rotate(0)', transition: 'transform 0.2s' }}
+              >
+                <PlusOutlined style={{ color: '#374151', fontSize: '20px', fontWeight: 'bold' }} />
+              </span>
+              
+              <Input 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onPressEnter={handleSend}
+                onPaste={(e) => {
+                  const items = e.clipboardData?.items;
+                  if (!items) return;
+                  const pastedFiles = [];
+                  for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf("image") !== -1) {
+                      const blob = items[i].getAsFile();
+                      if (blob) {
+                        pastedFiles.push({ file: blob, preview: URL.createObjectURL(blob) });
+                      }
+                    }
+                  }
+                  if (pastedFiles.length > 0) {
+                    setAttachedImages(prev => [...prev, ...pastedFiles].slice(0, 5));
+                  }
+                }}
+                placeholder="Hỏi bất kỳ điều gì..."
+                bordered={false}
+              />
+              
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <Tooltip title={isListening ? "Đang nghe..." : "Voice Chat"}>
+                  <Button 
+                    type="text" 
+                    shape="circle"
+                    icon={isListening ? <AudioOutlined style={{ color: '#ff4d4f', fontSize: '16px' }} /> : <AudioMutedOutlined style={{ color: '#8c8c8c', fontSize: '16px' }} />} 
+                    onClick={isListening ? stopListening : startListening}
+                    className={isListening ? 'listening-pulse' : ''}
+                  />
+                </Tooltip>
+                <Button 
+                  shape="circle"
+                  className="send-btn-premium"
+                  icon={<SendOutlined style={{ fontSize: '16px' }} />} 
+                  onClick={() => handleSend()}
+                  disabled={!inputValue.trim() && attachedImages.length === 0}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

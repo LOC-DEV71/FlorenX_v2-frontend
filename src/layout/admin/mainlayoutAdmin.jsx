@@ -193,7 +193,37 @@ const MainLayoutAdmin = () => {
   const siderWidth = collapsed ? 80 : 200;
   const socket = useSocket();
 
+  useEffect(() => {
+    if (admin && socket) {
+      const emitPresence = () => {
+        socket.emit("admin_online", {
+          id: admin._id || admin.id || "unknown_" + Math.random(),
+          fullname: admin.fullname,
+          role: role?.title || "Quản trị viên"
+        });
+      };
 
+      // Phát sự kiện ngay lần đầu (nếu socket đã kết nối)
+      if (socket.connected) {
+        emitPresence();
+      } else {
+        // Hoặc chờ socket kết nối xong ở lần đầu
+        socket.on("connect", emitPresence);
+      }
+
+      // Xử lý trường hợp backend bị restart, socket tự động reconnect lại
+      // thì phải phát lại tín hiệu để cập nhật danh sách
+      socket.on("reconnect", emitPresence);
+      
+      // Dự phòng cho phiên bản socket io mới có thể gọi connect lại
+      socket.on("connect", emitPresence);
+
+      return () => {
+        socket.off("connect", emitPresence);
+        socket.off("reconnect", emitPresence);
+      };
+    }
+  }, [admin, role, socket]);
 
   const [notifications, setNotifications] = useState([]);
   const [openNoti, setOpenNoti] = useState(false);

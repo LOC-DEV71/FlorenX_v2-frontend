@@ -1,5 +1,5 @@
 import "./ProductsDetail.scss";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FiMoreVertical, FiPackage, FiStar, FiImage, FiRefreshCw } from "react-icons/fi";
 import {
@@ -40,6 +40,7 @@ function ProductsDetail() {
     const socket = useSocket();
     const [action, setAction] = useState({ type: false, id: "" });
     const [returnReview, setReturnReview] = useState({ id: "", comment: "" });
+    const autoPilotTypingRef = useRef(null); // Ref cho interval typing animation
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -89,6 +90,66 @@ function ProductsDetail() {
         socket.on("server_return_admin_product_preview", handler);
         return () => socket.off("server_return_admin_product_preview", handler);
     }, [socket]);
+
+    // === AUTO-PILOT: Lắng nghe sự kiện scroll đến review + typing animation ===
+    useEffect(() => {
+        const handleFocus = (e) => {
+            const { reviewId } = e.detail;
+            // Retry tìm review card (có thể data chưa load xong)
+            let retries = 0;
+            const tryScroll = () => {
+                const reviewCard = document.querySelector(`[data-review-id="${reviewId}"]`);
+                if (reviewCard) {
+                    reviewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    reviewCard.classList.add('pd__review-card--highlight');
+                    setTimeout(() => reviewCard.classList.remove('pd__review-card--highlight'), 5000);
+                    // Mở reply input cho review đó
+                    setReturnReview({ id: reviewId, comment: '' });
+                } else if (retries < 10) {
+                    retries++;
+                    setTimeout(tryScroll, 300);
+                }
+            };
+            setTimeout(tryScroll, 500);
+        };
+
+        const handleType = (e) => {
+            const { reviewId, comment } = e.detail;
+            if (!comment) return;
+            
+            // Clear interval cũ nếu có
+            if (autoPilotTypingRef.current) clearInterval(autoPilotTypingRef.current);
+
+            let charIndex = 0;
+            setReturnReview({ id: reviewId, comment: '' });
+
+            // Gõ từng ký tự
+            autoPilotTypingRef.current = setInterval(() => {
+                charIndex++;
+                const currentText = comment.substring(0, charIndex);
+                setReturnReview({ id: reviewId, comment: currentText });
+
+                // Scroll textarea xuống cuối khi typing
+                const textarea = document.querySelector(`[data-review-id="${reviewId}"] .pd__reply-box textarea`);
+                if (textarea) {
+                    textarea.scrollTop = textarea.scrollHeight;
+                }
+
+                if (charIndex >= comment.length) {
+                    clearInterval(autoPilotTypingRef.current);
+                    autoPilotTypingRef.current = null;
+                }
+            }, 30);
+        };
+
+        window.addEventListener('autopilot_review_focus', handleFocus);
+        window.addEventListener('autopilot_review_type', handleType);
+        return () => {
+            window.removeEventListener('autopilot_review_focus', handleFocus);
+            window.removeEventListener('autopilot_review_type', handleType);
+            if (autoPilotTypingRef.current) clearInterval(autoPilotTypingRef.current);
+        };
+    }, []);
 
     const finalPrice = useMemo(() => {
         if (!data?.price) return 0;
@@ -290,7 +351,7 @@ function ProductsDetail() {
 
                         <div className="pd__review-list">
                             {preview?.length > 0 ? preview.map((review) => (
-                                <div className="pd__review-card" key={review._id}>
+                                <div className="pd__review-card" key={review._id} data-review-id={review._id}>
                                     <div className="pd__review-top">
                                         <div className="pd__review-user">
                                             <Avatar>{review?.user_name?.charAt(0)}</Avatar>

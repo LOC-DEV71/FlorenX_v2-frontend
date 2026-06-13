@@ -45,9 +45,9 @@ const SystemManagement = () => {
     }
   };
 
-  const handleSaveMulti = async (payload) => {
+  const handleSaveMulti = async (payload, botAvatarFile) => {
     try {
-      const res = await updateSystemConfig(payload);
+      const res = await updateSystemConfig(payload, botAvatarFile);
       if (res.data.code === 200) {
         message.success("Lưu cấu hình thành công!");
         fetchData();
@@ -70,7 +70,7 @@ const SystemManagement = () => {
     {
       key: '2',
       label: 'Cấu hình AI Chatbox',
-      children: <AIConfig data={data} onSave={(payload) => handleSaveMulti(payload)} />,
+      children: <AIConfig data={data} onSave={(payload, file) => handleSaveMulti(payload, file)} />,
     },
     {
       key: '3',

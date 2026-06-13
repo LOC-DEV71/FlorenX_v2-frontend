@@ -448,9 +448,21 @@
     padding: 18px;
     background: #fff;
     position: relative;
-    transition: box-shadow 0.15s;
+    transition: box-shadow 0.15s, border-color 0.3s;
 
     &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    // Auto-Pilot highlight animation
+    &--highlight {
+        border-color: var(--pd-accent) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 8px 24px rgba(99, 102, 241, 0.12) !important;
+        animation: pd-review-pulse 1.5s ease-in-out infinite;
+    }
+}
+
+@keyframes pd-review-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 8px 24px rgba(99, 102, 241, 0.12); }
+    50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.08), 0 12px 32px rgba(99, 102, 241, 0.18); }
 }
 
 .pd__review-top {

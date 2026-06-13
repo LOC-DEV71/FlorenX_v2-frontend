@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Select, Switch, Tag, Progress, Space, InputNumber, Divider, Typography } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import React, { useState, useRef } from 'react';
+import { Form, Input, Button, Select, Switch, Tag, Progress, Space, InputNumber, Divider, Typography, Upload, Avatar, message } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { FaRobot, FaMagic, FaChartLine, FaListUl, FaSave, FaGoogle, FaEye } from 'react-icons/fa';
 
 const { TextArea } = Input;
@@ -11,6 +11,9 @@ import { requestSecretOtp, verifySecretOtp } from '../../../services/admin/syste
 
 const AIConfig = ({ data, onSave }) => {
   const [form] = Form.useForm();
+  const [avatarPreview, setAvatarPreview] = useState(data?.ai?.botAvatar || '');
+  const botAvatarFileRef = useRef(null);
+
   const onFinish = (values) => {
     let modelValue = values.model;
     if (Array.isArray(modelValue)) {
@@ -24,8 +27,16 @@ const AIConfig = ({ data, onSave }) => {
         requestsToday: aiConfig.requestsToday || 0,
         lastResetDate: aiConfig.lastResetDate || new Date()
     };
+    // Xử lý avatar: giữ cũ / upload mới / xóa
+    if (botAvatarFileRef.current) {
+      // Có file mới → sẽ upload qua FormData, không cần gán ở đây
+    } else if (avatarPreview && aiConfig.botAvatar) {
+      aiData.botAvatar = aiConfig.botAvatar; // Giữ nguyên avatar cũ
+    } else {
+      aiData.botAvatar = ''; // Đã xóa avatar
+    }
     const aiModels = values.aiModels || [];
-    onSave({ ai: aiData, aiModels });
+    onSave({ ai: aiData, aiModels }, botAvatarFileRef.current);
   };
 
   const aiConfig = data?.ai || {};
@@ -152,6 +163,66 @@ const AIConfig = ({ data, onSave }) => {
         >
           <Switch checkedChildren="Bật (Active)" unCheckedChildren="Tắt (Disabled)" style={{ background: aiConfig.status ? '#10b981' : undefined }} />
         </Form.Item>
+
+        {/* Avatar cho Bot AI */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px', marginBottom: 12 }}>
+            <FaRobot style={{ color: '#ec4899', fontSize: '18px' }} /> Avatar Bot AI
+            <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 400 }}>(Hiển thị khi AI trả lời đánh giá sản phẩm)</span>
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <Avatar 
+              src={avatarPreview || undefined} 
+              size={72} 
+              style={{ 
+                border: '3px solid #e5e7eb', 
+                background: avatarPreview ? 'transparent' : 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+                fontSize: '28px',
+                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.25)'
+              }}
+            >
+              {!avatarPreview && '🤖'}
+            </Avatar>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Upload
+                beforeUpload={(file) => {
+                  const isImage = file.type.startsWith('image/');
+                  if (!isImage) {
+                    message.error('Chỉ được upload file ảnh!');
+                    return Upload.LIST_IGNORE;
+                  }
+                  if (file.size > 2 * 1024 * 1024) {
+                    message.error('Ảnh phải nhỏ hơn 2MB!');
+                    return Upload.LIST_IGNORE;
+                  }
+                  botAvatarFileRef.current = file;
+                  setAvatarPreview(URL.createObjectURL(file));
+                  return false; // Ngăn upload tự động
+                }}
+                showUploadList={false}
+                accept="image/*"
+              >
+                <Button icon={<UploadOutlined />} style={{ borderRadius: '8px' }}>
+                  Chọn ảnh đại diện
+                </Button>
+              </Upload>
+              {avatarPreview && (
+                <Button 
+                  type="link" 
+                  danger 
+                  size="small" 
+                  style={{ padding: 0, height: 'auto' }}
+                  onClick={() => {
+                    botAvatarFileRef.current = null;
+                    setAvatarPreview('');
+                  }}
+                >
+                  Xóa avatar
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
 
         <Form.Item 
           label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaMagic style={{color: '#3b82f6', fontSize: '18px'}}/> Google AI API Key</span>} 
