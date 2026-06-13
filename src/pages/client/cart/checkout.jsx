@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { error, success } from "../../../utils/notift";
 import { getVoucher } from "../../../services/client/voucher.service";
 import { formatCustom } from "../../../utils/formatCustomDate";
-import { capturePaypalOrder, createPaypalOrder, OrderSubmit } from "../../../services/client/checkout.service";
+import { capturePaypalOrder, createPaypalOrder, OrderSubmit, getPaymentConfig } from "../../../services/client/checkout.service";
 import Loading from "../../../utils/loading";
 import { useSocket } from "../../../Socket/useSocket";
 
@@ -51,6 +51,7 @@ function Checkout() {
   });
 
   const [vouchers, setVouchers] = useState([]);
+  const [banks, setBanks] = useState([]);
 
   // useEffect(() => {
   //   setForm(prev => ({
@@ -93,6 +94,10 @@ function Checkout() {
       if (res?.data?.code) {
         setVouchers(res.data.vouchers);
       }
+      const paymentRes = await getPaymentConfig();
+      if (paymentRes?.data?.code === 200) {
+        setBanks(paymentRes.data.banks);
+      }
     };
     fetchApi();
   }, []);
@@ -126,7 +131,6 @@ function Checkout() {
         ...form,
         totalPrice: finalTotal
       });
-
 
       if (res?.data?.code) {
         const order = res.data.orderReturn;
@@ -301,6 +305,38 @@ function Checkout() {
                 PayPal
               </label>
 
+              <label
+                className={`method ${form.pay === "bank" ? "active" : ""}`}
+                onClick={() => setForm({ ...form, pay: "bank" })}
+              >
+                <input type="radio" checked={form.pay === "bank"} readOnly />
+                Chuyển khoản ngân hàng
+              </label>
+
+              {form.pay === "bank" && banks.length > 0 && (
+                <div style={{ marginTop: 15, padding: 15, border: '1px dashed #16a34a', borderRadius: 8, background: '#f0fdf4' }}>
+                  <p style={{ fontWeight: 600, color: '#166534', marginBottom: 10 }}>Vui lòng quét mã QR hoặc chuyển khoản vào các tài khoản sau:</p>
+                  <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap' }}>
+                    {banks.map((bank, idx) => (
+                      <div key={idx} style={{ flex: 1, minWidth: 250, padding: 10, background: 'white', borderRadius: 8, boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', gap: 15, alignItems: 'center' }}>
+                        {bank.qrCode && <img src={bank.qrCode} alt="QR Code" style={{ width: 100, height: 100, objectFit: 'contain', borderRadius: 4, border: '1px solid #e5e7eb' }} />}
+                        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+                          <div style={{ fontWeight: 600, color: '#1f2937' }}>{bank.bankName}</div>
+                          <div style={{ color: '#4b5563' }}>STK: <strong style={{ color: '#2563eb' }}>{bank.accountNumber}</strong></div>
+                          <div style={{ color: '#4b5563' }}>Tên: <strong>{bank.accountName}</strong></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ marginTop: 15, fontSize: 13, fontStyle: 'italic', color: '#dc2626' }}>
+                    * Lời nhắn chuyển tiền: <strong>VELTRIX [SỐ ĐIỆN THOẠI CỦA BẠN]</strong>
+                  </p>
+                  <p style={{ fontSize: 13, fontStyle: 'italic', color: '#dc2626' }}>
+                    * Vui lòng nhấn <strong>ĐẶT HÀNG NGAY</strong> sau khi chuyển khoản thành công.
+                  </p>
+                </div>
+              )}
+
               {form.pay === "paypal" && (
                 <PayPalScriptProvider
                   options={{
@@ -326,7 +362,7 @@ function Checkout() {
               )}
             </div>
 
-            {form.pay === "cod" && (
+            {form.pay !== "paypal" && (
               <button className="submit" onClick={handleSubmit}>
                 ĐẶT HÀNG NGAY - {finalTotal.toLocaleString("vi-VN")} VNĐ
               </button>

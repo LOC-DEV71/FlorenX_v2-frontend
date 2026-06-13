@@ -16,3 +16,7 @@ export const OrderSubmit = (form) => {
 export const getDetailOrder = (orderCode) => {
   return axiosClient.get(`/checkout/order/detail/${orderCode}`);
 };
+
+export const getPaymentConfig = () => {
+  return axiosClient.get(`/checkout/payment-config`);
+};

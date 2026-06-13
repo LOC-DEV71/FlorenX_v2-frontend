@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Select, Switch, Tag, Progress, Space, InputNumber, Divider, Typography } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { FaRobot, FaMagic, FaChartLine, FaListUl, FaSave, FaGoogle } from 'react-icons/fa';
+import { FaRobot, FaMagic, FaChartLine, FaListUl, FaSave, FaGoogle, FaEye } from 'react-icons/fa';
 
 const { TextArea } = Input;
 const { Option } = Select;
 const { Text } = Typography;
+import Swal from 'sweetalert2';
+import { requestSecretOtp, verifySecretOtp } from '../../../services/admin/system.service';
 
 const AIConfig = ({ data, onSave }) => {
+  const [form] = Form.useForm();
   const onFinish = (values) => {
     let modelValue = values.model;
     if (Array.isArray(modelValue)) {
@@ -49,6 +52,62 @@ const AIConfig = ({ data, onSave }) => {
   const requestsToday = aiConfig.requestsToday ?? 0;
   const percent = actualLimit > 0 ? Math.min(Math.round((requestsToday / actualLimit) * 100), 100) : 0;
 
+  const handleViewApiKey = async () => {
+    try {
+        const confirm = await Swal.fire({
+            title: 'Xác nhận bảo mật',
+            text: 'Để xem mã API Key gốc, hệ thống sẽ gửi một mã OTP gồm 6 số về Email của bạn. Bạn có muốn tiếp tục?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Gửi mã OTP',
+            cancelButtonText: 'Hủy'
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        Swal.fire({
+            title: 'Đang gửi OTP...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+        const res = await requestSecretOtp();
+        if (res.data.code === 200) {
+            Swal.close();
+            const { value: otp } = await Swal.fire({
+                title: 'Nhập mã OTP',
+                text: res.data.message,
+                input: 'text',
+                inputPlaceholder: 'Nhập 6 số OTP...',
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#3b82f6',
+            });
+
+            if (otp) {
+                Swal.fire({
+                    title: 'Đang xác thực...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+                const verifyRes = await verifySecretOtp({ otp, field: 'apiKey' });
+                if (verifyRes.data.code === 200) {
+                    Swal.fire('Thành công!', 'Đã mở khóa API Key thành công.', 'success');
+                    form.setFieldsValue({ apiKey: verifyRes.data.data });
+                } else {
+                    Swal.fire('Thất bại', verifyRes.data.message, 'error');
+                }
+            }
+        } else {
+            Swal.fire('Lỗi', res.data.message, 'error');
+        }
+    } catch (error) {
+        Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ.', 'error');
+    }
+  };
+
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '10px 0' }}>
       
@@ -74,6 +133,7 @@ const AIConfig = ({ data, onSave }) => {
       </div>
 
       <Form 
+        form={form}
         layout="vertical" 
         onFinish={onFinish} 
         initialValues={{ 
@@ -95,11 +155,17 @@ const AIConfig = ({ data, onSave }) => {
 
         <Form.Item 
           label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaMagic style={{color: '#3b82f6', fontSize: '18px'}}/> Google AI API Key</span>} 
-          name="apiKey" 
-          tooltip="Lấy mã này tại Google AI Studio để Chatbot hoạt động."
-          rules={[{ required: true, message: 'Vui lòng nhập API Key' }]}
+          tooltip="Lấy mã này tại Google AI Studio để Chatbot hoạt động. Cần nhập OTP để xem mã gốc."
+          required
         >
-          <Input.Password placeholder="Nhập API Key bắt đầu bằng AIzaSy..." style={{ borderRadius: '8px' }} />
+          <Space.Compact style={{ width: '100%' }}>
+            <Form.Item name="apiKey" noStyle rules={[{ required: true, message: 'Vui lòng nhập API Key' }]}>
+              <Input.Password placeholder="Nhập API Key bắt đầu bằng AIzaSy..." style={{ borderRadius: '8px 0 0 8px', width: '100%' }} />
+            </Form.Item>
+            <Button type="default" onClick={handleViewApiKey} style={{ borderRadius: '0 8px 8px 0', background: '#f8fafc', borderColor: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FaEye style={{ fontSize: '16px', color: '#64748b' }} /> Xem Mã
+            </Button>
+          </Space.Compact>
         </Form.Item>
         
         <Form.Item 

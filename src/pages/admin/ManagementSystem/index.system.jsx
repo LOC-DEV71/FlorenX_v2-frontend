@@ -4,6 +4,9 @@ import BankManagement from './BankManagement';
 import AIConfig from './AIConfig';
 import EmailConfig from './EmailConfig';
 import PolicyConfig from './PolicyConfig';
+import IAMConfig from './IAMConfig';
+import MediaConfig from './MediaConfig';
+import PaymentConfig from './PaymentConfig';
 import { getSystemConfig, updateSystemConfig } from '../../../services/admin/system.service';
 
 const SystemManagement = () => {
@@ -79,10 +82,39 @@ const SystemManagement = () => {
       label: 'Chính sách & Thuế',
       children: <PolicyConfig data={data?.policy} onSave={(v) => handleSave('policy', v)} />,
     },
+    {
+      key: '5',
+      label: 'Định danh & Truy cập (IAM)',
+      children: <IAMConfig data={data?.iam} onSave={(v) => handleSave('iam', v)} />,
+    },
+    {
+      key: '6',
+      label: 'Quản lý Đa phương tiện',
+      children: <MediaConfig data={data?.media} onSave={(v) => handleSave('media', v)} />,
+    },
+    {
+      key: '7',
+      label: 'Cổng Thanh toán',
+      children: <PaymentConfig data={data?.payment} onSave={(v) => handleSave('payment', v)} />,
+    },
   ];
 
   return (
-    <Card title="Quản trị Hệ thống (System Settings)" bordered={false}>
+    <Card title="Quản trị Hệ thống (System Settings)" bordered={false} className="system-settings-card">
+      <style>{`
+        .system-settings-card .ant-tabs-nav {
+          position: sticky;
+          top: 20px;
+          align-self: flex-start;
+          max-height: calc(100vh - 40px);
+          overflow-y: auto;
+        }
+        /* Ẩn thanh scrollbar cho đẹp */
+        .system-settings-card .ant-tabs-nav::-webkit-scrollbar {
+          width: 0px;
+          background: transparent;
+        }
+      `}</style>
       <Tabs defaultActiveKey="2" items={items} tabPosition="left" />
     </Card>
   );
