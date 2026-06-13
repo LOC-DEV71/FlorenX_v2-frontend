@@ -47,7 +47,9 @@ function AdminRoutes() {
           </PrivateRoute>
         }
       >
-        <Route index element={<DashBoard />} />
+        <Route element={<PrivateRoutePermission permission="view_dashboard" />}>
+          <Route index element={<DashBoard />} />
+        </Route>
 
         {/* nhập kho */}
         <Route element={<PrivateRoutePermission permission="import_warehouse" />}>
@@ -178,7 +180,7 @@ function AdminRoutes() {
 
 
         {/* users */}
-        <Route element={<PrivateRoutePermission permission="view_orders"/>}>
+        <Route element={<PrivateRoutePermission permission="view_users"/>}>
           <Route path="users" element={<Users />} />
         </Route>
         

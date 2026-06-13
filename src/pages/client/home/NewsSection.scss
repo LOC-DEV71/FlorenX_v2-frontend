@@ -1,6 +1,6 @@
 .news_client {
     padding: 30px 16px;
-    max-width: 1240px;
+    max-width: 1500px;
     margin: 0 auto;
     &_top {
         display: flex;
@@ -36,7 +36,7 @@
 
     &_main {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 10px;
     }
 

@@ -4,6 +4,7 @@ import TinyEditor from "../../../utils/tinyEditor";
 import { error, success } from "../../../utils/notift";
 import { getList } from "../../../services/admin/news.category.service";
 import { createNews } from "../../../services/admin/news.service";
+import { useLocation } from "react-router-dom";
 import {
   RiArticleLine,
   RiSaveLine,
@@ -23,6 +24,7 @@ const STATUS_CONFIG = {
 };
 
 const NewsCreate = () => {
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -39,6 +41,12 @@ const NewsCreate = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
+  const submitBtnRef = useRef(null);
+
+  // 🤖 Robot Mode States
+  const [robotMode, setRobotMode] = useState(false);
+  const [robotStep, setRobotStep] = useState('');
+  const [robotDraft, setRobotDraft] = useState(null);
 
   const handleChange = (e) => {
     const { id, value, type, files } = e.target;
@@ -52,6 +60,30 @@ const NewsCreate = () => {
     setForm((prev) => ({ ...prev, content: value }));
   };
 
+  // Utility: Typewriter effect for a form field
+  const typewriterField = (fieldName, text, speed = 20) => {
+    return new Promise((resolve) => {
+      let i = 0;
+      const interval = setInterval(() => {
+        setForm(prev => ({ ...prev, [fieldName]: text.slice(0, i + 1) }));
+        i++;
+        if (i >= text.length) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, speed);
+    });
+  };
+
+  // Utility: Smooth scroll to an element
+  const scrollToField = (selector) => {
+    const el = document.querySelector(selector);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  // Utility: Wait ms
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
   useEffect(() => {
     const fetchApi = async () => {
       try {
@@ -62,7 +94,108 @@ const NewsCreate = () => {
       }
     };
     fetchApi();
-  }, []);
+
+    // 🤖 Robot Mode: Detect autoMode from location.state
+    if (location.state && location.state.autoMode && location.state.draftPayload) {
+      setRobotDraft(location.state.draftPayload);
+      setRobotMode(true);
+      window.history.replaceState({}, document.title);
+    } else if (location.state && location.state.draftPayload) {
+      // Fallback: instant fill (không có animation)
+      const draft = location.state.draftPayload;
+      setForm(prev => ({
+        ...prev,
+        title: draft.title || "",
+        slug_category: draft.slug_category || "",
+        description: draft.description || "",
+        content: draft.content || "",
+      }));
+      if (draft.thumbnailUrl) {
+        setThumbnail(draft.thumbnailUrl);
+        setThumbnailPreview(draft.thumbnailUrl);
+      }
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // 🤖 Robot Mode: Sequential auto-fill with animation
+  useEffect(() => {
+    if (!robotMode || !robotDraft) return;
+
+    const runRobot = async () => {
+      await wait(1000);
+
+      // Step 1: Typewriter Title
+      setRobotStep('📝 Đang nhập tiêu đề...');
+      scrollToField('#title');
+      document.querySelector('#title')?.focus();
+      await wait(300);
+      await typewriterField('title', robotDraft.title || '', 25);
+      await wait(500);
+
+      // Step 2: Typewriter Description
+      setRobotStep('💬 Đang nhập mô tả...');
+      scrollToField('#description');
+      document.querySelector('#description')?.focus();
+      await wait(300);
+      await typewriterField('description', robotDraft.description || '', 15);
+      await wait(500);
+
+      // Step 3: Auto-select Category
+      setRobotStep('📂 Đang chọn danh mục...');
+      scrollToField('#slug_category');
+      await wait(300);
+      setForm(prev => ({ ...prev, slug_category: robotDraft.slug_category || '' }));
+      await wait(800);
+
+      // Step 4: Set Content (TinyMCE)
+      setRobotStep('✍️ Đang điền nội dung bài viết...');
+      scrollToField('.nc-editor-wrap');
+      await wait(500);
+      setForm(prev => ({ ...prev, content: robotDraft.content || '' }));
+      await wait(1000);
+
+      // Step 5: Set Thumbnail
+      if (robotDraft.thumbnailUrl) {
+        setRobotStep('🖼️ Đang thiết lập ảnh đại diện...');
+        scrollToField('.nc-dropzone');
+        await wait(300);
+        setThumbnail(robotDraft.thumbnailUrl);
+        setThumbnailPreview(robotDraft.thumbnailUrl);
+        await wait(800);
+      }
+
+      // Step 6: Set Status = published
+      setRobotStep('⚙️ Đang cài đặt trạng thái...');
+      scrollToField('#status');
+      await wait(300);
+      setForm(prev => ({ ...prev, status: robotDraft.status || 'published' }));
+      await wait(500);
+
+      // Step 7: Set Featured = yes
+      setRobotStep('⭐ Đánh dấu nổi bật...');
+      scrollToField('#featured');
+      await wait(300);
+      setForm(prev => ({ ...prev, featured: robotDraft.featured || 'yes' }));
+      await wait(800);
+
+      // Step 8: Auto-click Submit
+      setRobotStep('🚀 Đang đăng bài viết...');
+      scrollToField('.nc-header__actions');
+      await wait(600);
+      
+      setRobotMode(false);
+      setRobotStep('');
+      setRobotDraft(null);
+
+      if (submitBtnRef.current) {
+        submitBtnRef.current.click();
+      }
+    };
+
+    runRobot();
+  }, [robotMode, robotDraft]);
+
 
   const handleClearThumbnail = () => {
     setThumbnail(null);
@@ -109,6 +242,20 @@ const NewsCreate = () => {
 
   return (
     <div className="nc-page">
+      {/* 🤖 Robot Mode Overlay */}
+      {robotMode && (
+        <div className="robot-overlay">
+          <div className="robot-overlay__content">
+            <div className="robot-overlay__pulse"></div>
+            <span className="robot-overlay__icon">🤖</span>
+            <div className="robot-overlay__text">
+              <strong>Veltrix AI đang thao tác</strong>
+              <span>{robotStep}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="nc-header">
         <div className="nc-header__left">
@@ -122,7 +269,8 @@ const NewsCreate = () => {
         </div>
         <div className="nc-header__actions">
           <button
-            className={`nc-btn nc-btn--primary${loading ? " nc-btn--loading" : ""}`}
+            ref={submitBtnRef}
+            className={`nc-btn nc-btn--primary${loading ? " nc-btn--loading" : ""}${robotMode ? " robot-highlight" : ""}`}
             type="button"
             onClick={handleCreateNews}
             disabled={loading}

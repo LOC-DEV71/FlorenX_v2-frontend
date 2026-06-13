@@ -1,0 +1,218 @@
+.admin-dashboard {
+  padding: 0 0 24px;
+
+  &__header {
+    margin-bottom: 24px;
+    
+    h3 {
+      margin-bottom: 4px;
+      margin-top: 0;
+      color: #1f2937;
+      font-weight: 700;
+    }
+    
+    p {
+      color: #6b7280;
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  &__stats {
+    margin-bottom: 24px;
+
+    .stat-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+      border: 1px solid #f0f0f0;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      .stat-card-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        .ant-statistic {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .mini-chart {
+          width: 80px;
+          flex-shrink: 0;
+          margin-bottom: 5px;
+        }
+      }
+
+      .stat-card-footer {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #f3f4f6;
+        font-size: 13px;
+        color: #9ca3af;
+
+        .trend {
+          font-weight: 600;
+          padding: 2px 8px;
+          border-radius: 4px;
+          margin-right: 6px;
+
+          &.up { background: #f6ffed; color: #52c41a; }
+          &.down { background: #fff2f0; color: #ff4d4f; }
+        }
+      }
+
+      .ant-statistic-title {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .ant-statistic-content-prefix {
+        margin-right: 14px;
+        font-size: 20px;
+        width: 42px;
+        height: 42px;
+        background: #f3f4f6;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #4b5563;
+      }
+    }
+  }
+
+  &__content, &__charts {
+    .content-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      border: 1px solid #f0f0f0;
+      height: 100%;
+
+      .ant-card-head {
+        border-bottom: 1px solid #f3f4f6;
+        padding: 0 24px;
+        min-height: 60px;
+        
+        .ant-card-head-title {
+          font-size: 15px;
+          font-weight: 700;
+          color: #1f2937;
+        }
+      }
+
+      .ant-card-body {
+        padding: 24px;
+      }
+    }
+
+    .pie-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 16px;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #4b5563;
+
+        .color-box {
+          width: 12px;
+          height: 12px;
+          border-radius: 3px;
+        }
+      }
+    }
+
+    .location-card {
+      .location-item {
+        margin-bottom: 20px;
+
+        .loc-head {
+          display: flex;
+          justify-content: space-between;
+          font-size: 14px;
+          margin-bottom: 6px;
+          color: #374151;
+        }
+      }
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+
+      .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+
+        .dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          margin-top: 6px;
+          flex-shrink: 0;
+          
+          &-blue { background: #1677ff; box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.15); }
+          &-green { background: #52c41a; box-shadow: 0 0 0 4px rgba(82, 196, 26, 0.15); }
+          &-orange { background: #faad14; box-shadow: 0 0 0 4px rgba(250, 173, 20, 0.15); }
+          &-purple { background: #722ed1; box-shadow: 0 0 0 4px rgba(114, 46, 209, 0.15); }
+        }
+
+        .info {
+          p {
+            margin: 0 0 6px;
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          
+          small {
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+    &:hover {
+      background: #d1d5db;
+    }
+  }
+}
+
+.review-list-item {
+  &:hover {
+    background-color: #f3f4f6;
+    cursor: pointer;
+  }
+}

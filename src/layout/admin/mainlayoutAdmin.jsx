@@ -32,8 +32,7 @@ import { Badge, Popover, List, Typography } from "antd";
 import { BsBellFill } from "react-icons/bs";
 import formatTimeAgo from "../../utils/formatTimeAgo";
 import { getList, ReadAllNotification, readNotification } from "../../services/admin/notifications.service";
-
-
+import AdminChatbot from "../../components/admin/AdminChatbot/AdminChatbot";
 
 const { Header, Sider, Content } = Layout;
 
@@ -43,6 +42,7 @@ const MainLayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
   const role = useSelector(state => state.auth.role)
   const permission = role?.permissions;
+  const exitDashboard = permission?.includes("view_dashboard");
   const exitProduct = permission?.includes("view_products");
   const exitAccount = permission?.includes("view_accounts");
   const exitProductCategory = permission?.includes("view_product_category");
@@ -57,11 +57,16 @@ const MainLayoutAdmin = () => {
   const exitSystem = permission?.includes("system_management");
   const { admin } = useSelector((state) => state.auth);
   const menuItems = [
-    {
-      key: "1",
-      icon: <MdDashboard />,
-      label: <Link to="/admin">Dashboard</Link>,
-    },
+    ...(exitDashboard
+      ? [
+          {
+            key: "1",
+            icon: <MdDashboard />,
+            label: <Link to="/admin">Dashboard</Link>,
+          }
+        ]
+      : []
+    ),
     ...(exitProduct
       ? [
         {
@@ -419,6 +424,7 @@ const MainLayoutAdmin = () => {
           <Outlet />
         </Content>
       </Layout>
+      <AdminChatbot />
     </Layout>
   );
 };

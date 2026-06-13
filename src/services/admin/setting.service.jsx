@@ -1,8 +1,10 @@
 import axiosAdmin from "../../utils/axios.admin";
+import axiosClient from "../../utils/axios.client";
 
 const settingService = {
   getDetail: async () => {
-    const res = await axiosAdmin.get("/settings/detail");
+    // Dùng API public để client không đăng nhập vẫn lấy được thông tin Web (Logo, Banner,...)
+    const res = await axiosClient.get("/settings/detail");
     return res.data;
   },
 
