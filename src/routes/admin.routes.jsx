@@ -188,13 +188,19 @@ function AdminRoutes() {
 
 
         {/* trash can */}
-        <Route path="trashcan" element={<TrashPage />} />
+        <Route element={<PrivateRoutePermission permission="trash_management" />}>
+          <Route path="trashcan" element={<TrashPage />} />
+        </Route>
 
         {/* setting */}
-        <Route path="setting" element={<SettingPage />} />
+        <Route element={<PrivateRoutePermission permission="setting_management" />}>
+          <Route path="setting" element={<SettingPage />} />
+        </Route>
 
         {/* system management */}
-        <Route path="system-management" element={<SystemManagement />} />
+        <Route element={<PrivateRoutePermission permission="system_management" />}>
+          <Route path="system-management" element={<SystemManagement />} />
+        </Route>
       </Route>
     </Routes>
   );

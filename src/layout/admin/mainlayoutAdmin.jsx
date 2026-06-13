@@ -52,6 +52,9 @@ const MainLayoutAdmin = () => {
   const exitNews = permission?.includes("view_news");
   const exitNewsCategory = permission?.includes("view_news_category");
   const exitUsers = permission?.includes("view_users");
+  const exitTrash = permission?.includes("trash_management");
+  const exitSetting = permission?.includes("setting_management");
+  const exitSystem = permission?.includes("system_management");
   const { admin } = useSelector((state) => state.auth);
   const menuItems = [
     {
@@ -142,25 +145,37 @@ const MainLayoutAdmin = () => {
       key: "11",
       icon: <IoMdChatboxes />,
       label: <Link to="/admin/chat">CSKH</Link>,
-    }
-    ,
-    {
-      key: "12",
-      icon: <FaRegTrashCan />,
-      label: <Link to="/admin/trashcan">Thùng rác</Link>,
-    }
-    ,
-    {
-      key: "13",
-      icon: <IoSettings />,
-      label: <Link to="/admin/setting">Cài đặt</Link>,
     },
-    {
-      key: "14",
-      icon: <FaServer />,
-      label: <Link to="/admin/system-management">Hệ thống</Link>,
-    }
-
+    ...(exitTrash
+      ? [
+          {
+            key: "12",
+            icon: <FaRegTrashCan />,
+            label: <Link to="/admin/trashcan">Thùng rác</Link>,
+          }
+        ]
+      : []
+    ),
+    ...(exitSetting
+      ? [
+          {
+            key: "13",
+            icon: <IoSettings />,
+            label: <Link to="/admin/setting">Cài đặt</Link>,
+          }
+        ]
+      : []
+    ),
+    ...(exitSystem
+      ? [
+          {
+            key: "14",
+            icon: <FaServer />,
+            label: <Link to="/admin/system-management">Hệ thống</Link>,
+          }
+        ]
+      : []
+    )
   ];
   const {
     token: { borderRadiusLG },
