@@ -15,8 +15,8 @@ function NewsSection() {
         const fetchApi = async () => {
             try {
                 const [newsRes, voucherRes] = await Promise.all([
-                    getByCategory("tin-tuc-cong-nghe"),
-                    getByCategory("khuyen-mai")
+                    getByCategory("tin-tuc-cong-nghe", { featured: "true", limit: 4 }),
+                    getByCategory("khuyen-mai", { featured: "true", limit: 4 })
                 ]);
 
                 if (newsRes.data.code) {

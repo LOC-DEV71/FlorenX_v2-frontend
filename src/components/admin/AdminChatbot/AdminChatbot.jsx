@@ -33,118 +33,150 @@ function AdminChatbot() {
   const fileInputRef = useRef(null);
   const socket = useSocket();
 
+  const autoPilotQueueRef = useRef([]);
+  const isProcessingRef = useRef(false);
+  const aiResponsesCacheRef = useRef({});
+
   useEffect(() => {
     if (!socket) return;
-    
-    const handleAutoPilotTrigger = (data) => {
-      // Chỉ kích hoạt hiệu ứng mô phỏng nếu Sếp đang BẬT chế độ Auto-Pilot
-      if (!isAutoPilot) return; 
 
-      const orderCode = data.orderCode;
-      
-      // Kích hoạt Robot Overlay (Thay vì gửi tin nhắn rác vào lịch sử chat)
-      setRobotMode(true);
-      
-      // Bước 1: Thông báo nhận đơn
-      setTimeout(() => {
-        setRobotStep(`Phát hiện đơn hàng mới #${orderCode}. Tiến hành phân tích...`);
-      }, 500);
-
-      // Bước 2: Nhảy sang trang quản lý đơn hàng
-      setTimeout(() => {
-        navigate('/admin/orders');
-      }, 2000);
-
-      // Bước 3: Thông báo kiểm tra kho
-      setTimeout(() => {
-        setRobotStep(`Chuyển đến Kho Hàng. Kiểm tra tình trạng stock của đơn #${orderCode}...`);
-      }, 3500);
-
-      // Bước 4: Nhảy sang trang phiếu xuất kho
-      setTimeout(() => {
-        navigate('/admin/products/inventory/export/list');
-      }, 5000);
-
-      // Bước 5: Hoàn tất
-      setTimeout(() => {
-        setRobotStep(`Stock đủ! Đã xác nhận tạo phiếu xuất kho và cập nhật đơn hàng #${orderCode}.`);
-      }, 7000);
-
-      // Bước 6: Tắt Overlay sau khi người dùng đọc xong
-      setTimeout(() => {
-        setRobotMode(false);
-        setRobotStep('');
-      }, 10000);
+    // Lắng nghe và lưu cache mọi câu trả lời AI ngay lập tức
+    const handleAiResponseCache = (replyData) => {
+      aiResponsesCacheRef.current[replyData.reviewId] = replyData;
     };
-    const handleAutoPilotReviewTrigger = (data) => {
-      if (!isAutoPilot) return; 
-
-      const { slug, rating, reviewId } = data;
+    socket.on("admin_auto_pilot_review_ai_response", handleAiResponseCache);
+    
+    const processNextTask = () => {
+      // Dừng nếu đang xử lý hoặc hàng đợi rỗng
+      if (isProcessingRef.current || autoPilotQueueRef.current.length === 0) return;
       
-      setRobotMode(true);
-      
-      setTimeout(() => {
-        setRobotStep(`🔔 Phát hiện đánh giá mới (${rating} ⭐). Đang chuyển đến trang sản phẩm...`);
-      }, 500);
+      // Nếu tắt autopilot giữa chừng và task không bị force, clear queue
+      if (!isAutoPilot && !autoPilotQueueRef.current[0].data.force) {
+        autoPilotQueueRef.current = [];
+        return;
+      }
 
-      // Chuyển trang
-      setTimeout(() => {
-        navigate(`/admin/products/detail/${slug}`);
-      }, 2000);
+      isProcessingRef.current = true;
+      const task = autoPilotQueueRef.current.shift();
 
-      // Sau khi trang load xong, gửi sự kiện để trang chi tiết scroll + mở input + gõ
-      setTimeout(() => {
-        setRobotStep(`📝 Đang cuộn đến đánh giá và mở phần trả lời...`);
-        window.dispatchEvent(new CustomEvent('autopilot_review_focus', { 
-          detail: { reviewId } 
-        }));
-      }, 3500);
+      if (task.type === 'order') {
+        const orderCode = task.data.orderCode;
+        setRobotMode(true);
+        
+        setTimeout(() => setRobotStep(`Phát hiện đơn hàng mới #${orderCode}. Tiến hành phân tích...`), 100);
+        setTimeout(() => navigate('/admin/orders'), 600);
+        setTimeout(() => setRobotStep(`Chuyển đến Kho Hàng. Kiểm tra tình trạng stock của đơn #${orderCode}...`), 1100);
+        setTimeout(() => navigate('/admin/products/inventory/export/list'), 1600);
+        setTimeout(() => setRobotStep(`Stock đủ! Đã xác nhận tạo phiếu xuất kho và cập nhật đơn hàng #${orderCode}.`), 2100);
+        setTimeout(() => {
+          setRobotMode(false);
+          setRobotStep('');
+          isProcessingRef.current = false;
+          processNextTask();
+        }, 3500);
+      } 
+      else if (task.type === 'review') {
+        const { slug, rating, reviewId } = task.data;
+        setRobotMode(true);
+        
+        setTimeout(() => setRobotStep(`🔔 Phát hiện đánh giá mới (${rating} ⭐). Đang chuyển đến trang sản phẩm...`), 500);
+        setTimeout(() => navigate(`/admin/products/detail/${slug}`), 2000);
+        setTimeout(() => {
+          setRobotStep(`📝 Đang cuộn đến đánh giá và mở phần trả lời...`);
+          window.dispatchEvent(new CustomEvent('autopilot_review_focus', { detail: { reviewId } }));
+        }, 3500);
 
-      setTimeout(() => {
-        setRobotStep(`🤖 AI đang phân tích nội dung và soạn câu trả lời phù hợp...`);
-      }, 5000);
-
-      // Lắng nghe khi backend xử lý xong (AI đã gửi reply thành công)
-      const onAiReplyDone = (replyData) => {
-        if (String(replyData.id) === String(reviewId)) {
-          socket.off("server_return_admin_product_preview", onAiReplyDone);
-          
-          // Gửi sự kiện typing animation với nội dung AI đã sinh
+        const proceedWithAiReply = (replyData) => {
+          // Gửi event sang Component ProductPreview để hiển thị ô nhập và gõ chữ
           window.dispatchEvent(new CustomEvent('autopilot_review_type', { 
-            detail: { reviewId, comment: replyData.server_return.comment } 
+            detail: { reviewId, comment: replyData.aiText } 
           }));
-
           setRobotStep(`⌨️ Đang nhập câu trả lời vào ô phản hồi...`);
 
-          // Chờ typing xong rồi báo thành công
-          const typingDuration = Math.min(replyData.server_return.comment.length * 35, 5000);
+          const typingDuration = Math.min(replyData.aiText.length * 35, 5000);
           setTimeout(() => {
-            setRobotStep(`✅ Đã gửi phản hồi đánh giá thành công bằng Veltrix AI!`);
+            setRobotStep(`✅ Đã soạn xong, đang gửi phản hồi lên hệ thống...`);
+            
+            import('../../../services/admin/product.preview').then(({ adminReturnReview }) => {
+              adminReturnReview({ id: reviewId, comment: replyData.aiText, isAutoPilot: true }).then(() => {
+                setRobotStep(`✅ Đã gửi phản hồi đánh giá thành công bằng Veltrix AI!`);
+                socket.emit("admin_product_preview", {
+                    id: reviewId,
+                    server_return: { comment: replyData.aiText, admin_name: "Veltrix AI", role: "Trợ lý Hệ thống", avatar: replyData.botAvatar, createdAt: Date.now() }
+                });
+
+                setTimeout(() => {
+                  setRobotMode(false);
+                  setRobotStep('');
+                  isProcessingRef.current = false;
+                  processNextTask();
+                }, 2000);
+              }).catch(() => {
+                setRobotStep(`❌ Gặp lỗi khi lưu phản hồi.`);
+                setTimeout(() => {
+                  setRobotMode(false);
+                  setRobotStep('');
+                  isProcessingRef.current = false;
+                  processNextTask();
+                }, 2000);
+              });
+            });
           }, typingDuration + 500);
+        };
 
-          setTimeout(() => {
-            setRobotMode(false);
-            setRobotStep('');
-          }, typingDuration + 3500);
-        }
-      };
-      socket.on("server_return_admin_product_preview", onAiReplyDone);
+        const onAiReplyDone = (replyData) => {
+          if (String(replyData.reviewId) === String(reviewId)) {
+            socket.off("admin_auto_pilot_review_ai_response", onAiReplyDone);
+            proceedWithAiReply(replyData);
+          }
+        };
 
-      // Timeout fallback nếu AI mất quá lâu (15s)
-      setTimeout(() => {
-        socket.off("server_return_admin_product_preview", onAiReplyDone);
-        if (robotMode) {
-          setRobotStep(`✅ Đã xử lý xong!`);
-          setTimeout(() => {
-            setRobotMode(false);
-            setRobotStep('');
-          }, 2000);
-        }
-      }, 15000);
+        setTimeout(() => {
+          setRobotStep(`🤖 AI đang phân tích nội dung và soạn câu trả lời phù hợp...`);
+          // Kiểm tra xem backend đã emit kết quả trong lúc mình đang bận chuyển tab chưa
+          if (aiResponsesCacheRef.current[reviewId]) {
+            const cachedReply = aiResponsesCacheRef.current[reviewId];
+            delete aiResponsesCacheRef.current[reviewId];
+            proceedWithAiReply(cachedReply);
+          } else {
+            // Nếu chưa có, tiếp tục chờ
+            socket.on("admin_auto_pilot_review_ai_response", onAiReplyDone);
+          }
+        }, 5000);
+
+        setTimeout(() => {
+          socket.off("admin_auto_pilot_review_ai_response", onAiReplyDone);
+          if (isProcessingRef.current && robotMode) {
+            setRobotStep(`✅ Đã xử lý xong! (Timeout)`);
+            setTimeout(() => {
+              setRobotMode(false);
+              setRobotStep('');
+              isProcessingRef.current = false;
+              processNextTask();
+            }, 2000);
+          }
+        }, 20000);
+      }
+    };
+
+    const handleAutoPilotTrigger = (data) => {
+      if (!isAutoPilot && !data.force) return; 
+      autoPilotQueueRef.current.push({ type: 'order', data });
+      processNextTask();
+    };
+
+    const handleAutoPilotReviewTrigger = (data) => {
+      if (!isAutoPilot) return; 
+      autoPilotQueueRef.current.push({ type: 'review', data });
+      processNextTask();
     };
 
     socket.on("admin_auto_pilot_trigger", handleAutoPilotTrigger);
     socket.on("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
+    
+    // Khởi động queue nếu có task tồn đọng
+    processNextTask();
+
     return () => {
       socket.off("admin_auto_pilot_trigger", handleAutoPilotTrigger);
       socket.off("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
@@ -380,6 +412,14 @@ function AdminChatbot() {
               } 
             });
           }, 1500); // Chờ 1.5s cho Sếp đọc tin nhắn AI
+        }
+
+        // 🚀 ĐIỀU HƯỚNG GIAO DIỆN CHỦ ĐỘNG
+        if (response.data.action === 'navigate' && response.data.navigateUrl) {
+          setTimeout(() => {
+            setIsOpen(false); // Đóng chatbot để Sếp nhìn rõ màn hình
+            navigate(response.data.navigateUrl);
+          }, 1000); // Đợi 1 giây để Sếp kịp đọc câu "Em mời Sếp qua xem"
         }
 
         if (isVoiceCall) {
