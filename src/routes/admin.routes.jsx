@@ -36,6 +36,7 @@ import Users from "../pages/admin/Uses/Users.index";
 import ProductsDetail from "../pages/admin/Products/poductsDetail";
 import OrderDetail from "../pages/admin/Order/OrderDetail";
 import SystemManagement from "../pages/admin/ManagementSystem/index.system";
+import Banned from "../pages/admin/Auth/Banned";
 
 function AdminRoutes() {
   return (
@@ -204,6 +205,9 @@ function AdminRoutes() {
           <Route path="system-management" element={<SystemManagement />} />
         </Route>
       </Route>
+
+      {/* Banned page without PrivateRoute protection */}
+      <Route path="banned" element={<Banned />} />
     </Routes>
   );
 }

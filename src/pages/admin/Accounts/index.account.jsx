@@ -1,6 +1,6 @@
 import "./AccountAdmin.scss";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Statistic } from "antd";
+import { Statistic, Modal, Timeline, Empty, Spin } from "antd";
 import CountUp from "react-countup";
 import { SearchOutlined } from "@ant-design/icons";
 import { CgMathPlus } from "react-icons/cg";
@@ -11,7 +11,7 @@ import SEO from "../../../utils/SEO";
 import { useState } from "react";
 import { useEffect } from "react";
 import { confirm, error, success } from "../../../utils/notift";
-import { getListAccount, changeMulti } from "../../../services/admin/account.admin.service";
+import { getListAccount, changeMulti, getActivityLogs } from "../../../services/admin/account.admin.service";
 import Avatar from "../../../assets/banner/avatar-none.jpg";
 
 const formatter = (value) => (
@@ -28,6 +28,28 @@ function AccountAdmin() {
   const sort = searchParams.get("sort") || "";
   const [reload, setReload] = useState(false);
   const navigate = useNavigate();
+
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+  const [currentAccountName, setCurrentAccountName] = useState("");
+
+  const handleViewLogs = async (account) => {
+    setCurrentAccountName(account.fullname);
+    setIsLogModalOpen(true);
+    setLoadingLogs(true);
+    setActivityLogs([]);
+    try {
+      const res = await getActivityLogs(account._id);
+      if (res.data.code) {
+        setActivityLogs(res.data.logs);
+      }
+    } catch (err) {
+      error("Lỗi khi lấy log hoạt động");
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
   useEffect(() => {
     try {
       const fetchApi = async () => {
@@ -267,12 +289,46 @@ function AccountAdmin() {
                 <Link className="edit" to={`/admin/accounts/update/${item._id}`}>
                   Edit
                 </Link>
+                <button className="edit" onClick={() => handleViewLogs(item)} style={{ background: '#1890ff', color: 'white', marginLeft: '5px' }}>
+                  Log
+                </button>
                 <button className="delete" onClick={() => handleDeleteOne(item._id)}>Delete</button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      <Modal
+        title={`Lịch sử hoạt động: ${currentAccountName}`}
+        open={isLogModalOpen}
+        onCancel={() => setIsLogModalOpen(false)}
+        footer={null}
+        width={600}
+      >
+        {loadingLogs ? (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <Spin size="large" />
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        ) : activityLogs.length > 0 ? (
+          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '10px' }}>
+            <Timeline>
+              {activityLogs.map((log) => (
+                <Timeline.Item key={log._id} color={log.action === 'DELETE' ? 'red' : log.action === 'POST' ? 'green' : 'blue'}>
+                  <p style={{ margin: 0 }}>
+                    <strong>{new Date(log.createdAt).toLocaleString()}</strong> - <span style={{ color: '#888' }}>[{log.module}]</span>
+                  </p>
+                  <p style={{ margin: 0 }}>{log.description}</p>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </div>
+        ) : (
+          <Empty description="Tài khoản này chưa có hoạt động nào được ghi nhận." />
+        )}
+      </Modal>
+
     </div>
   );
 }

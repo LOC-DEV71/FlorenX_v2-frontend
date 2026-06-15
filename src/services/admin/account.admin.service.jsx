@@ -23,3 +23,7 @@ export const updateAccount = ({id, data}) => {
 export const getAccountById = (id) => {
     return axiosAdmin.get(`/accounts/${id}`);
 }
+
+export const getActivityLogs = (id) => {
+    return axiosAdmin.get(`/accounts/${id}/activity-logs`);
+}

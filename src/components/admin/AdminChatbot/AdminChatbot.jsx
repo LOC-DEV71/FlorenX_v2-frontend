@@ -9,6 +9,7 @@ import { askAdminAI, getAdminChatHistory } from '../../../services/admin/ai.serv
 import { getSystemConfig } from '../../../services/admin/system.service';
 import TypingAnimation from '../../../utils/typing-animation';
 import { useSocket } from '../../../Socket/useSocket';
+import { useSelector } from 'react-redux';
 
 function AdminChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,12 +22,15 @@ function AdminChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [progressText, setProgressText] = useState('');
   const [isAutoPilot, setIsAutoPilot] = useState(false);
+  const [isAutoSystemMonitor, setIsAutoSystemMonitor] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechVoices, setSpeechVoices] = useState([]);
   const [attachedImages, setAttachedImages] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [robotMode, setRobotMode] = useState(false);
   const [robotStep, setRobotStep] = useState('');
+  const [directMessageMode, setDirectMessageMode] = useState(false);
+  const [directMessageData, setDirectMessageData] = useState(null);
   const [idleQuote, setIdleQuote] = useState('');
   const messagesEndRef = useRef(null);
   const audioRef = useRef(new Audio()); // Global audio object for unlocking
@@ -36,6 +40,9 @@ function AdminChatbot() {
   const autoPilotQueueRef = useRef([]);
   const isProcessingRef = useRef(false);
   const aiResponsesCacheRef = useRef({});
+
+  const role = useSelector(state => state.auth.role);
+  const isSuperAdmin = role && role.title && (role.title.toLowerCase().includes('super admin') || role.title.toLowerCase().includes('superadmin'));
 
   useEffect(() => {
     if (!socket) return;
@@ -50,8 +57,8 @@ function AdminChatbot() {
       // Dừng nếu đang xử lý hoặc hàng đợi rỗng
       if (isProcessingRef.current || autoPilotQueueRef.current.length === 0) return;
       
-      // Nếu tắt autopilot giữa chừng và task không bị force, clear queue
-      if (!isAutoPilot && !autoPilotQueueRef.current[0].data.force) {
+      // Nếu tắt autopilot và god mode giữa chừng và task không bị force, clear queue
+      if (!isAutoPilot && !isAutoSystemMonitor && !autoPilotQueueRef.current[0].data.force) {
         autoPilotQueueRef.current = [];
         return;
       }
@@ -65,16 +72,65 @@ function AdminChatbot() {
         
         setTimeout(() => setRobotStep(`Phát hiện đơn hàng mới #${orderCode}. Tiến hành phân tích...`), 100);
         setTimeout(() => navigate('/admin/orders'), 600);
-        setTimeout(() => setRobotStep(`Chuyển đến Kho Hàng. Kiểm tra tình trạng stock của đơn #${orderCode}...`), 1100);
-        setTimeout(() => navigate('/admin/products/inventory/export/list'), 1600);
-        setTimeout(() => setRobotStep(`Stock đủ! Đã xác nhận tạo phiếu xuất kho và cập nhật đơn hàng #${orderCode}.`), 2100);
+        setTimeout(() => setRobotStep(`Hệ thống đang kiểm tra tình trạng tồn kho ngầm cho đơn #${orderCode}...`), 1100);
+        
+        const failTask = (msg) => {
+          setRobotStep(`❌ Lỗi: ${msg}`);
+          setTimeout(() => {
+            setRobotMode(false);
+            setRobotStep('');
+            isProcessingRef.current = false;
+            processNextTask();
+          }, 3500);
+        };
+
         setTimeout(() => {
-          setRobotMode(false);
-          setRobotStep('');
-          isProcessingRef.current = false;
-          processNextTask();
-        }, 3500);
-      } 
+          import('../../../services/admin/order.admin.service.jsx').then(orderService => {
+            orderService.getDetailOrder(orderCode).then(res => {
+              const order = res.data.order;
+              if (order && order.products && order.products.length > 0) {
+                import('../../../services/admin/warehouse.service.jsx').then(whService => {
+                  whService.getWarehouseList().then(whRes => {
+                    const warehouseId = whRes.data?.warehouse?.[0]?._id;
+                    if (warehouseId) {
+                      const exportPayload = {
+                        warehouse_id: warehouseId,
+                        ref_code: orderCode,
+                        export_date: new Date().toISOString(),
+                        customer_name: order.fullname || 'Khách Vãng Lai',
+                        note: 'God Mode / Auto Pilot tự động duyệt đơn và xuất kho',
+                        items: order.products.map(p => ({
+                          product_id: p.productId,
+                          stock: p.quantity
+                        }))
+                      };
+                      
+                      import('../../../services/admin/InventoryTransaction.service.jsx').then(invService => {
+                        invService.inventoryExport(exportPayload).then(() => {
+                          orderService.updateOrderStatus({ ids: [order._id], action: 'shipped' }).then(() => {
+                            setRobotStep(`Stock đủ! Đã tự động xuất kho & chuyển đơn #${orderCode} sang Đang Giao.`);
+                            // Emit event để load lại bảng đơn hàng nếu cần
+                            setTimeout(() => {
+                              setRobotMode(false);
+                              setRobotStep('');
+                              isProcessingRef.current = false;
+                              processNextTask();
+                            }, 3500);
+                          }).catch(err => failTask("Không thể đổi trạng thái đơn."));
+                        }).catch(err => failTask(err.response?.data?.message || "Thiếu tồn kho để xuất."));
+                      });
+                    } else {
+                      failTask("Chưa cấu hình kho hàng.");
+                    }
+                  }).catch(() => failTask("Lỗi đọc dữ liệu kho."));
+                });
+              } else {
+                failTask("Không tìm thấy đơn hàng hoặc đơn trống.");
+              }
+            }).catch(() => failTask("Lỗi truy xuất thông tin đơn."));
+          });
+        }, 2000);
+      }
       else if (task.type === 'review') {
         const { slug, rating, reviewId } = task.data;
         setRobotMode(true);
@@ -95,32 +151,19 @@ function AdminChatbot() {
 
           const typingDuration = Math.min(replyData.aiText.length * 35, 5000);
           setTimeout(() => {
-            setRobotStep(`✅ Đã soạn xong, đang gửi phản hồi lên hệ thống...`);
-            
-            import('../../../services/admin/product.preview').then(({ adminReturnReview }) => {
-              adminReturnReview({ id: reviewId, comment: replyData.aiText, isAutoPilot: true }).then(() => {
-                setRobotStep(`✅ Đã gửi phản hồi đánh giá thành công bằng Veltrix AI!`);
-                socket.emit("admin_product_preview", {
-                    id: reviewId,
-                    server_return: { comment: replyData.aiText, admin_name: "Veltrix AI", role: "Trợ lý Hệ thống", avatar: replyData.botAvatar, createdAt: Date.now() }
-                });
-
-                setTimeout(() => {
-                  setRobotMode(false);
-                  setRobotStep('');
-                  isProcessingRef.current = false;
-                  processNextTask();
-                }, 2000);
-              }).catch(() => {
-                setRobotStep(`❌ Gặp lỗi khi lưu phản hồi.`);
-                setTimeout(() => {
-                  setRobotMode(false);
-                  setRobotStep('');
-                  isProcessingRef.current = false;
-                  processNextTask();
-                }, 2000);
-              });
+            setRobotStep(`✅ Đã phản hồi đánh giá thành công & gửi email cảm ơn khách hàng!`);
+            // Backend đã lưu DB rồi, chỉ cần emit socket để cập nhật UI real-time
+            socket.emit("admin_product_preview", {
+                id: reviewId,
+                server_return: { comment: replyData.aiText, admin_name: "Veltrix AI", role: "Trợ lý Hệ thống", avatar: replyData.botAvatar, createdAt: Date.now() }
             });
+
+            setTimeout(() => {
+              setRobotMode(false);
+              setRobotStep('');
+              isProcessingRef.current = false;
+              processNextTask();
+            }, 2000);
           }, typingDuration + 500);
         };
 
@@ -160,13 +203,24 @@ function AdminChatbot() {
     };
 
     const handleAutoPilotTrigger = (data) => {
-      if (!isAutoPilot && !data.force) return; 
+      setDirectMessageData({ from: "Hệ thống Bán Hàng", message: "Bạn có ĐƠN HÀNG MỚI!" });
+      setDirectMessageMode(true);
+      window.dispatchEvent(new CustomEvent('trigger_tts_notification', { detail: 'Bạn có đơn hàng mới!' }));
+      
+      if (!isAutoPilot && !isAutoSystemMonitor && !data.force) return; 
       autoPilotQueueRef.current.push({ type: 'order', data });
       processNextTask();
     };
 
     const handleAutoPilotReviewTrigger = (data) => {
-      if (!isAutoPilot) return; 
+      setDirectMessageData({ from: "Hệ thống Đánh Giá", message: "Bạn có ĐÁNH GIÁ MỚI!" });
+      setDirectMessageMode(true);
+      window.dispatchEvent(new CustomEvent('trigger_tts_notification', { detail: 'Bạn có đánh giá mới!' }));
+      
+      if (!isAutoPilot && !isAutoSystemMonitor) return; 
+      
+      isProcessingRef.current = false; // Reset lock if stuck
+      
       autoPilotQueueRef.current.push({ type: 'review', data });
       processNextTask();
     };
@@ -174,20 +228,74 @@ function AdminChatbot() {
     socket.on("admin_auto_pilot_trigger", handleAutoPilotTrigger);
     socket.on("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
     
+    // Xử lý sự kiện tin nhắn khẩn cấp (Direct Message)
+    const handleDirectMessage = (data) => {
+      setIsOpen(true);
+      setMessages(prev => [...prev, { 
+        id: Date.now(), 
+        sender: 'ai', 
+        text: `🚨 Lệnh từ Sếp Lớn ${data.from}:\n${data.message}` 
+      }]);
+      
+      setDirectMessageData(data);
+      setDirectMessageMode(true);
+      
+      // Dispatch custom event to trigger TTS outside this scope
+      window.dispatchEvent(new CustomEvent('trigger_tts_message', { 
+        detail: `Cảnh báo an ninh từ ${data.from}: ${data.message}` 
+      }));
+    };
+    socket.on("admin_direct_message", handleDirectMessage);
+
+    const handleToggleSystemMonitor = (data) => {
+      setIsAutoSystemMonitor(data.enabled);
+    };
+    socket.on("admin_toggle_auto_system_monitor", handleToggleSystemMonitor);
+
     // Khởi động queue nếu có task tồn đọng
     processNextTask();
 
     return () => {
       socket.off("admin_auto_pilot_trigger", handleAutoPilotTrigger);
       socket.off("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
+      socket.off("admin_direct_message", handleDirectMessage);
+      socket.off("admin_toggle_auto_system_monitor", handleToggleSystemMonitor);
     };
-  }, [socket, isAutoPilot, navigate]);
+  }, [socket, isAutoPilot, isAutoSystemMonitor, navigate]);
 
-  // Sinh câu nói hài hước khi rảnh rỗi (5s/lần)
+  // Sinh câu nói hài hước/quyền lực khi rảnh rỗi (5s/lần)
   useEffect(() => {
     let interval;
-    if (isAutoPilot && !robotMode) {
-      const quotes = [
+    if ((isAutoPilot || isAutoSystemMonitor) && !robotMode) {
+      let quotes = [];
+      if (isAutoSystemMonitor) {
+        if (isSuperAdmin) {
+          quotes = [
+            "Đang quét mọi hành động của nhân sự... 👁️", 
+            "Không một thao tác nào lọt qua Mắt Thần! ⚡",
+            "Hệ thống bảo mật và vận hành ở mức tối đa 🛡️",
+            "Đang giám sát doanh thu theo thời gian thực... 📈",
+            "Ai lười biếng sẽ bị ghi vào sổ Nam Tào! 📝",
+            "Mọi hoạt động đều nằm trong tầm kiểm soát 🎯",
+            "Sếp cứ việc uống trà, thế giới để em lo! 🌍",
+            "Server đang chạy mượt mà 100% ✨",
+            "Đang chờ đơn hàng nổ để duyệt tự động... 🛒",
+            "Sẵn sàng chặn đứng mọi cuộc nổi loạn! 🛑"
+          ];
+        } else {
+          quotes = [
+            "Sếp lớn đang nhìn đấy, lo làm việc đi! 👁️",
+            "Có vẻ bạn đang lười biếng? Mắt thần đã ghi lại! ⚠️",
+            "Không được làm việc riêng trong giờ! 🛑",
+            "Mọi thao tác của bạn đều được gửi về máy chủ! 📡",
+            "Tập trung làm việc đi, KPI tháng này đạt chưa? 📉",
+            "Cảnh cáo: Phát hiện hành vi đáng ngờ! (Đùa thôi) 🚨",
+            "Veltrix AI đang giám sát màn hình của bạn... 🤖",
+            "Đừng để Sếp phải nhắc nhở nhé! ⏰"
+          ];
+        }
+      } else {
+        quotes = [
         "Chill chill chờ đơn mới...", "Làm việc kiếm tiền nạp điện 🔋", "Nô lệ tư bản của Veltrix Gear 💼", 
         "Trà đá vỉa hè không Sếp? 🍵", "Hệ thống ổn định, mọi thứ trong tầm kiểm soát 😎", 
         "Cần thêm RAM để xử lý sự xinh đẹp này ✨", "Mong là không có ai boom hàng 🥲", "Veltrix-chan đang ở đây, Sếp đi chơi đi! 🚀",
@@ -237,6 +345,8 @@ function AdminChatbot() {
         "Sếp có muốn em viết một bài đăng mạng xã hội không? 📱", "Đang chờ Sếp khen một câu! 🥺",
         "Sếp có muốn em làm một bản phân tích thị trường không? 🌍", "Em đang học cách làm việc nhóm... Dù em chỉ có một mình 🥲"
       ];
+      } // CLOSE the else block here!
+
       setIdleQuote(quotes[Math.floor(Math.random() * quotes.length)]);
       
       interval = setInterval(() => {
@@ -246,7 +356,7 @@ function AdminChatbot() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isAutoPilot, robotMode]);
+  }, [isAutoPilot, isAutoSystemMonitor, robotMode]);
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
@@ -271,6 +381,7 @@ function AdminChatbot() {
         const configRes = await getSystemConfig();
         if (configRes.data && configRes.data.data) {
           setIsAutoPilot(configRes.data.data.ai?.autoProcessOrders || false);
+          setIsAutoSystemMonitor(configRes.data.data.ai?.autoSystemMonitor || false);
         }
       } catch (error) {
         console.log("Lỗi tải cấu hình hệ thống (Có thể do thiếu quyền):", error);
@@ -298,7 +409,116 @@ function AdminChatbot() {
     scrollToBottom();
   }, [messages, isOpen]);
 
-  const readMessageAloud = async (text) => {
+  useEffect(() => {
+    const handleTTS = async (e) => {
+      try {
+        // Thử dùng Google TTS trước (giọng đẹp hơn)
+        try {
+          audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+          await audioRef.current.play();
+          audioRef.current.pause();
+          // Audio đã unlock -> dùng Google TTS
+          await readMessageAloud(e.detail, 1.5);
+        } catch (err) {
+          // Audio bị chặn -> dùng SpeechSynthesis
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const cleanText = e.detail.replace(/<[^>]*>?/gm, '').replace(/[*_#\-|\n]/g, ' ').replace(/\s+/g, ' ').trim();
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 1.3;
+            utterance.volume = 1.0;
+            const voices = window.speechSynthesis.getVoices();
+            const viVoice = voices.find(v => v.lang.startsWith('vi'));
+            if (viVoice) utterance.voice = viVoice;
+            await new Promise((resolve) => {
+              utterance.onend = resolve;
+              utterance.onerror = resolve;
+              setTimeout(resolve, Math.max(5000, cleanText.length * 80));
+              window.speechSynthesis.speak(utterance);
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi đọc tin nhắn:", error);
+      } finally {
+        setDirectMessageMode(false);
+        setDirectMessageData(null);
+      }
+    };
+    window.addEventListener('trigger_tts_message', handleTTS);
+    return () => window.removeEventListener('trigger_tts_message', handleTTS);
+  }, []);
+
+  useEffect(() => {
+    // Hàm đọc bằng SpeechSynthesis (không bị chặn autoplay như Audio element)
+    const speakWithSpeechSynthesis = (text, rate = 1.3) => {
+      return new Promise((resolve) => {
+        if (!('speechSynthesis' in window)) {
+          resolve();
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[*_#\-|\n]/g, ' ').replace(/\s+/g, ' ').trim();
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'vi-VN';
+        utterance.rate = rate;
+        utterance.volume = 1.0;
+        
+        // Tìm giọng Việt Nam nếu có
+        const voices = window.speechSynthesis.getVoices();
+        const viVoice = voices.find(v => v.lang.startsWith('vi'));
+        if (viVoice) utterance.voice = viVoice;
+        
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+        setTimeout(resolve, Math.max(5000, cleanText.length * 80)); // Fallback timeout
+        window.speechSynthesis.speak(utterance);
+      });
+    };
+
+    const handleTTSNotification = async (e) => {
+      try {
+        if (!audioRef.current) return;
+        
+        let audioUnlocked = false;
+
+        // Thử phát chuông Ting bằng Audio element
+        try {
+          audioRef.current.src = 'https://actions.google.com/sounds/v1/doors/elevator_ding.ogg';
+          audioRef.current.playbackRate = 1.0;
+          audioRef.current.volume = 1.0;
+          await audioRef.current.play();
+          audioUnlocked = true;
+          await new Promise((resolve) => {
+            audioRef.current.onended = resolve;
+            audioRef.current.onerror = resolve;
+            setTimeout(resolve, 3000);
+          });
+        } catch (err) {
+          console.log("Browser blocked auto-play, using SpeechSynthesis fallback");
+          audioUnlocked = false;
+        }
+
+        if (audioUnlocked) {
+          // Audio element đã unlock → dùng Google TTS cho giọng đẹp
+          await readMessageAloud(e.detail, 1.5);
+        } else {
+          // Audio bị chặn → dùng SpeechSynthesis (luôn hoạt động kể cả ẩn danh)
+          await speakWithSpeechSynthesis(e.detail, 1.3);
+        }
+      } catch (error) {
+        console.error("Lỗi đọc thông báo:", error);
+      } finally {
+        setDirectMessageMode(false);
+        setDirectMessageData(null);
+      }
+    };
+    window.addEventListener('trigger_tts_notification', handleTTSNotification);
+    return () => window.removeEventListener('trigger_tts_notification', handleTTSNotification);
+  }, []);
+
+  const readMessageAloud = async (text, rate = 1.5) => {
     // Unlock the audio element synchronously with the user's click
     audioRef.current.play().catch(() => {});
     audioRef.current.pause();
@@ -324,7 +544,7 @@ function AdminChatbot() {
       
       await new Promise((resolve) => {
         audioRef.current.src = url;
-        audioRef.current.playbackRate = 1.5; // Tăng tốc độ đọc lên 1.5x theo ý Sếp
+        audioRef.current.playbackRate = rate; // Sử dụng rate được truyền vào
         audioRef.current.onended = resolve;
         audioRef.current.onerror = (e) => {
           console.log("Audio load error:", e);
@@ -332,7 +552,9 @@ function AdminChatbot() {
         };
         audioRef.current.play().catch(e => {
           console.log("Autoplay blocked:", e);
-          resolve();
+          // Tính toán thời gian đọc ước tính để giữ popup mở đủ lâu cho Sếp đọc chữ
+          const estimatedTime = (textToSpeak.length / 20) * 1000; 
+          setTimeout(resolve, Math.max(3000, estimatedTime));
         });
       });
     }
@@ -396,6 +618,7 @@ function AdminChatbot() {
           const configRes = await getSystemConfig();
           if (configRes.data && configRes.data.data) {
             setIsAutoPilot(configRes.data.data.ai?.autoProcessOrders || false);
+            setIsAutoSystemMonitor(configRes.data.data.ai?.autoSystemMonitor || false);
           }
         } catch (e) {
           console.error("Lỗi đồng bộ cấu hình AI:", e);
@@ -497,6 +720,21 @@ function AdminChatbot() {
         handleSend(newState ? "Bật chế độ Auto-Pilot duyệt đơn tự động" : "Tắt chế độ Auto-Pilot duyệt đơn tự động");
       }
     },
+    ...(isSuperAdmin ? [
+      {
+        key: 'system-monitor',
+        label: (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '220px' }}>
+            <span style={{ fontWeight: 500, color: '#f5222d' }}>Giám sát toàn hệ thống</span>
+            <Switch checked={isAutoSystemMonitor} size="small" style={{ backgroundColor: isAutoSystemMonitor ? '#f5222d' : undefined }} />
+          </div>
+        ),
+        onClick: () => {
+          const newState = !isAutoSystemMonitor;
+          handleSend(newState ? "Bật chế độ giám sát toàn hệ thống (God Mode)" : "Tắt chế độ giám sát toàn hệ thống");
+        }
+      }
+    ] : []),
     {
       type: 'divider'
     },
@@ -509,8 +747,8 @@ function AdminChatbot() {
 
   return (
     <>
-      {/* 🤖 Robot Mode Overlay Toàn cục */}
-      {isAutoPilot && (
+      {/* 🤖 Robot Mode Overlay Toàn cục (Chỉ hiện khi chưa bật God Mode) */}
+      {isAutoPilot && !isAutoSystemMonitor && (
         <div className="global-robot-overlay">
           <div className="global-robot-overlay__content" style={{ position: 'relative' }}>
             <div className={`global-robot-overlay__pulse ${!robotMode ? 'idle' : ''}`}></div>
@@ -526,6 +764,50 @@ function AdminChatbot() {
                 {idleQuote}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 👁️ God Mode Overlay (Giám sát toàn hệ thống) */}
+      {isAutoSystemMonitor && (
+        <div className="global-robot-overlay god-mode-overlay" style={{ top: '16px' }}>
+          <div className="global-robot-overlay__content god-mode-content" style={{ position: 'relative' }}>
+            <div className={`global-robot-overlay__pulse god-mode-pulse ${!robotMode ? 'idle' : ''}`}></div>
+            <span className="global-robot-overlay__icon god-mode-icon">👁️</span>
+            <div className="global-robot-overlay__text">
+              <strong className="god-mode-title">{isSuperAdmin ? "Giám Sát Toàn Năng (God Mode)" : "BẠN ĐANG BỊ GIÁM SÁT!"}</strong>
+              <span className="god-mode-desc">{robotMode ? robotStep : (isSuperAdmin ? 'Đang kiểm soát quyền lực tuyệt đối toàn hệ thống...' : 'Mọi hành động của bạn đều đang được ghi lại...')}</span>
+            </div>
+            
+            {/* Box suy nghĩ quyền lực khi rảnh rỗi */}
+            {!robotMode && idleQuote && (
+              <div className="robot-thought-bubble god-mode-bubble">
+                {idleQuote}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {/* 🚨 Popup Tin Nhắn Khẩn Cấp từ Super Admin */}
+      {directMessageMode && directMessageData && (
+        <div className="global-robot-overlay direct-message-overlay" style={{ background: 'linear-gradient(135deg, #ef4444, #b91c1c)' }}>
+          <div className="global-robot-overlay__content dm-content" style={{ position: 'relative' }}>
+            <div className="global-robot-overlay__pulse dm-pulse"></div>
+            <span className="global-robot-overlay__icon">🤖</span>
+            <div className="global-robot-overlay__text">
+              <strong style={{ color: 'white' }}>Sếp Lớn {directMessageData.from} truyền đạt</strong>
+              <div className="soundwave-container">
+                <span className="wave"></span>
+                <span className="wave"></span>
+                <span className="wave"></span>
+                <span className="wave"></span>
+                <span className="wave"></span>
+              </div>
+            </div>
+            
+            <div className="robot-thought-bubble dm-bubble" style={{ bottom: '-60px', left: '10px', right: 'auto', background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5', minWidth: 'max-content' }}>
+              {directMessageData.message}
+            </div>
           </div>
         </div>
       )}

@@ -4,7 +4,7 @@ import {
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu, theme } from "antd";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import LogoMain from "../../assets/logo/logo_main.png";
 import Logo from "../../assets/logo/logo.png";
 import {
@@ -192,6 +192,13 @@ const MainLayoutAdmin = () => {
 
   const siderWidth = collapsed ? 80 : 200;
   const socket = useSocket();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (socket && socket.connected) {
+      socket.emit("admin_change_page", { page: location.pathname });
+    }
+  }, [location.pathname, socket]);
 
   useEffect(() => {
     if (admin && socket) {
@@ -199,7 +206,8 @@ const MainLayoutAdmin = () => {
         socket.emit("admin_online", {
           id: admin._id || admin.id || "unknown_" + Math.random(),
           fullname: admin.fullname,
-          role: role?.title || "Quản trị viên"
+          role: role?.title || "Quản trị viên",
+          current_page: window.location.pathname
         });
       };
 
@@ -218,9 +226,24 @@ const MainLayoutAdmin = () => {
       // Dự phòng cho phiên bản socket io mới có thể gọi connect lại
       socket.on("connect", emitPresence);
 
+      // Xử lý trường hợp bị hệ thống AI (Bảo vệ) cấm
+      const handleForceLogout = (data) => {
+        console.log("BỊ HỆ THỐNG KICK:", data, "Current Admin:", admin);
+        if (String(data.accountId) === String(admin?._id) || String(data.accountId) === String(admin?.id)) {
+          // Xóa token cookies triệt để
+          import('js-cookie').then((Cookies) => {
+             Cookies.default.remove('token_admin', { path: '/' });
+             // Chuyển hướng cứng (bỏ qua React Router bảo vệ)
+             window.location.href = '/admin/banned';
+          });
+        }
+      };
+      socket.on("admin_force_logout", handleForceLogout);
+
       return () => {
         socket.off("connect", emitPresence);
         socket.off("reconnect", emitPresence);
+        socket.off("admin_force_logout", handleForceLogout);
       };
     }
   }, [admin, role, socket]);
