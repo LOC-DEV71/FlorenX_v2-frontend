@@ -7,7 +7,7 @@ import {
     BsTruck
 } from "react-icons/bs";
 import { MdDoneAll, MdDeleteOutline, MdClose, MdReceipt } from "react-icons/md";
-import { FiPackage } from "react-icons/fi";
+import { FiPackage, FiAlertTriangle } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { RiUserLine, RiPhoneLine, RiMailLine, RiBankCardLine, RiCoupon3Line } from "react-icons/ri";
 import SEO from "../../../utils/SEO";
@@ -39,7 +39,8 @@ function Orders() {
         pending: 0,
         confirmed: 0,
         shipped: 0,
-        done: 0
+        done: 0,
+        suspicious: 0
     });
 
     const page = Number(searchParams.get("page")) || 1;
@@ -75,12 +76,13 @@ function Orders() {
                 const ordersData = res.data.orders || [];
                 setOrders(ordersData);
                 setPagination(res.data.pagination);
-                const { doneOrder, pendingOrder, comfirmOrder, shippedOrder } = res.data.status;
+                const { doneOrder, pendingOrder, comfirmOrder, shippedOrder, suspiciousOrder } = res.data.status;
                 setStats({
                     pending: pendingOrder,
                     confirmed: comfirmOrder,
                     shipped: shippedOrder,
-                    done: doneOrder
+                    done: doneOrder,
+                    suspicious: suspiciousOrder
                 });
             }
         } catch (error) {
@@ -120,7 +122,8 @@ function Orders() {
         confirmed: "Đã xác nhận",
         shipped: "Đang giao",
         done: "Hoàn thành",
-        cancel: "Đã huỷ"
+        cancel: "Đã huỷ",
+        suspicious: "Khả nghi"
     };
 
     const navigate = useNavigate();
@@ -161,6 +164,13 @@ function Orders() {
                     <p><MdDoneAll /> Hoàn thành</p>
                     {loading ? <Skeleton.Input active size="small" /> : <Statistic value={stats.done} />}
                 </div>
+                <div
+                    className={`admin-stat-card admin-stat-suspicious ${sortStatus === "suspicious" ? "status-active" : ""}`}
+                    onClick={() => handleFilterStatus("suspicious")}
+                >
+                    <p style={{color: "#b91c1c"}}><FiAlertTriangle /> Khả nghi</p>
+                    {loading ? <Skeleton.Input active size="small" /> : <Statistic value={stats.suspicious} />}
+                </div>
             </div>
 
             {/* Toolbar */}
@@ -191,6 +201,7 @@ function Orders() {
                         <option value="shipped">Vận chuyển</option>
                         <option value="done">Hoàn thành</option>
                         <option value="cancel">Hủy đơn</option>
+                        <option value="suspicious">Khả nghi</option>
                     </select>
                 </div>
                 <div className="admin-toolbar__actions">

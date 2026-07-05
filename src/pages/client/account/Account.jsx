@@ -2,10 +2,12 @@ import { useSelector } from "react-redux";
 import "./Account.scss";
 import React, { useEffect, useMemo, useState } from "react";
 import { update } from "../../../services/client/Auth.service";
+import { getTiers } from "../../../services/client/tier.client.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 import LuxuryBox from "../../../utils/luxury";
 import SEO from "../../../utils/SEO";
+import LocationSelector from "../../../components/client/LocationSelector/LocationSelector";
 
 function AccountClient() {
     const account = useSelector((state) => state.authClient.user);
@@ -15,11 +17,35 @@ function AccountClient() {
     
     // --- State mới cho Modal hạng mức ---
     const [isTierModalOpen, setIsTierModalOpen] = useState(false);
+    const [tierBenefits, setTierBenefits] = useState([]);
     
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
     const avatarsPerPage = 32;
+
+    useEffect(() => {
+        const fetchTiersData = async () => {
+            try {
+                const res = await getTiers();
+                if (res.data) {
+                    const formatted = res.data.map(t => ({
+                        id: t.slug,
+                        name: t.name,
+                        discount: `${t.discountRate}%`,
+                        max: `${(t.maxDiscount / 1000000).toLocaleString('vi-VN')} triệu`,
+                        minOrder: `${(t.minOrderValue / 1000000).toLocaleString('vi-VN')} triệu`,
+                        condition: t.slug === 'bronze' ? `Dưới ${(t.conditionTotalSpent / 1000000).toLocaleString('vi-VN')} triệu` : `Trên ${(t.conditionTotalSpent / 1000000).toLocaleString('vi-VN')} triệu`,
+                        class: t.slug
+                    }));
+                    setTierBenefits(formatted);
+                }
+            } catch (error) {
+                console.error("Failed to fetch tiers", error);
+            }
+        };
+        fetchTiersData();
+    }, []);
 
     useEffect(() => {
         if (account) {
@@ -87,24 +113,7 @@ function AccountClient() {
     };
 
     // --- Dữ liệu cấu hình hạng mức mới ---
-    const tierBenefits = [
-        { 
-            id: "bronze", name: "Đồng", discount: "5%", max: "1 triệu", 
-            minOrder: "10 triệu", condition: "Dưới 5 triệu", class: "bronze" 
-        },
-        { 
-            id: "silver", name: "Bạc", discount: "6%", max: "2 triệu", 
-            minOrder: "10 triệu", condition: "Trên 30 triệu", class: "silver" 
-        },
-        { 
-            id: "gold", name: "Vàng", discount: "8%", max: "3 triệu", 
-            minOrder: "10 triệu", condition: "Trên 50 triệu", class: "gold" 
-        },
-        { 
-            id: "diamond", name: "Kim cương", discount: "15%", max: "5 triệu", 
-            minOrder: "10 triệu", condition: "Trên 100 triệu", class: "diamond" 
-        },
-    ];
+    // (Được lấy từ DB qua fetchTiersData)
 
     return (
         <div className="user-profile-page" id="user-profile-page">
@@ -186,14 +195,21 @@ function AccountClient() {
                             </div>
 
                             <div className="form-group full-width">
-                                <label htmlFor="address">Địa chỉ</label>
+                                <label htmlFor="address">Địa chỉ hiện tại</label>
                                 <input
                                     type="text"
                                     id="address"
                                     name="address"
                                     value={user.address || ""}
-                                    onChange={handleChange}
-                                    placeholder="Nhập địa chỉ"
+                                    disabled
+                                    placeholder="Chưa có địa chỉ"
+                                />
+                            </div>
+                            
+                            <div className="form-group full-width">
+                                <label>Cập nhật địa chỉ mới (bỏ qua nếu không muốn đổi)</label>
+                                <LocationSelector 
+                                    onChange={(addr) => setUser(prev => ({ ...prev, address: addr }))} 
                                 />
                             </div>
                         </div>

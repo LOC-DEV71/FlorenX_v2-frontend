@@ -7,8 +7,10 @@ import { error, success } from "../../../utils/notift";
 import { getVoucher } from "../../../services/client/voucher.service";
 import { formatCustom } from "../../../utils/formatCustomDate";
 import { capturePaypalOrder, createPaypalOrder, OrderSubmit, getPaymentConfig } from "../../../services/client/checkout.service";
+import { getTiers } from "../../../services/client/tier.client.service";
 import Loading from "../../../utils/loading";
 import { useSocket } from "../../../Socket/useSocket";
+import LocationSelector from "../../../components/client/LocationSelector/LocationSelector";
 
 function Checkout() {
   const location = useLocation();
@@ -18,6 +20,7 @@ function Checkout() {
   const [loading, setLoading] = useState(false)
   const [orderReturn, setOrderReturn] = useState([]);
   const socket = useSocket();
+  const [useAccountInfo, setUseAccountInfo] = useState(false);
 
   const totalPrice = products.reduce(
     (total, item) =>
@@ -51,6 +54,8 @@ function Checkout() {
   });
 
   const [vouchers, setVouchers] = useState([]);
+  const [tiers, setTiers] = useState([]);
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [banks, setBanks] = useState([]);
 
   // useEffect(() => {
@@ -61,30 +66,14 @@ function Checkout() {
   // }, [products]);
 
   const memberDiscount = (() => {
-    if (!account || !account.member) return 0;
+    if (!account || !account.member || !tiers.length) return 0;
     const memberTier = account.member.toLowerCase();
-    let tierConfig = null;
+    const tierConfig = tiers.find(t => t.slug === memberTier);
 
-    switch (memberTier) {
-      case "diamond":
-        tierConfig = { rate: 0.15, max: 5000000, minOrder: 10000000 };
-        break;
-      case "gold":
-        tierConfig = { rate: 0.08, max: 3000000, minOrder: 10000000 };
-        break;
-      case "silver":
-        tierConfig = { rate: 0.06, max: 2000000, minOrder: 10000000 };
-        break;
-      case "bronze":
-        tierConfig = { rate: 0.05, max: 1000000, minOrder: 10000000 };
-        break;
-      default:
-        return 0;
-    }
-
-    if (totalPrice < tierConfig.minOrder) return 0;
-    const discountAmount = totalPrice * tierConfig.rate;
-    return Math.min(discountAmount, tierConfig.max);
+    if (!tierConfig) return 0;
+    if (totalPrice < tierConfig.minOrderValue) return 0;
+    const discountAmount = totalPrice * (tierConfig.discountRate / 100);
+    return Math.min(discountAmount, tierConfig.maxDiscount);
   })();
 
 
@@ -93,6 +82,10 @@ function Checkout() {
       const res = await getVoucher();
       if (res?.data?.code) {
         setVouchers(res.data.vouchers);
+      }
+      const tiersRes = await getTiers();
+      if (tiersRes?.data) {
+        setTiers(tiersRes.data);
       }
       const paymentRes = await getPaymentConfig();
       if (paymentRes?.data?.code === 200) {
@@ -181,9 +174,14 @@ function Checkout() {
               <div>
                 {vouchers.map(item => (
                   <div
-                    className={`item ${form.voucher === item?.code && "active"}`}
+                    className={`item ${form.voucher === item?.code ? "active" : ""} ${item.isUsed ? "disabled" : ""}`}
                     key={item?._id}
+                    style={item.isUsed ? { opacity: 0.5, cursor: "not-allowed", pointerEvents: "auto" } : {}}
                     onClick={() => {
+                      if (item.isUsed) {
+                        error("Bạn đã sử dụng mã giảm giá này rồi.");
+                        return;
+                      }
                       setForm(prev => ({
                         ...prev,
                         voucher: prev.voucher === item?.code ? "" : item?.code,
@@ -202,7 +200,7 @@ function Checkout() {
                       </div>
                     </div>
                     <div className="right">
-                      {form.voucher === item?.code ? "Đã áp dụng" : "Áp dụng"}
+                      {item.isUsed ? "Đã sử dụng" : (form.voucher === item?.code ? "Đã áp dụng" : "Áp dụng")}
                     </div>
                   </div>
                 ))}
@@ -257,11 +255,19 @@ function Checkout() {
               />
             </div>
 
-            <input
-              placeholder="Địa chỉ nhận hàng"
-              value={form.address}
-              onChange={e => setForm({ ...form, address: e.target.value })}
-            />
+            {!useAccountInfo && (
+              <LocationSelector 
+                onChange={(addr) => setForm(prev => ({ ...prev, address: addr }))} 
+              />
+            )}
+            
+            {useAccountInfo && (
+              <input
+                placeholder="Địa chỉ nhận hàng"
+                value={form.address}
+                disabled
+              />
+            )}
 
             <textarea placeholder="Lời nhắn cho shipper..." />
 
@@ -269,14 +275,25 @@ function Checkout() {
               <input
                 type="checkbox"
                 id="account"
+                checked={useAccountInfo}
                 onChange={e => {
-                  if (e.target.checked && account) {
+                  const checked = e.target.checked;
+                  setUseAccountInfo(checked);
+                  if (checked && account) {
                     setForm({
                       ...form,
                       fullname: account.fullname || "",
                       address: account.address || "",
                       phone: account.phone || "",
                       email: account.email || ""
+                    });
+                  } else {
+                    setForm({
+                      ...form,
+                      fullname: "",
+                      address: "",
+                      phone: "",
+                      email: ""
                     });
                   }
                 }}

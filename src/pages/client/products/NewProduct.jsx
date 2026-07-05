@@ -3,6 +3,7 @@ import "./NewProduct.scss";
 import heroVideo from "../../../assets/banner/product.mp4";
 import { HashLink } from "react-router-hash-link";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function AutoVideoSection({
   src,
@@ -110,6 +111,11 @@ function AutoVideoSection({
 function NewProduct() {
   const heroSectionRef = useRef(null);
   const heroVideoRef = useRef(null);
+  
+  const settings = useSelector((state) => state.setting.settings);
+  const salePageData = settings?.sale_page || [];
+  const heroData = salePageData.find(item => item.type === "hero");
+  const sectionData = salePageData.filter(item => item.type === "section");
 
   const [isHeroPlaying, setIsHeroPlaying] = useState(false);
   const [hasHeroPlayedOnce, setHasHeroPlayedOnce] = useState(false);
@@ -165,7 +171,7 @@ function NewProduct() {
         <video
           ref={heroVideoRef}
           className="child-hero__video"
-          src={heroVideo}
+          src={heroData?.mediaUrl || heroVideo}
           muted
           playsInline
           preload="metadata"
@@ -173,13 +179,17 @@ function NewProduct() {
         />
 
         <div className="child-hero__overlay" />
+        <div className="child-hero__text" style={{ position: "absolute", top: "45%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 2, textAlign: "center", color: "#fff", width: "100%", padding: "0 20px", pointerEvents: "none" }}>
+          {heroData?.tag && <h4 style={{ color: "#22c55e", letterSpacing: "2px", marginBottom: "10px", fontSize: "18px", fontWeight: 700 }}>{heroData.tag}</h4>}
+          {heroData?.title && <h1 style={{ fontSize: "clamp(32px, 5vw, 64px)", margin: 0, fontWeight: 800, textTransform: "uppercase" }}>{heroData.title}</h1>}
+        </div>
 
         <div className="child-hero__actions">
           <HashLink smooth to={"/products/new-product/laptop-gaming/#description-product"} className="child-hero__action child-hero__action--outline">
             Xem ngay
           </HashLink>
 
-          <Link to={"/products/detail/laptop-gaming-veltrix-gear-v10"} className="child-hero__action child-hero__action--filled">
+          <Link to={heroData?.link || "/products/detail/laptop-gaming-veltrix-gear-v10"} className="child-hero__action child-hero__action--filled">
             Mua ngay
           </Link>
         </div>
@@ -198,26 +208,26 @@ function NewProduct() {
         </button>
       </section>
 
-      <AutoVideoSection
-        id="description-product"
-        src="https://assets2.razerzone.com/images/pnx.assets/7c84f6a15d392b71522e621e35d8e842/blade16-2026-nvidia-1920x700.mp4"
-        title="Up to NVIDIA® GeForce RTX™ 5090 Laptop GPU"
-        desc="Sức mạnh đồ họa thế hệ mới từ NVIDIA mang lại hiệu năng vượt trội cho gaming, sáng tạo nội dung và xử lý AI. RTX 5090 Laptop GPU nâng tầm trải nghiệm với Ray Tracing chân thực, DLSS AI và khả năng xử lý mạnh mẽ trong mọi tác vụ."
-      />
-
-      <AutoVideoSection
-        src="https://assets2.razerzone.com/images/pnx.assets/55f74e2d1ce95c5d403775b7b8d551d2/blade16-2026-intel-1920x700.mp4"
-        title="Next-Gen Intel® Core™ Ultra 9 Processor"
-        desc="Trang bị Intel® Core™ Ultra 9 thế hệ mới, mang lại hiệu năng vượt trội cho đa nhiệm, xử lý AI và các tác vụ chuyên sâu. Kiến trúc tối ưu giúp cân bằng giữa sức mạnh và hiệu quả năng lượng, đem đến trải nghiệm mượt mà từ gaming đến sáng tạo nội dung."
-        tagClassName="blue"
-      />
-
-      <AutoVideoSection
-        src="https://assets2.razerzone.com/images/pnx.assets/25bd4d690a204ac6c9f408d1c63c06e0/blade16-2026-oled-1920x700.mp4"
-        title="MÀN HÌNH OLED TUYỆT ĐẸP"
-        desc="Đắm chìm hoàn toàn vào thế giới game và phim ảnh ở bất cứ đâu với màn hình OLED VESA DisplayHDR TrueBlack 1000, mang đến hình ảnh QHD sắc nét, tần số quét 240 Hz mượt mà và thời gian phản hồi 0.2 ms."
-        tagClassName="blue"
-      />
+      {sectionData.length > 0 ? (
+        sectionData.map((item, idx) => (
+          <AutoVideoSection
+            key={idx}
+            id={idx === 0 ? "description-product" : undefined}
+            src={item.mediaUrl}
+            title={item.title}
+            desc={item.desc}
+            tag={item.tag}
+            tagClassName={item.tagClassName}
+          />
+        ))
+      ) : (
+        <AutoVideoSection
+          id="description-product"
+          src="https://assets2.razerzone.com/images/pnx.assets/7c84f6a15d392b71522e621e35d8e842/blade16-2026-nvidia-1920x700.mp4"
+          title="Up to NVIDIA® GeForce RTX™ 5090 Laptop GPU"
+          desc="Sức mạnh đồ họa thế hệ mới từ NVIDIA mang lại hiệu năng vượt trội cho gaming, sáng tạo nội dung và xử lý AI. RTX 5090 Laptop GPU nâng tầm trải nghiệm với Ray Tracing chân thực, DLSS AI và khả năng xử lý mạnh mẽ trong mọi tác vụ."
+        />
+      )}
     </>
   );
 }

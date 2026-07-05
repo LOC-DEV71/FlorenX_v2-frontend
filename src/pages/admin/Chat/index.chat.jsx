@@ -70,6 +70,7 @@ function CustomerSupportChat() {
   const [user, setUser] = useState([])
   const [orders, setOrders] = useState([])
   const [room_chat_id, setRoom_chat_id] = useState("")
+  const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -124,22 +125,63 @@ function CustomerSupportChat() {
     if (activeConv && socket) {
       socket.emit("client_join_room", { roomId: activeConv, sender: "admin" });
 
-      socket.on("server_return_room_data", (data) => {
+      const handleRoomData = (data) => {
         setMessages(data.message);
         setUser(data.user)
         setOrders(data.orders)
-      });
+      };
 
-      socket.on("server_send_message", (newMsg) => {
-        setMessages((prev) => [...prev, newMsg]);
-      });
+      const handleSendMessage = (newMsg) => {
+        if (newMsg.roomId === activeConv) {
+          setMessages((prev) => [...prev, newMsg]);
+        }
+      };
+
+      socket.on("server_return_room_data", handleRoomData);
+      socket.on("server_send_message", handleSendMessage);
+
+      return () => {
+        socket.emit("client_leave_room", { roomId: activeConv });
+        socket.off("server_return_room_data", handleRoomData);
+        socket.off("server_send_message", handleSendMessage);
+      };
     }
-
-    return () => {
-      socket.off("server_return_room_data");
-      socket.off("server_send_message");
-    };
   }, [activeConv, socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleGlobalUpdate = (data) => {
+      const { roomId, text, sender, timestamp } = data;
+      setRoomchat((prev) => {
+        const index = prev.findIndex((r) => r._id === roomId);
+        if (index > -1) {
+          const updated = [...prev];
+          const room = { ...updated[index] };
+          room.lastMessage = text;
+          room.lastMessageTime = timestamp;
+          if (sender === "user" && activeConv !== roomId) {
+            room.unread = (room.unread || 0) + 1;
+          }
+          updated.splice(index, 1);
+          updated.unshift(room);
+          return updated;
+        }
+        return prev;
+      });
+    };
+
+    socket.on("admin_global_chat_update", handleGlobalUpdate);
+    return () => socket.off("admin_global_chat_update", handleGlobalUpdate);
+  }, [socket, activeConv]);
+
+  useEffect(() => {
+    if (activeConv) {
+      setRoomchat((prev) =>
+        prev.map((r) => (r._id === activeConv ? { ...r, unread: 0 } : r))
+      );
+    }
+  }, [activeConv]);
 
   const formatMember = (member) => {
     switch (member) {
@@ -176,7 +218,7 @@ function CustomerSupportChat() {
   useEffect(() => {
     const fetchApi = async () => {
       try {
-      const res = await getListRoom();
+        const res = await getListRoom(keyword);
         if(res?.data?.code){
           setRoomchat(res?.data?.rooms)
         }
@@ -185,8 +227,12 @@ function CustomerSupportChat() {
       }
     }
 
-    fetchApi();
-  }, [])
+    const timer = setTimeout(() => {
+      fetchApi();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [keyword])
   return (
     <div className="csp">
       {/* Header */}
@@ -232,7 +278,7 @@ function CustomerSupportChat() {
           <div className="sidebar-top">
             <div className="search-box">
               <SearchOutlined style={{ color: "#b0b6cc", fontSize: 14 }} />
-              <input type="text" placeholder="Tìm theo tên, SĐT, mã đơn..." />
+              <input type="text" placeholder="Tìm theo tên, SĐT, email..." value={keyword} onChange={(e) => setKeyword(e.target.value)} />
             </div>
             <div className="filters">
               {filters.map((f) => (
@@ -260,10 +306,10 @@ function CustomerSupportChat() {
                 <div className="conv-body">
                   <div className="conv-row">
                     <span className="conv-name">{item?.fullname}</span>
-                    <span className="conv-time">{formatCustom(item?.createdAt)}</span>
+                    <span className="conv-time">{item?.lastMessageTime ? formatCustom(item.lastMessageTime) : formatCustom(item?.createdAt)}</span>
                   </div>
                   <div className="conv-row">
-                    <span className="conv-msg">{item.lastMessage}</span>
+                    <span className="conv-msg">{item?.lastMessage || "Chưa có tin nhắn"}</span>
                     {item?.unread > 0 && <span className="badge">{item?.unread}</span>}
                   </div>
                 </div>

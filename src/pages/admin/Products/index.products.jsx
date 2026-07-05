@@ -323,6 +323,10 @@ function Products() {
                         <CgMathPlus /> Tạo mới
                     </Link>
 
+                    <Link className="admin-create" to="/admin/vouchers" style={{ marginLeft: "10px", background: "#f59e0b" }}>
+                        🎟️ Quản lý Voucher
+                    </Link>
+
                     <div className="admin-inventory-menu" ref={inventoryMenuRef}>
                         <button
                             type="button"

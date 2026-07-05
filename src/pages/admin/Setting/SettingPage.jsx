@@ -43,13 +43,12 @@ const defaultForm = {
     endDate: ""
   },
 
-  section_hero: [
+  category_banners: [
     {
-      image: "",
+      categorySlug: "",
       title: "",
-      desc: "",
-      tag: "",
-      link: ""
+      description: "",
+      image: ""
     }
   ],
 
@@ -58,6 +57,18 @@ const defaultForm = {
       image: "",
       title: "",
       tag: "",
+      link: ""
+    }
+  ],
+
+  sale_page: [
+    {
+      type: "hero",
+      mediaUrl: "",
+      title: "",
+      desc: "",
+      tag: "",
+      tagClassName: "",
       link: ""
     }
   ]
@@ -115,25 +126,6 @@ function SettingPage() {
           endDate: normalizeDate(data.saleBanner?.endDate)
         },
 
-        section_hero:
-          data.section_hero?.length > 0
-            ? data.section_hero.map((item) => ({
-                image: item.image || "",
-                title: item.title || "",
-                desc: item.desc || "",
-                tag: item.tag || "",
-                link: item.link || ""
-              }))
-            : [
-                {
-                  image: "",
-                  title: "",
-                  desc: "",
-                  tag: "",
-                  link: ""
-                }
-              ],
-
         section_hero_slider:
           data.section_hero_slider?.length > 0
             ? data.section_hero_slider.map((item) => ({
@@ -147,6 +139,46 @@ function SettingPage() {
                   image: "",
                   title: "",
                   tag: "",
+                  link: ""
+                }
+              ],
+
+        category_banners:
+          data.category_banners?.length > 0
+            ? data.category_banners.map((item) => ({
+                categorySlug: item.categorySlug || "",
+                title: item.title || "",
+                description: item.description || "",
+                image: item.image || ""
+              }))
+            : [
+                {
+                  categorySlug: "",
+                  title: "",
+                  description: "",
+                  image: ""
+                }
+              ],
+
+        sale_page:
+          data.sale_page?.length > 0
+            ? data.sale_page.map((item) => ({
+                type: item.type || "section",
+                mediaUrl: item.mediaUrl || "",
+                title: item.title || "",
+                desc: item.desc || "",
+                tag: item.tag || "",
+                tagClassName: item.tagClassName || "",
+                link: item.link || ""
+              }))
+            : [
+                {
+                  type: "hero",
+                  mediaUrl: "",
+                  title: "",
+                  desc: "",
+                  tag: "",
+                  tagClassName: "",
                   link: ""
                 }
               ]
@@ -222,64 +254,6 @@ function SettingPage() {
     }));
   };
 
-  const handleHeroChange = (index, field, value) => {
-    const updated = [...form.section_hero];
-    updated[index][field] = value;
-
-    setForm((prev) => ({
-      ...prev,
-      section_hero: updated
-    }));
-  };
-
-  const handleHeroImageChange = (e, index) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const updated = [...form.section_hero];
-    updated[index].image = file;
-    updated[index].hasNewImage = true;
-
-    setForm((prev) => ({
-      ...prev,
-      section_hero: updated
-    }));
-  };
-
-  const addHeroItem = () => {
-    setForm((prev) => ({
-      ...prev,
-      section_hero: [
-        ...prev.section_hero,
-        {
-          image: "",
-          title: "",
-          desc: "",
-          tag: "",
-          link: ""
-        }
-      ]
-    }));
-  };
-
-  const removeHeroItem = (index) => {
-    const updated = form.section_hero.filter((_, i) => i !== index);
-    setForm((prev) => ({
-      ...prev,
-      section_hero: updated.length
-        ? updated
-        : [
-            {
-              image: "",
-              title: "",
-              desc: "",
-              tag: "",
-              link: ""
-            }
-          ]
-    }));
-  };
-
   const handleSliderChange = (index, field, value) => {
     const updated = [...form.section_hero_slider];
     updated[index][field] = value;
@@ -333,6 +307,72 @@ function SettingPage() {
               link: ""
             }
           ]
+    }));
+  };
+
+  const handleSalePageChange = (index, field, value) => {
+    const updated = [...form.sale_page];
+    updated[index][field] = value;
+    setForm((prev) => ({ ...prev, sale_page: updated }));
+  };
+
+  const handleCategoryBannerChange = (index, field, value) => {
+    const updated = [...form.category_banners];
+    updated[index][field] = value;
+    setForm((prev) => ({ ...prev, category_banners: updated }));
+  };
+
+  const handleCategoryBannerImage = (e, index) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const updated = [...form.category_banners];
+    updated[index].image = file;
+    updated[index].hasNewImage = true;
+    setForm((prev) => ({ ...prev, category_banners: updated }));
+  };
+
+  const addCategoryBannerItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      category_banners: [
+        ...prev.category_banners,
+        { categorySlug: "", title: "", description: "", image: "" }
+      ]
+    }));
+  };
+
+  const removeCategoryBannerItem = (index) => {
+    const updated = form.category_banners.filter((_, i) => i !== index);
+    setForm((prev) => ({
+      ...prev,
+      category_banners: updated.length ? updated : [{ categorySlug: "", title: "", description: "", image: "" }]
+    }));
+  };
+
+  const handleSalePageMediaChange = (e, index) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const updated = [...form.sale_page];
+    updated[index].mediaUrl = file;
+    updated[index].hasNewImage = true;
+    setForm((prev) => ({ ...prev, sale_page: updated }));
+  };
+
+  const addSalePageItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      sale_page: [
+        ...prev.sale_page,
+        { type: "section", mediaUrl: "", title: "", desc: "", tag: "", tagClassName: "", link: "" }
+      ]
+    }));
+  };
+
+  const removeSalePageItem = (index) => {
+    const updated = form.sale_page.filter((_, i) => i !== index);
+    setForm((prev) => ({
+      ...prev,
+      sale_page: updated.length ? updated : [{ type: "hero", mediaUrl: "", title: "", desc: "", tag: "", tagClassName: "", link: "" }]
     }));
   };
 
@@ -391,15 +431,6 @@ function SettingPage() {
         formData.append("bannerMobile", form.saleBanner.mobileImage);
       }
 
-      const heroItems = form.section_hero.map((item) => ({
-        title: item.title || "",
-        desc: item.desc || "",
-        tag: item.tag || "",
-        link: item.link || "",
-        image: item.image instanceof File ? "" : item.image || "",
-        hasNewImage: item.image instanceof File
-      }));
-
       const sliderItems = form.section_hero_slider.map((item) => ({
         title: item.title || "",
         tag: item.tag || "",
@@ -408,19 +439,39 @@ function SettingPage() {
         hasNewImage: item.image instanceof File
       }));
 
-      formData.append("sectionHeroItems", JSON.stringify(heroItems));
       formData.append("sectionHeroSliderItems", JSON.stringify(sliderItems));
 
-      form.section_hero.forEach((item) => {
-        if (item.image instanceof File) {
-          formData.append("sectionHeroImages", item.image);
-        }
+      const salePageItems = form.sale_page.map((item) => ({
+        type: item.type || "section",
+        title: item.title || "",
+        desc: item.desc || "",
+        tag: item.tag || "",
+        tagClassName: item.tagClassName || "",
+        link: item.link || "",
+        mediaUrl: item.mediaUrl instanceof File ? "" : item.mediaUrl || "",
+        hasNewImage: item.mediaUrl instanceof File
+      }));
+      formData.append("salePageItems", JSON.stringify(salePageItems));
+
+      const categoryBannersItems = form.category_banners.map((item) => ({
+        categorySlug: item.categorySlug || "",
+        title: item.title || "",
+        description: item.description || "",
+        image: item.image instanceof File ? "" : item.image || "",
+        hasNewImage: item.image instanceof File
+      }));
+      formData.append("categoryBannersItems", JSON.stringify(categoryBannersItems));
+
+      form.section_hero_slider.forEach((item, index) => {
+        if (item.image instanceof File) formData.append(`sliderImage_${index}`, item.image);
       });
 
-      form.section_hero_slider.forEach((item) => {
-        if (item.image instanceof File) {
-          formData.append("sectionHeroSliderImages", item.image);
-        }
+      form.sale_page.forEach((item, index) => {
+        if (item.mediaUrl instanceof File) formData.append(`saleMedia_${index}`, item.mediaUrl);
+      });
+
+      form.category_banners.forEach((item, index) => {
+        if (item.image instanceof File) formData.append(`categoryBannerImage_${index}`, item.image);
       });
 
       const res = await settingService.update(formData);
@@ -662,95 +713,6 @@ function SettingPage() {
             </div>
           </div>
 
-          <div className="setting_bot-left--hero">
-            <span>
-              <BsImages /> HERO SECTION
-            </span>
-
-            <div className="main-column">
-              {form.section_hero.map((item, index) => (
-                <div className="dynamic-card" key={index}>
-                  <div className="card-header">
-                    <h4>Hero item #{index + 1}</h4>
-                    <button
-                      type="button"
-                      className="btn-delete"
-                      onClick={() => removeHeroItem(index)}
-                    >
-                      Xóa
-                    </button>
-                  </div>
-
-                  <div className="card-grid">
-                    <div className="form-input">
-                      <label htmlFor={`hero-image-${index}`} id="file">
-                        <div>
-                          <MdDriveFolderUpload /> <br />
-                          <span className="des">Upload ảnh hero</span>
-                        </div>
-                      </label>
-                      <input
-                        type="file"
-                        id={`hero-image-${index}`}
-                        accept="image/*"
-                        onChange={(e) => handleHeroImageChange(e, index)}
-                      />
-                      {renderFileInfo(item.image, `hero-${index}`)}
-                    </div>
-
-                    <div className="form-input">
-                      <label>Tiêu đề</label>
-                      <input
-                        type="text"
-                        value={item.title}
-                        onChange={(e) =>
-                          handleHeroChange(index, "title", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="form-input">
-                      <label>Mô tả</label>
-                      <input
-                        type="text"
-                        value={item.desc}
-                        onChange={(e) =>
-                          handleHeroChange(index, "desc", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="form-input">
-                      <label>Tag</label>
-                      <input
-                        type="text"
-                        value={item.tag}
-                        onChange={(e) =>
-                          handleHeroChange(index, "tag", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="form-input full-width">
-                      <label>Link</label>
-                      <input
-                        type="text"
-                        value={item.link}
-                        onChange={(e) =>
-                          handleHeroChange(index, "link", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button type="button" className="btn-add" onClick={addHeroItem}>
-                + Thêm hero item
-              </button>
-            </div>
-          </div>
-
           <div className="setting_bot-left--slider">
             <span>
               <MdOutlineViewCarousel /> HERO SECTION SLIDER
@@ -828,10 +790,126 @@ function SettingPage() {
               </button>
             </div>
           </div>
+
+          <div className="setting_bot-left--categorybanner">
+            <span>
+              <MdOutlineViewCarousel /> QUẢN LÝ BANNER DANH MỤC
+            </span>
+
+            <div className="main-column">
+              {form.category_banners.map((item, index) => (
+                <div className="dynamic-card" key={index}>
+                  <div className="card-header">
+                    <h4>Banner Danh Mục #{index + 1}</h4>
+                    <button type="button" className="btn-delete" onClick={() => removeCategoryBannerItem(index)}>Xóa</button>
+                  </div>
+
+                  <div className="card-grid">
+                    <div className="form-input">
+                      <label htmlFor={`category-image-${index}`} id="file">
+                        <div>
+                          <MdDriveFolderUpload /> <br />
+                          <span className="des">Upload Ảnh Banner</span>
+                        </div>
+                      </label>
+                      <input type="file" id={`category-image-${index}`} accept="image/*" onChange={(e) => handleCategoryBannerImage(e, index)} />
+                      {renderFileInfo(item.image, `category-${index}`)}
+                    </div>
+
+                    <div className="form-input">
+                      <label>Slug Danh Mục (vd: laptop-gaming)</label>
+                      <input type="text" value={item.categorySlug} onChange={(e) => handleCategoryBannerChange(index, "categorySlug", e.target.value)} />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tiêu đề Banner</label>
+                      <input type="text" value={item.title} onChange={(e) => handleCategoryBannerChange(index, "title", e.target.value)} />
+                    </div>
+
+                    <div className="form-input full-width">
+                      <label>Mô tả ngắn</label>
+                      <input type="text" value={item.description} onChange={(e) => handleCategoryBannerChange(index, "description", e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button type="button" className="btn-add" onClick={addCategoryBannerItem}>
+                + Thêm Banner Danh Mục
+              </button>
+            </div>
+          </div>
+
+          <div className="setting_bot-left--salepage">
+            <span>
+              <MdOutlineViewCarousel /> SALE PAGE SECTIONS (NEW PRODUCT)
+            </span>
+
+            <div className="main-column">
+              {form.sale_page.map((item, index) => (
+                <div className="dynamic-card" key={index}>
+                  <div className="card-header">
+                    <h4>Sale Page Item #{index + 1}</h4>
+                    <button type="button" className="btn-delete" onClick={() => removeSalePageItem(index)}>Xóa</button>
+                  </div>
+
+                  <div className="card-grid">
+                    <div className="form-input">
+                      <label>Type</label>
+                      <select style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc", background: "#f8fafc" }} value={item.type} onChange={(e) => handleSalePageChange(index, "type", e.target.value)}>
+                        <option value="hero">Hero (Banner Top)</option>
+                        <option value="section">Section (Auto Play Video)</option>
+                      </select>
+                    </div>
+
+                    <div className="form-input">
+                      <label htmlFor={`sale-media-${index}`} id="file">
+                        <div>
+                          <MdDriveFolderUpload /> <br />
+                          <span className="des">Upload Media (Video/Image)</span>
+                        </div>
+                      </label>
+                      <input type="file" id={`sale-media-${index}`} accept="image/*,video/*" onChange={(e) => handleSalePageMediaChange(e, index)} />
+                      {renderFileInfo(item.mediaUrl, `sale-${index}`)}
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tiêu đề (Title)</label>
+                      <input type="text" value={item.title} onChange={(e) => handleSalePageChange(index, "title", e.target.value)} />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Mô tả (Desc)</label>
+                      <input type="text" value={item.desc} onChange={(e) => handleSalePageChange(index, "desc", e.target.value)} />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Tag (VD: CHỈ CÓ TẠI VELTRIX)</label>
+                      <input type="text" value={item.tag} onChange={(e) => handleSalePageChange(index, "tag", e.target.value)} />
+                    </div>
+
+                    <div className="form-input">
+                      <label>Màu Tag (vd: blue)</label>
+                      <input type="text" value={item.tagClassName} onChange={(e) => handleSalePageChange(index, "tagClassName", e.target.value)} />
+                    </div>
+
+                    <div className="form-input full-width">
+                      <label>Link (Dành cho nút Mua Ngay)</label>
+                      <input type="text" value={item.link} onChange={(e) => handleSalePageChange(index, "link", e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button type="button" className="btn-add" onClick={addSalePageItem}>
+                + Thêm Sale Page item
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="setting_bot-right">
-          <div className="setting_bot-right--feature">  
+          <div className="setting_bot-right--feature">
             <h3>
               <MdOutlineFeaturedPlayList /> QUẢN LÝ TÍNH NĂNG
             </h3>

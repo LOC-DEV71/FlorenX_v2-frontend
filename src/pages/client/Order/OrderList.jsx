@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./OrderList.scss";
-import { getList } from "../../../services/client/order.service";
-import { error } from "../../../utils/notift";
+import { getList, cancelOrder } from "../../../services/client/order.service";
+import { error, success, confirm } from "../../../utils/notift";
 import { Link } from "react-router-dom";
 
 const STATUS_CONFIG = {
@@ -45,7 +45,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function OrderCard({ order, onViewDetail, onReview }) {
+function OrderCard({ order, onViewDetail, onReview, onCancel }) {
   const thumb = order.products?.[0]?.thumbnail;
 
   return (
@@ -97,7 +97,7 @@ function OrderCard({ order, onViewDetail, onReview }) {
           )}
 
           {order.status === "pending" && (
-            <button className="vx-btn vx-btn--danger">Huỷ đơn</button>
+            <button className="vx-btn vx-btn--danger" onClick={() => onCancel(order)}>Huỷ đơn</button>
           )}
 
           <button
@@ -351,21 +351,38 @@ function OrderList() {
     return matchTab && matchSearch;
   });
 
-  useEffect(() => {
-    const fetchApi = async () => {
-      try {
-        const res = await getList();
-        if (res?.data?.code) {
-          setMckOrders(res?.data?.orders || []);
-        }
-      } catch (err) {
-        console.log(err.response?.data?.message);
-        error(err.response?.data?.message);
+  const fetchApi = async () => {
+    try {
+      const res = await getList();
+      if (res?.data?.code) {
+        setMckOrders(res?.data?.orders || []);
       }
-    };
+    } catch (err) {
+      console.log(err.response?.data?.message);
+      error(err.response?.data?.message);
+    }
+  };
 
+  useEffect(() => {
     fetchApi();
   }, []);
+
+  const handleCancelOrder = async (order) => {
+    const isConfirm = await confirm("Huỷ đơn hàng?", "Bạn có chắc chắn muốn huỷ đơn hàng này không?");
+    if (isConfirm.isConfirmed) {
+      try {
+        const res = await cancelOrder(order._id || order.id);
+        if (res.data.code) {
+          success(res.data.message);
+          fetchApi();
+        } else {
+          error(res.data.message);
+        }
+      } catch (err) {
+        error(err.response?.data?.message || "Lỗi khi huỷ đơn");
+      }
+    }
+  };
 
 
   return (
@@ -414,6 +431,7 @@ function OrderList() {
                 order={order}
                 onViewDetail={setSelectedOrder}
                 onReview={handleOpenReview}
+                onCancel={handleCancelOrder}
               />
             ))
           )}

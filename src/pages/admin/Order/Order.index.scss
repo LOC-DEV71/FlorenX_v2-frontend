@@ -72,6 +72,11 @@
             svg { color: #ef4444; }
             &.status-active { border-color: #ef4444; }
         }
+
+        &.admin-stat-suspicious {
+            svg { color: #b91c1c; }
+            &.status-active { border-color: #b91c1c; }
+        }
     }
 }
 
@@ -297,6 +302,11 @@
     }
 
     &--cancel {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    &--suspicious {
         background: #fee2e2;
         color: #b91c1c;
     }

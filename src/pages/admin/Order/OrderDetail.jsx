@@ -22,6 +22,7 @@ const STATUS_CONFIG = {
     shipped:   { label: "Đang giao",    color: "#6d28d9", bg: "#ede9fe" },
     done:      { label: "Hoàn thành",   color: "#065f46", bg: "#d1fae5" },
     cancel:    { label: "Đã huỷ",       color: "#b91c1c", bg: "#fee2e2" },
+    suspicious:{ label: "Khả nghi",     color: "#b91c1c", bg: "#fee2e2" },
 };
 
 const PAY_LABEL = {
@@ -36,6 +37,10 @@ const ACTIONS = {
     pending: [
         { label: "Xác nhận đơn",       nextStatus: "confirmed", icon: <FiCheckCircle />, className: "btn--confirm" },
         { label: "Huỷ đơn",            nextStatus: "cancel",    icon: <FiXCircle />,     className: "btn--cancel" },
+    ],
+    suspicious: [
+        { label: "Bỏ qua & Xác nhận",  nextStatus: "confirmed", icon: <FiCheckCircle />, className: "btn--confirm" },
+        { label: "Huỷ đơn (Gian lận)", nextStatus: "cancel",    icon: <FiXCircle />,     className: "btn--cancel" },
     ],
     confirmed: [
         { label: "Chuyển vận chuyển",  nextStatus: "shipped",   icon: <FiTruck />,       className: "btn--ship" },

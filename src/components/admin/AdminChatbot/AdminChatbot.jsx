@@ -252,6 +252,11 @@ function AdminChatbot() {
     };
     socket.on("admin_toggle_auto_system_monitor", handleToggleSystemMonitor);
 
+    const handleToggleAutoPilot = (data) => {
+      setIsAutoPilot(data.enabled);
+    };
+    socket.on("admin_toggle_auto_pilot", handleToggleAutoPilot);
+
     // Khởi động queue nếu có task tồn đọng
     processNextTask();
 
@@ -260,8 +265,9 @@ function AdminChatbot() {
       socket.off("admin_auto_pilot_review_trigger", handleAutoPilotReviewTrigger);
       socket.off("admin_direct_message", handleDirectMessage);
       socket.off("admin_toggle_auto_system_monitor", handleToggleSystemMonitor);
+      socket.off("admin_toggle_auto_pilot", handleToggleAutoPilot);
     };
-  }, [socket, isAutoPilot, isAutoSystemMonitor, navigate]);
+  }, [socket, isAutoPilot, isAutoSystemMonitor, robotMode, isSuperAdmin, navigate]);
 
   // Sinh câu nói hài hước/quyền lực khi rảnh rỗi (5s/lần)
   useEffect(() => {
@@ -273,11 +279,11 @@ function AdminChatbot() {
           quotes = [
             "Đang quét mọi hành động của nhân sự... 👁️", 
             "Không một thao tác nào lọt qua Mắt Thần! ⚡",
-            "Hệ thống bảo mật và vận hành ở mức tối đa 🛡️",
+            "Đang kiểm tra tồn kho ngầm toàn hệ thống... 📦",
+            "Đang rà soát các đơn hàng khả nghi... 🕵️",
+            "Đang chạy bảo trì và dọn dẹp hệ thống... 🧹",
             "Đang giám sát doanh thu theo thời gian thực... 📈",
             "Ai lười biếng sẽ bị ghi vào sổ Nam Tào! 📝",
-            "Mọi hoạt động đều nằm trong tầm kiểm soát 🎯",
-            "Sếp cứ việc uống trà, thế giới để em lo! 🌍",
             "Server đang chạy mượt mà 100% ✨",
             "Đang chờ đơn hàng nổ để duyệt tự động... 🛒",
             "Sẵn sàng chặn đứng mọi cuộc nổi loạn! 🛑"

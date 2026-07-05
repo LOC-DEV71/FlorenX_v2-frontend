@@ -410,8 +410,15 @@ function Users() {
   return (
     <div className="users-page">
       <SEO title="Quản lý người dùng" />
-      <h2 className="users-page__title">Quản Lý Người Dùng</h2>
-
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 className="users-page__title">Quản Lý Người Dùng</h2>
+        <button 
+          onClick={() => navigate('/admin/member-tiers')}
+          style={{ background: '#ecc94b', color: '#000', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          Quản Lý Đặc Quyền Hạng
+        </button>
+      </div>
       {/* Stats */}
       <div className="account-stats">
         <div className="stat-card stat-total">

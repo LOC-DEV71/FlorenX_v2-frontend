@@ -19,8 +19,8 @@ function ProductByCategory() {
     const [categoryList, setCategoryList] = useState([]);
 
     const settings = useSelector((state) => state.setting.settings);
-    const section_hero = settings?.section_hero || [];
-    const heroItem = section_hero.find((item) => item.tag === category);
+    const category_banners = settings?.category_banners || [];
+    const heroItem = category_banners.find((item) => item.categorySlug === category);
     const loadingUi = useSelector((state) => state.setting.loading);
     const [likeIds, setLikedIds] = useState([]);
 

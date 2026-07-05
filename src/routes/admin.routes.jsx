@@ -1,42 +1,47 @@
 import { Route, Routes } from "react-router-dom";
 import MainLayoutAdmin from "../layout/admin/mainlayoutAdmin";
-import DashBoard from "../pages/admin/DashBoard/index.dashboad";
-import Products from "../pages/admin/Products/index.products";
-import CreateProduct from "../pages/admin/Products/create.products";
-import UpdateProduct from "../pages/admin/Products/update.products";
+import DashBoard from "../pages/Admin/DashBoard/index.dashboad";
+import Products from "../pages/Admin/Products/index.products";
+import CreateProduct from "../pages/Admin/Products/create.products";
+import UpdateProduct from "../pages/Admin/Products/update.products";
 import PrivateRoute from "../PrivateRoute/Admin/PrivateRoute.admin";
-import Categories from "../pages/admin/ProductCategory/index.productcategory";
-import CreateCategory from "../pages/admin/ProductCategory/create.category";
-import UpdateCategory from "../pages/admin/ProductCategory/update.category";
-import AccountAdmin from "../pages/admin/Accounts/index.account";
-import CreateAccounts from "../pages/admin/Accounts/create.account";
-import CreateRole from "../pages/admin/Role/create.role";
-import Roles from "../pages/admin/Role/index.role";
-import UpdateRole from "../pages/admin/Role/update.role";
-import UpdateAccount from "../pages/admin/Accounts/update.account";
-import Permissions from "../pages/admin/permission/Permission";
+import Categories from "../pages/Admin/ProductCategory/index.productcategory";
+import CreateCategory from "../pages/Admin/ProductCategory/create.category";
+import UpdateCategory from "../pages/Admin/ProductCategory/update.category";
+import AccountAdmin from "../pages/Admin/Accounts/index.account";
+import CreateAccounts from "../pages/Admin/Accounts/create.account";
+import CreateRole from "../pages/Admin/Role/create.role";
+import Roles from "../pages/Admin/Role/index.role";
+import UpdateRole from "../pages/Admin/Role/update.role";
+import UpdateAccount from "../pages/Admin/Accounts/update.account";
+import Permissions from "../pages/Admin/permission/Permission";
 import PrivateRoutePermission from "../PrivateRoute/Admin/PrivareRoutesPermission";
-import NewsAdmin from "../pages/admin/News/index.news";
-import NewsCategoryAdmin from "../pages/admin/NewCategory/index.new.category";
-import NewsCategoryCreate from "../pages/admin/NewCategory/NewsCategoryCreate";
-import NewsCreate from "../pages/admin/News/NewsCreate";
-import CustomerSupportChat from "../pages/admin/Chat/index.chat";
-import UpdateNewsCategory from "../pages/admin/NewCategory/updateNewsCategory";
-import TrashPage from "../pages/admin/TrashCan/TrashPage";
-import SettingPage from "../pages/admin/Setting/SettingPage";
-import InventoryImportCreate from "../pages/admin/Products/InventoryImportCreate";
-import InventoryAudit from "../pages/admin/Products/InventoryAudit";
-import InventoryAuditList from "../pages/admin/Products/InventoryAuditList";
-import InventoryAuditDetail from "../pages/admin/Products/InventoryAuditDetail";
-import InventoryImportList from "../pages/admin/Products/InventoryImport";
-import InventoryExportCreate from "../pages/admin/Products/InventoryExportCreate";
-import InventoryExportList from "../pages/admin/Products/InventoryExport";
-import Orders from "../pages/admin/Order/Order.index";
-import Users from "../pages/admin/Uses/Users.index";
-import ProductsDetail from "../pages/admin/Products/poductsDetail";
+import NewsAdmin from "../pages/Admin/News/index.news";
+import NewsCategoryAdmin from "../pages/Admin/NewCategory/index.new.category";
+import NewsCategoryCreate from "../pages/Admin/NewCategory/NewsCategoryCreate";
+import NewsCreate from "../pages/Admin/News/NewsCreate";
+import NewsEdit from "../pages/Admin/News/NewsEdit";
+import CustomerSupportChat from "../pages/Admin/Chat/index.chat";
+import UpdateNewsCategory from "../pages/Admin/NewCategory/updateNewsCategory";
+import TrashPage from "../pages/Admin/TrashCan/TrashPage";
+import SettingPage from "../pages/Admin/Setting/SettingPage";
+import InventoryImportCreate from "../pages/Admin/Products/InventoryImportCreate";
+import InventoryAudit from "../pages/Admin/Products/InventoryAudit";
+import InventoryAuditList from "../pages/Admin/Products/InventoryAuditList";
+import InventoryAuditDetail from "../pages/Admin/Products/InventoryAuditDetail";
+import InventoryImportList from "../pages/Admin/Products/InventoryImport";
+import InventoryExportCreate from "../pages/Admin/Products/InventoryExportCreate";
+import InventoryExportList from "../pages/Admin/Products/InventoryExport";
+import Orders from "../pages/Admin/Order/Order.index";
+import Users from "../pages/Admin/Uses/Users.index";
+import ProductsDetail from "../pages/Admin/Products/poductsDetail";
+import SystemManagement from "../pages/Admin/ManagementSystem/index.system";
+import Banned from "../pages/Admin/Auth/Banned";
+import VouchersAdmin from "../pages/Admin/Vouchers/index.vouchers";
+import VoucherCreate from "../pages/Admin/Vouchers/VoucherCreate";
+import VoucherUpdate from "../pages/Admin/Vouchers/VoucherUpdate";
 import OrderDetail from "../pages/admin/Order/OrderDetail";
-import SystemManagement from "../pages/admin/ManagementSystem/index.system";
-import Banned from "../pages/admin/Auth/Banned";
+import MemberTiers from "../pages/admin/MemberTiers/MemberTiers";
 
 function AdminRoutes() {
   return (
@@ -157,6 +162,9 @@ function AdminRoutes() {
         <Route element={<PrivateRoutePermission permission="create_news" />}>
           <Route path="news/create" element={<NewsCreate />} />
         </Route>
+        <Route element={<PrivateRoutePermission permission="update_news" />}>
+          <Route path="news/edit/:slug" element={<NewsEdit />} />
+        </Route>
 
 
         {/* new categories */}
@@ -183,6 +191,7 @@ function AdminRoutes() {
         {/* users */}
         <Route element={<PrivateRoutePermission permission="view_users"/>}>
           <Route path="users" element={<Users />} />
+          <Route path="member-tiers" element={<MemberTiers />} />
         </Route>
         
 
@@ -203,6 +212,17 @@ function AdminRoutes() {
         {/* system management */}
         <Route element={<PrivateRoutePermission permission="system_management" />}>
           <Route path="system-management" element={<SystemManagement />} />
+        </Route>
+
+        {/* vouchers */}
+        <Route element={<PrivateRoutePermission permission="view_vouchers" />}>
+          <Route path="vouchers" element={<VouchersAdmin />} />
+        </Route>
+        <Route element={<PrivateRoutePermission permission="create_vouchers" />}>
+          <Route path="vouchers/create" element={<VoucherCreate />} />
+        </Route>
+        <Route element={<PrivateRoutePermission permission="update_vouchers" />}>
+          <Route path="vouchers/update/:id" element={<VoucherUpdate />} />
         </Route>
       </Route>
 
