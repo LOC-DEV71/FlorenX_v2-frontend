@@ -581,6 +581,137 @@ $diamond-bg: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 100%);
   }
 }
 
+/* --- Payment History --- */
+.payment-history-card {
+  .total-spent-highlight {
+    background: linear-gradient(135deg, rgba(28, 255, 149, 0.1) 0%, rgba(0, 179, 255, 0.05) 100%);
+    border: 1px solid rgba(28, 255, 149, 0.2);
+    border-radius: 20px;
+    padding: 24px 32px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    box-shadow: inset 0 0 20px rgba(28, 255, 149, 0.05);
+
+    .amount {
+      font-size: 42px;
+      font-weight: 800;
+      color: #1cff95;
+      text-shadow: 0 0 20px rgba(28, 255, 149, 0.3);
+      letter-spacing: -1px;
+    }
+
+    .currency {
+      font-size: 24px;
+      font-weight: 700;
+      color: #a0aec0;
+    }
+  }
+
+  .transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    .transaction-month-group {
+      .month-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        display: inline-block;
+      }
+    }
+
+    .transaction-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(28, 255, 149, 0.03);
+        border-color: rgba(28, 255, 149, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .trans-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .trans-code {
+          font-weight: 700;
+          color: #fff;
+          font-size: 15px;
+        }
+
+        .trans-date {
+          font-size: 13px;
+          color: #8b95a7;
+        }
+
+        .trans-status {
+          font-size: 12px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 6px;
+          display: inline-block;
+          width: fit-content;
+
+          &.status-done, &.status-shipped {
+            background: rgba(28, 255, 149, 0.1);
+            color: #1cff95;
+          }
+          &.status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+          }
+          &.status-confirmed {
+            background: rgba(0, 179, 255, 0.1);
+            color: #00b3ff;
+          }
+          &.status-cancel, &.status-suspicious {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+          }
+        }
+      }
+
+      .trans-amount {
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+        
+        &.cancelled {
+          text-decoration: line-through;
+          color: #718096;
+        }
+      }
+    }
+
+    .no-transactions {
+      text-align: center;
+      color: #8b95a7;
+      padding: 40px 0;
+      font-size: 15px;
+    }
+  }
+
+  .btn-view-all {
+    margin-top: 10px;
+    min-width: 180px;
+  }
+}
+
 @media (max-width: 992px) {
   .user-profile-container {
     grid-template-columns: 1fr;

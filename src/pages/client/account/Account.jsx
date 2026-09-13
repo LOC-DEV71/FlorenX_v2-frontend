@@ -3,6 +3,7 @@ import "./Account.scss";
 import React, { useEffect, useMemo, useState } from "react";
 import { update } from "../../../services/client/Auth.service";
 import { getTiers } from "../../../services/client/tier.client.service";
+import { getList as getListOrders } from "../../../services/client/order.service";
 import { error, success } from "../../../utils/notift";
 import Loading from "../../../utils/loading";
 import LuxuryBox from "../../../utils/luxury";
@@ -21,6 +22,11 @@ function AccountClient() {
     
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    
+    // --- State cho Lịch sử thanh toán ---
+    const [allOrders, setAllOrders] = useState([]);
+    const [totalSpent, setTotalSpent] = useState(0);
+    const [showAllTransactions, setShowAllTransactions] = useState(false);
 
     const avatarsPerPage = 32;
 
@@ -44,7 +50,27 @@ function AccountClient() {
                 console.error("Failed to fetch tiers", error);
             }
         };
+
+        const fetchOrdersData = async () => {
+            try {
+                const res = await getListOrders();
+                if (res.data?.code && res.data?.orders) {
+                    const sortedOrders = res.data.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    setAllOrders(sortedOrders);
+
+                    // Tính tổng thanh toán (chỉ tính đơn thành công/đã giao/chưa hủy)
+                    const validStatuses = ["pending", "confirmed", "shipped", "done"];
+                    const validOrders = sortedOrders.filter(o => validStatuses.includes(o.status));
+                    const total = validOrders.reduce((sum, item) => sum + (item.finalPrice || 0), 0);
+                    setTotalSpent(total);
+                }
+            } catch (error) {
+                console.error("Failed to fetch orders", error);
+            }
+        };
+
         fetchTiersData();
+        fetchOrdersData();
     }, []);
 
     useEffect(() => {
@@ -115,6 +141,24 @@ function AccountClient() {
     // --- Dữ liệu cấu hình hạng mức mới ---
     // (Được lấy từ DB qua fetchTiersData)
 
+    const ordersToShow = showAllTransactions ? allOrders : allOrders.slice(0, 2);
+    
+    const groupedOrders = useMemo(() => {
+        const grouped = {};
+        ordersToShow.forEach(order => {
+            const date = new Date(order.createdAt);
+            const monthYear = `Tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
+            if (!grouped[monthYear]) {
+                grouped[monthYear] = [];
+            }
+            grouped[monthYear].push(order);
+        });
+        return Object.keys(grouped).map(key => ({
+            month: key,
+            orders: grouped[key]
+        }));
+    }, [ordersToShow]);
+
     return (
         <div className="user-profile-page" id="user-profile-page">
             {(loading || loadingUi) && <Loading />}
@@ -148,90 +192,146 @@ function AccountClient() {
                     </div>
                 </div>
 
-                <div className="profile-content-card">
-                    <div className="section-header">
-                        <h1>Thông tin tài khoản</h1>
-                        <p>Quản lý thông tin tài khoản của bạn</p>
+                <div className="profile-main-area" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                    <div className="profile-content-card">
+                        <div className="section-header">
+                            <h1>Thông tin tài khoản</h1>
+                            <p>Quản lý thông tin tài khoản của bạn</p>
+                        </div>
+
+                        <form className="profile-form" onSubmit={handleSubmit}>
+                            <div className="form-grid">
+                                <div className="form-group full-width">
+                                    <label htmlFor="fullname">Họ và tên</label>
+                                    <input
+                                        type="text"
+                                        id="fullname"
+                                        name="fullname"
+                                        value={user.fullname || ""}
+                                        onChange={handleChange}
+                                        placeholder="Nhập họ và tên"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="email">Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={user.email || ""}
+                                        onChange={handleChange}
+                                        placeholder="Nhập email"
+                                        disabled
+                                        readOnly
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="phone">Số điện thoại</label>
+                                    <input
+                                        type="text"
+                                        id="phone"
+                                        name="phone"
+                                        value={user.phone || ""}
+                                        onChange={handleChange}
+                                        placeholder="Nhập số điện thoại"
+                                    />
+                                </div>
+
+                                <div className="form-group full-width">
+                                    <label htmlFor="address">Địa chỉ hiện tại</label>
+                                    <input
+                                        type="text"
+                                        id="address"
+                                        name="address"
+                                        value={user.address || ""}
+                                        disabled
+                                        placeholder="Chưa có địa chỉ"
+                                    />
+                                </div>
+                                
+                                <div className="form-group full-width">
+                                    <label>Cập nhật địa chỉ mới (bỏ qua nếu không muốn đổi)</label>
+                                    <LocationSelector 
+                                        onChange={(addr) => setUser(prev => ({ ...prev, address: addr }))} 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-actions">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    disabled={loading}
+                                    onClick={() => setUser(account)}
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={loading}
+                                >
+                                    {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
-                    <form className="profile-form" onSubmit={handleSubmit}>
-                        <div className="form-grid">
-                            <div className="form-group full-width">
-                                <label htmlFor="fullname">Họ và tên</label>
-                                <input
-                                    type="text"
-                                    id="fullname"
-                                    name="fullname"
-                                    value={user.fullname || ""}
-                                    onChange={handleChange}
-                                    placeholder="Nhập họ và tên"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="email">Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={user.email || ""}
-                                    onChange={handleChange}
-                                    placeholder="Nhập email"
-                                    disabled
-                                    readOnly
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="phone">Số điện thoại</label>
-                                <input
-                                    type="text"
-                                    id="phone"
-                                    name="phone"
-                                    value={user.phone || ""}
-                                    onChange={handleChange}
-                                    placeholder="Nhập số điện thoại"
-                                />
-                            </div>
-
-                            <div className="form-group full-width">
-                                <label htmlFor="address">Địa chỉ hiện tại</label>
-                                <input
-                                    type="text"
-                                    id="address"
-                                    name="address"
-                                    value={user.address || ""}
-                                    disabled
-                                    placeholder="Chưa có địa chỉ"
-                                />
-                            </div>
-                            
-                            <div className="form-group full-width">
-                                <label>Cập nhật địa chỉ mới (bỏ qua nếu không muốn đổi)</label>
-                                <LocationSelector 
-                                    onChange={(addr) => setUser(prev => ({ ...prev, address: addr }))} 
-                                />
-                            </div>
+                    <div className="profile-content-card payment-history-card">
+                        <div className="section-header">
+                            <h1>Tổng thanh toán của tôi</h1>
+                            <p>Lịch sử chi tiêu và các giao dịch gần đây</p>
+                        </div>
+                        
+                        <div className="total-spent-highlight">
+                            <span className="amount">{(totalSpent || 0).toLocaleString('vi-VN')}</span>
+                            <span className="currency">₫</span>
                         </div>
 
-                        <div className="form-actions">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                disabled={loading}
-                                onClick={() => setUser(account)}
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={loading}
-                            >
-                                {loading ? "Đang lưu..." : "Lưu thay đổi"}
-                            </button>
+                        <div className="transaction-list">
+                            {groupedOrders.length > 0 ? (
+                                groupedOrders.map((group, groupIndex) => (
+                                    <div key={groupIndex} className="transaction-month-group">
+                                        <h3 className="month-title">{group.month}</h3>
+                                        {group.orders.map((order) => (
+                                            <div key={order._id} className="transaction-item">
+                                                <div className="trans-info">
+                                                    <span className="trans-code">#{order.code || order._id.slice(-6).toUpperCase()}</span>
+                                                    <span className="trans-date">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</span>
+                                                    <span className={`trans-status status-${order.status}`}>
+                                                        {order.status === 'done' ? 'Thành công' : 
+                                                         order.status === 'pending' ? 'Đang xử lý' : 
+                                                         order.status === 'confirmed' ? 'Đã xác nhận' : 
+                                                         order.status === 'shipped' ? 'Đang giao' : 
+                                                         order.status === 'cancel' ? 'Đã hủy' : 'Nghi ngờ'}
+                                                    </span>
+                                                </div>
+                                                <div className={`trans-amount ${['cancel', 'suspicious'].includes(order.status) ? 'cancelled' : ''}`}>
+                                                    {(order.finalPrice || 0).toLocaleString('vi-VN')} ₫
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="no-transactions">Bạn chưa có giao dịch nào.</p>
+                            )}
                         </div>
-                    </form>
+
+                        {allOrders.length > 2 && (
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary btn-view-all"
+                                    onClick={() => setShowAllTransactions(!showAllTransactions)}
+                                >
+                                    {showAllTransactions ? "Thu gọn" : "Xem tất cả"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
