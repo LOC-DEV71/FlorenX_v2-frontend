@@ -1,6 +1,17 @@
 {
   "rewrites": [
     {
+      "source": "/news/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|zalo|telegrambot|twitterbot|linkedinbot|bot|crawler).*"
+        }
+      ],
+      "destination": "/api/og-news?slug=$slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
