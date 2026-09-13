@@ -72,9 +72,9 @@ function Header({ setOpenMenu }) {
 
         <div className="header_layout_client-search">
           <SearchOutlined onClick={handleSearch} style={{ cursor: "pointer" }} />
-          <input 
-            type="text" 
-            placeholder="Search tech..." 
+          <input
+            type="text"
+            placeholder="Search tech..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={handleSearch}
@@ -98,9 +98,9 @@ function Header({ setOpenMenu }) {
                   onClick={() => setOpenProfile((prev) => !prev)}
                 >
                   <img
-                  src={user?.avatar ? user?.avatar : `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.email}`}
-                  alt="avatar"
-                />                 
+                    src={user?.avatar ? user?.avatar : `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.email}`}
+                    alt="avatar"
+                  />
                 </div>
 
                 {openProfile && (
@@ -149,7 +149,7 @@ function Header({ setOpenMenu }) {
             </>
           ) : (
             <>
-              {isLogin === false && 
+              {isLogin === false &&
                 <HashLink smooth to="/gio-hang/#cart-page">
                   <ShoppingCartOutlined />
                 </HashLink>
