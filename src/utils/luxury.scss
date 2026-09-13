@@ -6,7 +6,9 @@ $diamond-bg: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 100%);
 
 .luxury-card-container {
   position: relative;
-  width: 380px;
+  width: 100%;
+  max-width: 380px;
+  box-sizing: border-box;
   height: 220px;
   border-radius: 22px;
   overflow: hidden;
