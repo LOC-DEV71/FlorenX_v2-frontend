@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import "./header.scss";
 import {
@@ -25,6 +25,17 @@ function Header({ setOpenMenu }) {
 
   const [openProfile, setOpenProfile] = useState(false);
   const profileRef = useRef(null);
+
+  const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" || e.type === "click") {
+      if (keyword.trim()) {
+        navigate(`/search?keyword=${encodeURIComponent(keyword.trim())}`);
+      }
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -60,8 +71,14 @@ function Header({ setOpenMenu }) {
         </nav>
 
         <div className="header_layout_client-search">
-          <SearchOutlined />
-          <input type="text" placeholder="Search tech..." />
+          <SearchOutlined onClick={handleSearch} style={{ cursor: "pointer" }} />
+          <input 
+            type="text" 
+            placeholder="Search tech..." 
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={handleSearch}
+          />
         </div>
 
         <div className="header_layout_client-card">

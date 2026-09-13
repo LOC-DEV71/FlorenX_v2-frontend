@@ -22,3 +22,12 @@ export const getCrossSellProducts = async () =>{
   return axiosClient.get(`/products/cross-sell`)
 }
 
+export const searchProductsAPI = async (data) => {
+  const params = new URLSearchParams();
+  if(data.keyword) params.append("keyword", data.keyword)
+  if(data.price) params.append("price", data.price)
+  if(data.discount) params.append("discount", data.discount)
+  if(data.page) params.append("page", data.page)
+  if(data.limit) params.append("limit", data.limit)
+  return axiosClient.get(`/products/search?${params}`);
+}

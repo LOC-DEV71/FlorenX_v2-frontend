@@ -20,6 +20,7 @@ import OrderSuccess from "../pages/client/cart/OrderSuccess";
 import OrderList from "../pages/client/Order/OrderList";
 import DetailNews from "../pages/client/News/DetailNews";
 import NotFound from "../pages/client/NotFound/NotFound";
+import SearchPage from "../pages/client/search/SearchPage";
 
 function ClientRoutes(){
     return(
@@ -56,6 +57,7 @@ function ClientRoutes(){
 
 
                 <Route path="/order-success/:orderCode" element={<OrderSuccess/>}/>
+                <Route path="/search" element={<SearchPage/>}/>
                 
                 <Route path="*" element={<NotFound/>}/>
             </Route>
