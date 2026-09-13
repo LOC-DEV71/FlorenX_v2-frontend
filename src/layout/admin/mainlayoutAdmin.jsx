@@ -33,6 +33,8 @@ import { BsBellFill } from "react-icons/bs";
 import formatTimeAgo from "../../utils/formatTimeAgo";
 import { getList, ReadAllNotification, readNotification } from "../../services/admin/notifications.service";
 import AdminChatbot from "../../components/admin/AdminChatbot/AdminChatbot";
+import { authLogoutAdmin } from "../../services/admin/auth.admin.service";
+import { FiLogOut } from "react-icons/fi";
 
 const { Header, Sider, Content } = Layout;
 
@@ -188,6 +190,16 @@ const MainLayoutAdmin = () => {
 
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authLogoutAdmin();
+      window.location.href = "/admin/login";
+    } catch (error) {
+      console.log(error);
+      window.location.href = "/admin/login";
+    }
   };
 
   const siderWidth = collapsed ? 80 : 200;
@@ -419,7 +431,9 @@ const MainLayoutAdmin = () => {
             {collapsed ? "" : <span>{admin.fullname}</span>}
 
           </div>
-          {/* <button>Đăng xuất</button> */}
+          <button onClick={handleLogout} style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%' }}>
+            <FiLogOut /> {!collapsed && "Đăng xuất"}
+          </button>
         </div>
       </Sider>
 

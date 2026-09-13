@@ -8,3 +8,7 @@ export const authLoginAdmin = (data) => {
 export const getMeAdmin = () => {
   return axiosAdmin.get("/auth-admin/get-admin");
 };
+
+export const authLogoutAdmin = () => {
+  return axiosAdmin.post("/auth-admin/logout");
+};
