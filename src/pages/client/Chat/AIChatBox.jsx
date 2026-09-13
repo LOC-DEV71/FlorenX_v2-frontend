@@ -104,11 +104,18 @@ function AIChatBox() {
                 throw new Error("Lỗi API");
             }
         } catch (error) {
+            let errorMessage = "Veltrix-chan đang bị lag quá, cậu chờ xíu rồi hỏi lại nha! 🥺";
+            
+            // Lấy câu thông báo từ Backend nếu là lỗi bảo trì (Maintenance Mode)
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            }
+
             setMessages(prev => {
                 const newMessages = [...prev];
                 newMessages[newMessages.length - 1] = { 
                     sender: "bot", 
-                    text: "Veltrix-chan đang bị lag quá, cậu chờ xíu rồi hỏi lại nha! 🥺" 
+                    text: errorMessage
                 };
                 return newMessages;
             });
