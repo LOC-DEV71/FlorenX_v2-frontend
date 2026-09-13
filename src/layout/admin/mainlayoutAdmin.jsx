@@ -31,6 +31,7 @@ import { CiUser } from "react-icons/ci";
 import { Badge, Popover, List, Typography } from "antd";
 import { BsBellFill } from "react-icons/bs";
 import formatTimeAgo from "../../utils/formatTimeAgo";
+import Swal from "sweetalert2";
 import { getList, ReadAllNotification, readNotification } from "../../services/admin/notifications.service";
 import AdminChatbot from "../../components/admin/AdminChatbot/AdminChatbot";
 import { authLogoutAdmin } from "../../services/admin/auth.admin.service";
@@ -194,8 +195,26 @@ const MainLayoutAdmin = () => {
 
   const handleLogout = async () => {
     try {
-      await authLogoutAdmin();
-      window.location.href = "/admin/login";
+      const confirm = await Swal.fire({
+        title: 'Xác nhận Đăng xuất',
+        text: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Đăng xuất',
+        cancelButtonText: 'Hủy'
+      });
+
+      if (confirm.isConfirmed) {
+        Swal.fire({
+          title: 'Đang xử lý...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+        await authLogoutAdmin();
+        window.location.href = "/admin/login";
+      }
     } catch (error) {
       console.log(error);
       window.location.href = "/admin/login";
@@ -425,15 +444,12 @@ const MainLayoutAdmin = () => {
           defaultSelectedKeys={["1"]}
           items={menuItems}
         />
-        <div className="sider-bot">
+        <div className="sider-bot" style={{ cursor: 'pointer' }} onClick={handleLogout} title="Nhấn để Đăng xuất">
           <div>
             <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
             {collapsed ? "" : <span>{admin.fullname}</span>}
 
           </div>
-          <button onClick={handleLogout} style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%' }}>
-            <FiLogOut /> {!collapsed && "Đăng xuất"}
-          </button>
         </div>
       </Sider>
 
