@@ -11,6 +11,7 @@ const MaintenanceConfig = ({ systemData, onSave, hasPermission = () => true }) =
     blockOrders: false,
     blockReviews: false,
     blockAi: false,
+    blockSendMail: false,
   });
 
   useEffect(() => {
@@ -121,6 +122,20 @@ const MaintenanceConfig = ({ systemData, onSave, hasPermission = () => true }) =
             <Switch
               checked={maintenance.blockAi}
               onChange={(checked) => handleToggle("blockAi", checked)}
+              disabled={!hasPermission("system_edit")}
+            />
+          </div>
+        </div>
+
+        <div className="config-card" style={{ padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong>Chặn Gửi Mail OTP (Chống Spam)</strong>
+              <div style={{ fontSize: '12px', color: '#888' }}>Chặn Đăng ký mới và Quên mật khẩu để tránh bị bot spam email OTP. Vẫn cho phép Đăng nhập.</div>
+            </div>
+            <Switch
+              checked={maintenance.blockSendMail}
+              onChange={(checked) => handleToggle("blockSendMail", checked)}
               disabled={!hasPermission("system_edit")}
             />
           </div>
