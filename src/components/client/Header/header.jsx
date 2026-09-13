@@ -65,7 +65,7 @@ function Header({ setOpenMenu }) {
 
         <nav className="header_layout_client-menu">
           <HashLink smooth to="/#">Trang chủ</HashLink>
-          <Link to="/bai-viet">Bài viết</Link>
+          <Link to="/news/tin-tuc-cong-nghe">Bài viết</Link>
           <HashLink smooth to="/#gioi-thieu">Giới thiệu</HashLink>
           <HashLink smooth to="/#showroom">Showroom</HashLink>
         </nav>
