@@ -98,10 +98,39 @@ function DetailNews() {
 
   const activeCategoryLabel = activeCategory?.title || "Danh mục";
 
+  // Chuẩn bị dữ liệu SEO cho bài báo
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : "";
+  const seoTitle = article ? `Veltrix - ${article.title}` : `Veltrix - ${activeCategoryLabel}`;
+  const seoDescription = article ? article.description : `Danh sách các bài viết thuộc danh mục ${activeCategoryLabel}`;
+  const seoImage = article ? article.thumbnail : null;
+  
+  let schemaMarkup = null;
+  if (article && viewMode === "detail") {
+    schemaMarkup = {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "headline": article.title,
+      "image": [article.thumbnail],
+      "datePublished": article.createdAt,
+      "author": [{
+          "@type": "Person",
+          "name": article.createdBy?.fullname || "Veltrix"
+      }],
+      "url": currentUrl
+    };
+  }
+
   return (
     <div className="detail-news">
       {viewMode === "loading" && <Loading />}
-      <SEO title={article ? `Veltrix - ${article.title}` : `Veltrix - ${activeCategoryLabel}`} />
+      <SEO 
+        title={seoTitle} 
+        description={seoDescription} 
+        url={currentUrl}
+        image={seoImage}
+        type={article ? "article" : "website"}
+        schemaMarkup={schemaMarkup}
+      />
       
       {/* Breadcrumb */}
       <div className="dn-breadcrumb">
