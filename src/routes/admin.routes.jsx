@@ -42,6 +42,7 @@ import VoucherCreate from "../pages/admin/Vouchers/VoucherCreate";
 import VoucherUpdate from "../pages/admin/Vouchers/VoucherUpdate";
 import OrderDetail from "../pages/admin/Order/OrderDetail";
 import MemberTiers from "../pages/admin/MemberTiers/MemberTiers";
+import ProfileAdmin from "../pages/admin/Profile/ProfileAdmin";
 
 function AdminRoutes() {
   return (
@@ -53,6 +54,9 @@ function AdminRoutes() {
           </PrivateRoute>
         }
       >
+        {/* profile */}
+        <Route path="profile" element={<ProfileAdmin />} />
+
         <Route element={<PrivateRoutePermission permission="view_dashboard" />}>
           <Route index element={<DashBoard />} />
         </Route>

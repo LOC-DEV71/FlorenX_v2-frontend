@@ -28,7 +28,7 @@ import { useSocket } from "../../Socket/useSocket";
 import { useEffect } from "react";
 import { success } from "../../utils/notift";
 import { CiUser } from "react-icons/ci";
-import { Badge, Popover, List, Typography } from "antd";
+import { Badge, Popover, List, Typography, Dropdown } from "antd";
 import { BsBellFill } from "react-icons/bs";
 import formatTimeAgo from "../../utils/formatTimeAgo";
 import Swal from "sweetalert2";
@@ -220,6 +220,24 @@ const MainLayoutAdmin = () => {
       window.location.href = "/admin/login";
     }
   };
+
+  const profileMenuItems = [
+    {
+      key: 'profile',
+      icon: <CiUser size={18} />,
+      label: <Link to="/admin/profile">Hồ sơ cá nhân</Link>,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      icon: <FiLogOut size={16} />,
+      label: 'Đăng xuất',
+      danger: true,
+      onClick: handleLogout,
+    },
+  ];
 
   const siderWidth = collapsed ? 80 : 200;
   const socket = useSocket();
@@ -444,13 +462,14 @@ const MainLayoutAdmin = () => {
           defaultSelectedKeys={["1"]}
           items={menuItems}
         />
-        <div className="sider-bot" style={{ cursor: 'pointer' }} onClick={handleLogout} title="Nhấn để Đăng xuất">
-          <div>
-            <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
-            {collapsed ? "" : <span>{admin.fullname}</span>}
-
+        <Dropdown menu={{ items: profileMenuItems }} trigger={['click']} placement="topLeft" arrow>
+          <div className="sider-bot" style={{ cursor: 'pointer' }} title="Tài khoản">
+            <div>
+              <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
+              {collapsed ? "" : <span>{admin.fullname}</span>}
+            </div>
           </div>
-        </div>
+        </Dropdown>
       </Sider>
 
       {/* RIGHT SIDE */}
