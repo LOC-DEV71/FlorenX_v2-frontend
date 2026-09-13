@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Alert, Space, Typography, Card, message } from 'antd';
+import { Form, Input, Button, Alert, Space, Typography, Card, message, Radio } from 'antd';
 import { FaEnvelope, FaKey, FaUserTag, FaPaperPlane, FaSave, FaServer, FaEye } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { testEmailConfig, requestSecretOtp, verifySecretOtp } from '../../../services/admin/system.service';
@@ -9,6 +9,11 @@ const { Text } = Typography;
 const EmailConfig = ({ data, onSave }) => {
   const [form] = Form.useForm();
   const [loadingTest, setLoadingTest] = useState(false);
+  const [provider, setProvider] = useState(data?.provider || 'google');
+
+  const onProviderChange = (e) => {
+    setProvider(e.target.value);
+  };
 
   const handleTestEmail = async () => {
     const { value: email } = await Swal.fire({
@@ -95,6 +100,62 @@ const EmailConfig = ({ data, onSave }) => {
     }
   };
 
+  const handleViewResendKey = async () => {
+    try {
+        const confirm = await Swal.fire({
+            title: 'Xác nhận bảo mật',
+            text: 'Để xem Resend API Key gốc, hệ thống sẽ gửi một mã OTP gồm 6 số về Email của bạn. Bạn có muốn tiếp tục?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Gửi mã OTP',
+            cancelButtonText: 'Hủy'
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        Swal.fire({
+            title: 'Đang gửi OTP...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+        const res = await requestSecretOtp();
+        if (res.data.code === 200) {
+            Swal.close();
+            const { value: otp } = await Swal.fire({
+                title: 'Nhập mã OTP',
+                text: res.data.message,
+                input: 'text',
+                inputPlaceholder: 'Nhập 6 số OTP...',
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#3b82f6',
+            });
+
+            if (otp) {
+                Swal.fire({
+                    title: 'Đang xác thực...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+                const verifyRes = await verifySecretOtp({ otp, field: 'resendApiKey' });
+                if (verifyRes.data.code === 200) {
+                    Swal.fire('Thành công!', 'Đã mở khóa Resend API Key thành công.', 'success');
+                    form.setFieldsValue({ resendApiKey: verifyRes.data.data });
+                } else {
+                    Swal.fire('Thất bại', verifyRes.data.message, 'error');
+                }
+            }
+        } else {
+            Swal.fire('Lỗi', res.data.message, 'error');
+        }
+    } catch (error) {
+        Swal.fire('Lỗi', 'Không thể kết nối đến máy chủ.', 'error');
+    }
+  };
+
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '10px 0' }}>
       <div style={{ marginBottom: 32, padding: '20px 24px', background: 'linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%)', borderRadius: 12, boxShadow: '0 4px 12px rgba(34, 197, 94, 0.15)', border: '1px solid #bbf7d0' }}>
@@ -126,34 +187,61 @@ const EmailConfig = ({ data, onSave }) => {
         layout="vertical" 
         onFinish={onSave} 
         initialValues={{ 
+          provider: data?.provider || 'google',
           smtpEmail: data?.smtpEmail || '', 
           smtpPassword: data?.smtpPassword || '', 
+          resendApiKey: data?.resendApiKey || '',
           senderName: data?.senderName || 'FlorenX System' 
         }}
         size="large"
       >
+        <Form.Item name="provider" label={<span style={{ fontWeight: '600', fontSize: '15px' }}>Dịch vụ gửi Mail</span>}>
+          <Radio.Group onChange={onProviderChange} buttonStyle="solid" style={{ width: '100%', display: 'flex' }}>
+            <Radio.Button value="google" style={{ flex: 1, textAlign: 'center' }}>Google SMTP</Radio.Button>
+            <Radio.Button value="resend" style={{ flex: 1, textAlign: 'center' }}>Resend (Cổng 2525)</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
         <Form.Item 
-          label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaEnvelope style={{color: '#ea4335', fontSize: '18px'}}/> Email Gửi Đi (SMTP Email)</span>} 
+          label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaEnvelope style={{color: '#ea4335', fontSize: '18px'}}/> Email Gửi Đi (Tùy chọn cho Resend)</span>} 
           name="smtpEmail"
-          rules={[{ required: true, message: 'Vui lòng nhập Email' }, { type: 'email', message: 'Email không hợp lệ' }]}
+          rules={[{ required: provider === 'google', message: 'Vui lòng nhập Email' }, { type: 'email', message: 'Email không hợp lệ' }]}
         >
           <Input placeholder="Ví dụ: hotro.florenx@gmail.com" style={{ borderRadius: '8px' }} />
         </Form.Item>
 
-        <Form.Item 
-          label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaKey style={{color: '#f59e0b', fontSize: '18px'}}/> Mật khẩu Ứng dụng (SMTP Password)</span>} 
-          tooltip="Mật khẩu 16 ký tự do Google cung cấp. Cần nhập OTP để xem mã gốc."
-          required
-        >
-          <Space.Compact style={{ width: '100%' }}>
-            <Form.Item name="smtpPassword" noStyle rules={[{ required: true, message: 'Vui lòng nhập Mật khẩu ứng dụng' }]}>
-              <Input.Password placeholder="Nhập mật khẩu 16 ký tự do Google cấp..." style={{ borderRadius: '8px 0 0 8px', width: '100%' }} />
-            </Form.Item>
-            <Button type="default" onClick={handleViewSmtpPassword} style={{ borderRadius: '0 8px 8px 0', background: '#f8fafc', borderColor: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <FaEye style={{ fontSize: '16px', color: '#64748b' }} /> Xem Mã
-            </Button>
-          </Space.Compact>
-        </Form.Item>
+        {provider === 'google' && (
+          <Form.Item 
+            label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaKey style={{color: '#f59e0b', fontSize: '18px'}}/> Mật khẩu Ứng dụng (SMTP Password)</span>} 
+            tooltip="Mật khẩu 16 ký tự do Google cung cấp. Cần nhập OTP để xem mã gốc."
+            required
+          >
+            <Space.Compact style={{ width: '100%' }}>
+              <Form.Item name="smtpPassword" noStyle rules={[{ required: true, message: 'Vui lòng nhập Mật khẩu ứng dụng' }]}>
+                <Input.Password placeholder="Nhập mật khẩu 16 ký tự do Google cấp..." style={{ borderRadius: '8px 0 0 8px', width: '100%' }} />
+              </Form.Item>
+              <Button type="default" onClick={handleViewSmtpPassword} style={{ borderRadius: '0 8px 8px 0', background: '#f8fafc', borderColor: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <FaEye style={{ fontSize: '16px', color: '#64748b' }} /> Xem Mã
+              </Button>
+            </Space.Compact>
+          </Form.Item>
+        )}
+
+        {provider === 'resend' && (
+          <Form.Item 
+            label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaKey style={{color: '#10b981', fontSize: '18px'}}/> Resend API Key</span>} 
+            tooltip="Mã API Key do Resend cung cấp (VD: re_abc123...)"
+            required
+          >
+            <Space.Compact style={{ width: '100%' }}>
+              <Form.Item name="resendApiKey" noStyle rules={[{ required: true, message: 'Vui lòng nhập Resend API Key' }]}>
+                <Input.Password placeholder="Nhập Resend API Key..." style={{ borderRadius: '8px 0 0 8px', width: '100%' }} />
+              </Form.Item>
+              <Button type="default" onClick={handleViewResendKey} style={{ borderRadius: '0 8px 8px 0', background: '#f8fafc', borderColor: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <FaEye style={{ fontSize: '16px', color: '#64748b' }} /> Xem Mã
+              </Button>
+            </Space.Compact>
+          </Form.Item>
+        )}
 
         <Form.Item 
           label={<span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: 8, fontSize: '15px' }}><FaUserTag style={{color: '#3b82f6', fontSize: '18px'}}/> Tên Người Gửi (Sender Name)</span>} 
