@@ -28,7 +28,7 @@ import { useSocket } from "../../Socket/useSocket";
 import { useEffect } from "react";
 import { success } from "../../utils/notift";
 import { CiUser } from "react-icons/ci";
-import { Badge, Popover, List, Typography, Dropdown } from "antd";
+import { Badge, Popover, List, Typography } from "antd";
 import { BsBellFill } from "react-icons/bs";
 import formatTimeAgo from "../../utils/formatTimeAgo";
 import Swal from "sweetalert2";
@@ -62,12 +62,12 @@ const MainLayoutAdmin = () => {
   const menuItems = [
     ...(exitDashboard
       ? [
-          {
-            key: "1",
-            icon: <MdDashboard />,
-            label: <Link to="/admin">Dashboard</Link>,
-          }
-        ]
+        {
+          key: "1",
+          icon: <MdDashboard />,
+          label: <Link to="/admin">Dashboard</Link>,
+        }
+      ]
       : []
     ),
     ...(exitProduct
@@ -156,32 +156,32 @@ const MainLayoutAdmin = () => {
     },
     ...(exitTrash
       ? [
-          {
-            key: "12",
-            icon: <FaRegTrashCan />,
-            label: <Link to="/admin/trashcan">Thùng rác</Link>,
-          }
-        ]
+        {
+          key: "12",
+          icon: <FaRegTrashCan />,
+          label: <Link to="/admin/trashcan">Thùng rác</Link>,
+        }
+      ]
       : []
     ),
     ...(exitSetting
       ? [
-          {
-            key: "13",
-            icon: <IoSettings />,
-            label: <Link to="/admin/setting">Cài đặt</Link>,
-          }
-        ]
+        {
+          key: "13",
+          icon: <IoSettings />,
+          label: <Link to="/admin/setting">Cài đặt</Link>,
+        }
+      ]
       : []
     ),
     ...(exitSystem
       ? [
-          {
-            key: "14",
-            icon: <FaServer />,
-            label: <Link to="/admin/system-management">Hệ thống</Link>,
-          }
-        ]
+        {
+          key: "14",
+          icon: <FaServer />,
+          label: <Link to="/admin/system-management">Hệ thống</Link>,
+        }
+      ]
       : []
     )
   ];
@@ -221,24 +221,6 @@ const MainLayoutAdmin = () => {
     }
   };
 
-  const profileMenuItems = [
-    {
-      key: 'profile',
-      icon: <CiUser size={18} />,
-      label: <Link to="/admin/profile">Hồ sơ cá nhân</Link>,
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      icon: <FiLogOut size={16} />,
-      label: 'Đăng xuất',
-      danger: true,
-      onClick: handleLogout,
-    },
-  ];
-
   const siderWidth = collapsed ? 80 : 200;
   const socket = useSocket();
   const location = useLocation();
@@ -271,7 +253,7 @@ const MainLayoutAdmin = () => {
       // Xử lý trường hợp backend bị restart, socket tự động reconnect lại
       // thì phải phát lại tín hiệu để cập nhật danh sách
       socket.on("reconnect", emitPresence);
-      
+
       // Dự phòng cho phiên bản socket io mới có thể gọi connect lại
       socket.on("connect", emitPresence);
 
@@ -281,9 +263,9 @@ const MainLayoutAdmin = () => {
         if (String(data.accountId) === String(admin?._id) || String(data.accountId) === String(admin?.id)) {
           // Xóa token cookies triệt để
           import('js-cookie').then((Cookies) => {
-             Cookies.default.remove('token_admin', { path: '/' });
-             // Chuyển hướng cứng (bỏ qua React Router bảo vệ)
-             window.location.href = '/admin/banned';
+            Cookies.default.remove('token_admin', { path: '/' });
+            // Chuyển hướng cứng (bỏ qua React Router bảo vệ)
+            window.location.href = '/admin/banned';
           });
         }
       };
@@ -305,7 +287,7 @@ const MainLayoutAdmin = () => {
     const fetchApi = async () => {
       try {
         const res = await getList();
-        if(res?.data?.code){
+        if (res?.data?.code) {
           setNotifications(res?.data?.notifications)
         }
       } catch (error) {
@@ -368,7 +350,7 @@ const MainLayoutAdmin = () => {
           <Link to={item.action_url}
             className={`noti-item ${!item.is_read ? "unread" : ""}`}
             onClick={() => {
-              handleRead(item._id) 
+              handleRead(item._id)
               setOpenNoti(false)
             }}
           >
@@ -408,7 +390,7 @@ const MainLayoutAdmin = () => {
   useEffect(() => {
     socket.on("server_return_product_preview", (data) => {
       success(
-        <Link to={`/admin/products/${data?.data?.slug}`} style={{textDecoration: "none"}}>Có đánh giá sản phẩm</Link>
+        <Link to={`/admin/products/${data?.data?.slug}`} style={{ textDecoration: "none" }}>Có đánh giá sản phẩm</Link>
       );
       setNotifications((prev) => [
         data?.notification, ...prev
@@ -462,14 +444,13 @@ const MainLayoutAdmin = () => {
           defaultSelectedKeys={["1"]}
           items={menuItems}
         />
-        <Dropdown menu={{ items: profileMenuItems }} trigger={['click']} placement="topLeft" arrow>
-          <div className="sider-bot" style={{ cursor: 'pointer' }} title="Tài khoản">
-            <div>
-              <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
-              {collapsed ? "" : <span>{admin.fullname}</span>}
-            </div>
+        <div className="sider-bot" style={{ cursor: 'pointer' }} onClick={handleLogout} title="Nhấn để Đăng xuất">
+          <div>
+            <img className="avatar" src={admin.avatar ? admin.avatar : Avatar} />
+            {collapsed ? "" : <span>{admin.fullname}</span>}
+
           </div>
-        </Dropdown>
+        </div>
       </Sider>
 
       {/* RIGHT SIDE */}
