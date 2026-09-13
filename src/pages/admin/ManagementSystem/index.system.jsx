@@ -7,6 +7,7 @@ import PolicyConfig from './PolicyConfig';
 import IAMConfig from './IAMConfig';
 import MediaConfig from './MediaConfig';
 import PaymentConfig from './PaymentConfig';
+import MaintenanceConfig from './MaintenanceConfig';
 import { getSystemConfig, updateSystemConfig } from '../../../services/admin/system.service';
 
 const SystemManagement = () => {
@@ -96,6 +97,11 @@ const SystemManagement = () => {
       key: '7',
       label: 'Cổng Thanh toán',
       children: <PaymentConfig data={data?.payment} onSave={(v) => handleSave('payment', v)} />,
+    },
+    {
+      key: '8',
+      label: 'Bảo Trì & Khóa Chức Năng',
+      children: <MaintenanceConfig systemData={data} onSave={(v) => handleSave('maintenance', v)} />,
     },
   ];
 
