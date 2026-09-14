@@ -8,4 +8,21 @@ const axiosClient = axios.create({
   withCredentials: true
 });
 
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || "";
+
+      if (status === 403 && message.includes("Blacklist") || status === 429) {
+        if (window.location.pathname !== "/banned") {
+          window.location.href = "/banned";
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default axiosClient;

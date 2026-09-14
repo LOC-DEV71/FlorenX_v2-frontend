@@ -1,0 +1,72 @@
+.banned-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #0d0d0d;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+
+  .banned-container {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+    background: rgba(255, 0, 0, 0.05);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(255, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    
+    .icon-wrapper {
+      margin-bottom: 24px;
+      .danger-icon {
+        font-size: 64px;
+        color: #ff4d4f;
+        filter: drop-shadow(0 0 10px rgba(255, 77, 79, 0.5));
+      }
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #ff4d4f;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #ccc;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .details {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 32px;
+      text-align: left;
+      border-left: 4px solid #ff4d4f;
+
+      p {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #aaa;
+        
+        strong {
+          color: #fff;
+        }
+      }
+    }
+
+    .banned-footer {
+      font-size: 13px;
+      color: #666;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+    }
+  }
+}

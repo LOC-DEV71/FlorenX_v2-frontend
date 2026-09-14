@@ -21,10 +21,12 @@ import OrderList from "../pages/client/Order/OrderList";
 import DetailNews from "../pages/client/News/DetailNews";
 import NotFound from "../pages/client/NotFound/NotFound";
 import SearchPage from "../pages/client/search/SearchPage";
+import Banned from "../pages/client/banned/Banned";
 
 function ClientRoutes(){
     return(
         <Routes>
+            <Route path="/banned" element={<Banned/>}/>
             <Route element={<MainLayout/>}>
                 <Route path="/" element={<Home/>}/>
 
