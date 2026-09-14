@@ -152,7 +152,7 @@ function ProductDeatil() {
     };
 
     fetchLikes();
-  }, [likeIds]);
+  }, []);
 
 
   const handleAddtoCart = async () => {

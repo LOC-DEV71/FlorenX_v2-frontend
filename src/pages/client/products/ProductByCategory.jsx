@@ -66,7 +66,7 @@ function ProductByCategory() {
             }
         };
         fetchLikes();
-    }, [likeIds]);
+    }, []);
 
     useEffect(() => {
         const fetchCategories = async () => {

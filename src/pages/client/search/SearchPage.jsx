@@ -60,7 +60,7 @@ function SearchPage() {
             }
         };
         fetchLikes();
-    }, [likeIds]);
+    }, []);
 
     const priceOptions = [5000000, 15000000, 50000000, 500000000];
 
