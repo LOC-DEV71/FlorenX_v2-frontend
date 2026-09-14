@@ -11,7 +11,9 @@ axiosAdmin.interceptors.response.use(
   (error) => {
     // Nếu Backend trả về 403 (Banned) hoặc 429 (Too many requests)
     if (error.response?.status === 403 || error.response?.status === 429) {
-      window.location.href = '/banned'; // Chuyển hướng ép buộc sang trang Banned
+      if (window.location.pathname !== '/banned') {
+        window.location.href = '/banned'; // Chuyển hướng ép buộc sang trang Banned
+      }
     }
     return Promise.reject(error);
   }
