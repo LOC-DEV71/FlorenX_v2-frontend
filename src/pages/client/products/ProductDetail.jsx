@@ -163,8 +163,9 @@ function ProductDeatil() {
         success(res.data.message);
       }
     } catch (err) {
-      error("Thêm giỏ hàng không thành công");
-      console.error(err.response?.data.message);
+      const errorMsg = err.response?.data?.message || "Thêm giỏ hàng không thành công";
+      error(errorMsg);
+      console.error(errorMsg);
     } finally {
       setLoading(false)
     }
@@ -178,8 +179,9 @@ function ProductDeatil() {
         window.location.href = "/gio-hang#cart-page";
       }
     } catch (err) {
-      error("Thêm giỏ hàng không thành công");
-      console.error(err.response?.data.message);
+      const errorMsg = err.response?.data?.message || "Thêm giỏ hàng không thành công";
+      error(errorMsg);
+      console.error(errorMsg);
     } finally {
       setLoading(false)
     }
@@ -255,8 +257,9 @@ function ProductDeatil() {
         console.log("Checkout socket ID:", socket.id)
       }
     } catch (err) {
-      error("Đánh giá thất bại")
-      console.log(err.response?.data?.message)
+      const errorMsg = err.response?.data?.message || "Đánh giá thất bại";
+      error(errorMsg);
+      console.log(errorMsg);
     } finally {
       setLoadingComment(false)
     }
