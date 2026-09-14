@@ -14,6 +14,7 @@ import { CiShoppingCart } from "react-icons/ci";
 import { CiHeart } from "react-icons/ci";
 import { SiVirustotal } from "react-icons/si";
 import formatTimeAgo from '../../../utils/formatTimeAgo';
+import { renderpagination } from '../../../utils/pagination';
 
 const formatter = (value) => <CountUp end={value} duration={2} separator="," />;
 
@@ -306,6 +307,7 @@ function UserModal({ userId, onClose }) {
 
 function Users() {
   const [users, setUsers] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [selectId, setSelectId] = useState([]);
   const [typeChange, setTypeChange] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -328,6 +330,7 @@ function Users() {
         const res = await getListUser({ page, limit, sort, search });
         if (res.data.code) {
           setUsers(res.data.users);
+          setPagination(res.data.pagination);
           setStats({
             total: res.data.totalUsers ?? 0,
             active: res.data.usersActive ?? 0,
@@ -566,6 +569,8 @@ function Users() {
         userId={selectedUserId}
         onClose={() => setSelectedUserId(null)}
       />
+
+      {renderpagination(pagination, setSearchParams, limit, sort, null, null, null, search)}
     </div>
   );
 }
